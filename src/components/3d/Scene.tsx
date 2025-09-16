@@ -1,5 +1,5 @@
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls, OrthographicCamera } from "@react-three/drei";
+import { OrbitControls, OrthographicCamera, PerspectiveCamera, Sky } from "@react-three/drei";
 import { CubeWithFaces } from "./CubeWithFaces";
 import { CameraController } from "./CameraController";
 import { useResponsiveFaceSize } from "@/hooks/useResponsiveFaceSize";
@@ -10,12 +10,13 @@ export const Scene = () => {
     return (
         <div className="canvas w-full h-full">
             <Canvas>
+                {/* <Sky /> */}
+                <ambientLight intensity={Math.PI / 2} />
                 <OrthographicCamera 
                     makeDefault 
-                    position={[0, 0, 1000]}
-                    zoom={1}
+                    position={[0, 0, 100]}
                 />
-                {/* <CameraController /> */}
+                <CameraController />
                 <CubeWithFaces />
                 <OrbitControls />
             </Canvas>
