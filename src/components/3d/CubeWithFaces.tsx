@@ -21,7 +21,7 @@ export const CubeWithFaces = () => {
     const cubeSize = useAtomValue(cubeSizeAtom);
     const cubeRef = useRef<THREE.Group>(null);
 
-    let cubeHtmlSize = cubeSize / 2 + .01;
+    let cubeHtmlSize = cubeSize / 2 + .02;
 
     const cubeFaces: Record<string, CubeFace> = {
         chat: {
@@ -35,9 +35,9 @@ export const CubeWithFaces = () => {
             )
         },
         about: {
-            position: [0, 0, cubeHtmlSize * -1],
-            rotation: { x: 0, y: Math.PI },
-            htmlRotation: [0, Math.PI, 0],
+            position: [cubeHtmlSize, 0, 0],
+            rotation: { x: 0, y: -Math.PI/2 },
+            htmlRotation: [0, Math.PI/2, 0],
             page: (
                 <MyRuntimeProvider>
                     <ChatUI />
@@ -45,9 +45,9 @@ export const CubeWithFaces = () => {
             )
         },
         projects: {
-            position: [cubeHtmlSize, 0, 0],
-            rotation: { x: 0, y: -Math.PI/2 },
-            htmlRotation: [0, Math.PI/2, 0],
+            position: [0, 0, cubeHtmlSize * -1],
+            rotation: { x: 0, y: Math.PI },
+            htmlRotation: [0, Math.PI, 0],
             page: (
                 <MyRuntimeProvider>
                     <ChatUI />
@@ -89,25 +89,36 @@ export const CubeWithFaces = () => {
     useEffect(() => {
         if (cubeRef.current && cubeFaces[activeFace]) {
             const targetRotation = cubeFaces[activeFace].rotation;
-
             setIsRotating(true);
             
-            const rotatingTimeout = setTimeout(() => {
-                setIsRotating(false);
-            }, 1000)
+            const current = {
+                x: cubeRef.current.rotation.x,
+                y: cubeRef.current.rotation.y
+            };
+            
+            // Calculate shortest path for Y rotation
+            let deltaY = targetRotation.y - current.y;
+            
+            // Normalize to [-PI, PI]
+            if (deltaY > Math.PI) deltaY -= Math.PI * 2;
+            if (deltaY < -Math.PI) deltaY += Math.PI * 2;
 
             gsap.to(
                 cubeRef.current.rotation, {
                     x: targetRotation.x,
-                    y: targetRotation.y,
+                    y: current.y + deltaY,
                     duration: 0.8,
                     ease: "power2.inOut",
+                    onComplete: () => {
+                        // Force the rotation to the expected value
+                        if (cubeRef.current) {
+                            cubeRef.current.rotation.y = targetRotation.y;
+                            cubeRef.current.rotation.x = targetRotation.x;
+                            setIsRotating(false); 
+                        }
+                    }
                 }
             );
-
-            return () => {
-                clearTimeout(rotatingTimeout);
-            }
         }
     }, [activeFace])
 
@@ -115,7 +126,7 @@ export const CubeWithFaces = () => {
         <group ref={cubeRef}>
             <mesh>
                 <boxGeometry args={[cubeSize, cubeSize, cubeSize]} />
-                <meshBasicMaterial color="#ffffff" />
+                <meshBasicMaterial color={"#ffffff"} transparent opacity={1} />
             </mesh>
 
             {Object.entries(cubeFaces).map(([face, data]) => (
@@ -131,7 +142,7 @@ export const CubeWithFaces = () => {
                     style={{
                         opacity: face === activeFace || isRotating ? 1 : 0,
                         pointerEvents: face === activeFace ? 'auto' : 'none',
-                        // transition: 'opacity 1s'
+                        transition: "opacity 0.1s"
                     }}
                 >
                     {data.page}
