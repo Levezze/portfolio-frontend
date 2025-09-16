@@ -7,3 +7,4 @@ export const activeFaceAtom = atom<BoxFaces>('front');
 
 // Sizing
 export const cubeSizeAtom = atom<number>(10);
+export const faceSizeAtom = atom<number>(6800);

@@ -1,6 +1,6 @@
 import { Html } from "@react-three/drei";
 import { useRef, useEffect, act } from "react";
-import { activeFaceAtom, cubeSizeAtom } from "@/atoms/atomStore";
+import { activeFaceAtom, faceSizeAtom } from "@/atoms/atomStore";
 import { useAtom, useAtomValue } from "jotai";
 import { gsap } from "gsap";
 import { MyRuntimeProvider } from "../providers/MyRuntimeProvider";
@@ -15,10 +15,10 @@ import SecretPage from "../faces/SecretPage";
 
 export const CubeWithFaces = () => {
     const [activeFace, setActiveFace] = useAtom(activeFaceAtom);
-    const cubeSize = useAtomValue(cubeSizeAtom);
+    const faceSize = useAtomValue(faceSizeAtom);
     const cubeRef = useRef<THREE.Group>(null);
 
-    let cubeHtmlSize = cubeSize / 2 + .01;
+    let cubeHtmlSize = faceSize / 2 + .01;
 
     const cubeFaces: Record<string, CubeFace> = {
         front: {
@@ -72,10 +72,12 @@ export const CubeWithFaces = () => {
         }
     }, [activeFace])
 
+    const htmlScale = faceSize;
+
     return (
         <group ref={cubeRef}>
             <mesh>
-                <boxGeometry args={[cubeSize, cubeSize, cubeSize]} />
+                <boxGeometry args={[faceSize, faceSize, faceSize]} />
                 <meshBasicMaterial color="#1c1c1c" />
             </mesh>
 
@@ -86,6 +88,8 @@ export const CubeWithFaces = () => {
                     transform
                     occlude
                     sprite={false}
+                    distanceFactor={htmlScale / 1.21}
+                    scale={1}
                 >
                     {cubeFaces[activeFace].page}
                 </Html>
