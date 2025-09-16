@@ -1,9 +1,10 @@
 import { Html } from "@react-three/drei";
 import { useRef, useEffect, act } from "react";
-import { activeFaceAtom } from "@/atoms/atomStore";
-import { useAtom } from "jotai";
+import { activeFaceAtom, cubeSizeAtom } from "@/atoms/atomStore";
+import { useAtom, useAtomValue } from "jotai";
 import { gsap } from "gsap";
 import { MyRuntimeProvider } from "../providers/MyRuntimeProvider";
+import { CubeFace } from "@/types/cubeTypes";
 import * as THREE from "three";
 import ChatUI from "../faces/ChatUI";
 import AboutMe from "../faces/AboutMe";
@@ -14,11 +15,14 @@ import SecretPage from "../faces/SecretPage";
 
 export const CubeWithFaces = () => {
     const [activeFace, setActiveFace] = useAtom(activeFaceAtom);
-    const boxRef = useRef<THREE.Group>(null);
+    const cubeSize = useAtomValue(cubeSizeAtom);
+    const cubeRef = useRef<THREE.Group>(null);
 
-    const boxFaces = {
+    let cubeHtmlSize = cubeSize / 2 + .01;
+
+    const cubeFaces: Record<string, CubeFace> = {
         front: {
-            position: [0, 0, 1.01],
+            position: [0, 0, cubeHtmlSize],
             rotation: { x: 0, y: 0 },
             page: (
                 <MyRuntimeProvider>
@@ -27,38 +31,38 @@ export const CubeWithFaces = () => {
             )
         },
         back: {
-            position: [0, 0, -1.01],
+            position: [0, 0, cubeHtmlSize * -1],
             rotation: { x: 0, y: Math.PI },
             page: <AboutMe />
         },
         right: {
-            position: [1.01, 0, 0],
+            position: [cubeHtmlSize, 0, 0],
             rotation: { x: 0, y: -Math.PI/2 },
             page: <Projects />
         },
         left: {
-            position: [-1.01, 0, 0],
+            position: [cubeHtmlSize * -1, 0, 0],
             rotation: { x: 0, y: Math.PI/2 },
             page: <ContactForm />
         },
         top: {
-            position: [0, 1.01, 0],
+            position: [0, cubeHtmlSize, 0],
             rotation: { x: -Math.PI/2, y: 0 },
             page: <Resume />
         },
         bottom: {
-            position: [0, -1.01, 0],
+            position: [0, cubeHtmlSize * -1, 0],
             rotation: { x: Math.PI/2, y: 0 },
             page: <SecretPage />
         },
     }
 
     useEffect(() => {
-        if (boxRef.current && boxFaces[activeFace]) {
-            const targetRotation = boxFaces[activeFace].rotation;
+        if (cubeRef.current && cubeFaces[activeFace]) {
+            const targetRotation = cubeFaces[activeFace].rotation;
 
             gsap.to(
-                boxRef.current.rotation, {
+                cubeRef.current.rotation, {
                     x: targetRotation.x,
                     y: targetRotation.y,
                     duration: 0.8,
@@ -69,15 +73,21 @@ export const CubeWithFaces = () => {
     }, [activeFace])
 
     return (
-        <group ref={boxRef}>
+        <group ref={cubeRef}>
             <mesh>
-                <boxGeometry args={[10, 10, 10]} />
-                <meshBasicMaterial color="1c1c1c" />
+                <boxGeometry args={[cubeSize, cubeSize, cubeSize]} />
+                <meshBasicMaterial color="#1c1c1c" />
             </mesh>
 
-            {activeFace && boxFaces[activeFace] && (
-                <Html position={boxFaces[activeFace].position} center>
-                    {boxFaces[activeFace].page}
+            {activeFace && cubeFaces[activeFace] && (
+                <Html 
+                    position={cubeFaces[activeFace].position} 
+                    center
+                    transform
+                    occlude
+                    sprite={false}
+                >
+                    {cubeFaces[activeFace].page}
                 </Html>
             )}
         </group>
