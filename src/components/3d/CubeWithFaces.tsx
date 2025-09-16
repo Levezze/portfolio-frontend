@@ -72,7 +72,7 @@ export const CubeWithFaces = () => {
         <group ref={boxRef}>
             <mesh>
                 <boxGeometry args={[10, 10, 10]} />
-                <meshBasicMaterial color="#ffffff" />
+                <meshBasicMaterial color="1c1c1c" />
             </mesh>
 
             {activeFace && boxFaces[activeFace] && (
