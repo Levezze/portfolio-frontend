@@ -1,0 +1,1 @@
+export type BoxFaces = "front" | "back" | "right" | "left" | "top" | "bottom";
