@@ -3,7 +3,7 @@ import { OrbitControls, OrthographicCamera, Sky, SoftShadows } from "@react-thre
 import { CubeWithFaces } from "./CubeWithFaces";
 import { CameraController } from "./CameraController";
 import { BowlGroundPlane } from "./BowlGroundPlane";
-import { useResponsiveFaceSize } from "@/hooks/useResponsiveFaceSize";
+import { useResponsiveFaceSize } from "@/lib/hooks/useResponsiveFaceSize";
 import { Float } from "@react-three/drei";
 
 export const Scene = () => {
