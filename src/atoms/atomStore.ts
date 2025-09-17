@@ -8,3 +8,6 @@ export const activeFaceAtom = atom<BoxFaces>('chat');
 // Sizing
 export const cubeSizeAtom = atom<number>(10);
 export const faceSizeAtom = atom<number>(800);
+
+// Animation
+export const cubeFloatingAtom = atom<boolean>(true);

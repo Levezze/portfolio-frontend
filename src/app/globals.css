@@ -77,7 +77,8 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
   --face-size: 400px;
-  --header-color: #597374;
+  --header-color: #324041;
+  --hover-header-color: #597374;
 }
 
 /* .dark {
@@ -137,8 +138,13 @@
 }
 
 .header-button {
-  /* color: var(--header-color); */
-  color: #324041;
+  color: var(--header-color);
+  transition: color 0.3s ease;
+}
+
+.header-button:hover {
+  color: var(--hover-header-color); 
+  transition: color 0.3s ease;
 }
 
 @layer base {
