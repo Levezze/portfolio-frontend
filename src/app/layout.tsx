@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Levezze | Portfolio",
-  description: "Lev Zhitnik | Full Stack & AI Engineer, Coffee Enthusiast, Former Computational Design Architect",
+  description: "Lev Zhitnik | Full Stack & AI Engineer, Coffee Enthusiast, Former Computational Designer and Architect",
 };
 
 export default function RootLayout({
