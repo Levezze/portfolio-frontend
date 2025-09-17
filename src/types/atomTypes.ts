@@ -1,0 +1,1 @@
+export type BoxFaces = "chat" | "about" | "projects" | "contact" | "resume" | "secret";
