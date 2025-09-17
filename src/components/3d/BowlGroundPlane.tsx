@@ -6,9 +6,9 @@ export const BowlGroundPlane = ({position, color}:
     {position: [number, number, number], color: string}) => {
   return (
     <group>
-        <mesh receiveShadow position={position} rotation={[Math.PI / 6, 0, 0]}>
+        <mesh receiveShadow position={position} rotation={[Math.PI / 4, 0, 0]}>
             <sphereGeometry args={[
-                70,  // radius
+                100,  // radius
                 32,   // widthSegments
                 16,   // heightSegments
                 0,    // phiStart
@@ -19,8 +19,8 @@ export const BowlGroundPlane = ({position, color}:
             <meshStandardMaterial side={THREE.DoubleSide}>
                 <GradientTexture
                     attach="map"
-                    stops={[0, 0.8]}
-                    colors={['#1c1c1c', '#a8dadc']}
+                    stops={[0, 0.99]}
+                    colors={['#a8dadc', '#1c1c1c']}
                     size={1024}
                 />
             </meshStandardMaterial>

@@ -18,12 +18,11 @@ export const Scene = () => {
                 }}
                 dpr={1}
             >
-                <Sky distance={50000} sunPosition={[5, 5, 0]} />
-                <ambientLight intensity={5} />
+                <ambientLight intensity={6} />
                 <directionalLight
                     castShadow
-                    position={[3, 10, 5]}
-                    intensity={1}
+                    position={[8, 7, 15]}
+                    intensity={2}
                     shadow-mapSize={[2048, 2048]}
                     shadow-camera-far={50}
                     shadow-camera-left={-10}
@@ -31,9 +30,13 @@ export const Scene = () => {
                     shadow-camera-top={10}
                     shadow-camera-bottom={-10}
                 />
+                <SoftShadows 
+                    size={4}
+                    samples={16}
+                />
                 <OrthographicCamera makeDefault position={[0, 0, 100]} />
                 <CameraController />      
-                <BowlGroundPlane position={[0, 50, 0]} color={"#1c1c1c"}/>          
+                <BowlGroundPlane position={[20, 65, 50]} color={"#1c1c1c"}/>          
                 <Float
                     speed={0.5} // Animation speed, defaults to 1
                     rotationIntensity={0.15} // XYZ rotation intensity, defaults to 1
