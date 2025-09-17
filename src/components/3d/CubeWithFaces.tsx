@@ -16,6 +16,7 @@ import { Face } from "../faces/Face";
 
 export const CubeWithFaces = () => {
     const activeFace = useAtomValue(activeFaceAtom);
+    const isMounted = useRef(false);
     const [isRotating, setIsRotating] = useState(false);
 
     const faceSize = useAtomValue(faceSizeAtom);
@@ -100,6 +101,11 @@ export const CubeWithFaces = () => {
     }
 
     useEffect(() => {
+        if (!isMounted.current) {
+            isMounted.current = true;
+            return;
+        }
+        
         if (cubeRef.current && cubeFaces[activeFace]) {
             const targetRotation = cubeFaces[activeFace].rotation;
             setIsRotating(true);
