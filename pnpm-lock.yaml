@@ -58,7 +58,7 @@ importers:
         version: 9.3.0(@types/react@19.1.13)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(three@0.180.0)
       ai:
         specifier: ^5.0.44
-        version: 5.0.44(zod@4.1.8)
+        version: 5.0.44(zod@4.1.9)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -119,6 +119,9 @@ importers:
       uuid:
         specifier: ^13.0.0
         version: 13.0.0
+      zod:
+        specifier: ^4.1.9
+        version: 4.1.9
       zustand:
         specifier: ^5.0.8
         version: 5.0.8(@types/react@19.1.13)(react@19.1.0)(use-sync-external-store@1.5.0(react@19.1.0))
@@ -2709,8 +2712,8 @@ packages:
     resolution: {integrity: sha512-YgvUTfwqyc7UXVMrB+SImsVYSmTS8X/tSrtdNZMImM+n7+QTriRXyXim0mBrTXNeqzVF0KWGgHPeiyViFFrNDw==}
     engines: {node: '>=18'}
 
-  zod@4.1.8:
-    resolution: {integrity: sha512-5R1P+WwQqmmMIEACyzSvo4JXHY5WiAFHRMg+zBZKgKS+Q1viRa0C1hmUKtHltoIFKtIdki3pRxkmpP74jnNYHQ==}
+  zod@4.1.9:
+    resolution: {integrity: sha512-HI32jTq0AUAC125z30E8bQNz0RQ+9Uc+4J7V97gLYjZVKRjeydPgGt6dvQzFrav7MYOUGFqqOGiHpA/fdbd0cQ==}
 
   zustand@4.5.7:
     resolution: {integrity: sha512-CHOUy7mu3lbD6o6LJLfllpjkzhHXSBlX8B9+qPddUsIfeF5S/UZ5q0kmCsnRqT1UHFQZchNFDDzMbQsuesHWlw==}
@@ -2750,18 +2753,18 @@ packages:
 
 snapshots:
 
-  '@ai-sdk/gateway@1.0.23(zod@4.1.8)':
+  '@ai-sdk/gateway@1.0.23(zod@4.1.9)':
     dependencies:
       '@ai-sdk/provider': 2.0.0
-      '@ai-sdk/provider-utils': 3.0.9(zod@4.1.8)
-      zod: 4.1.8
+      '@ai-sdk/provider-utils': 3.0.9(zod@4.1.9)
+      zod: 4.1.9
 
-  '@ai-sdk/provider-utils@3.0.9(zod@4.1.8)':
+  '@ai-sdk/provider-utils@3.0.9(zod@4.1.9)':
     dependencies:
       '@ai-sdk/provider': 2.0.0
       '@standard-schema/spec': 1.0.0
       eventsource-parser: 3.0.6
-      zod: 4.1.8
+      zod: 4.1.9
 
   '@ai-sdk/provider@2.0.0':
     dependencies:
@@ -2811,7 +2814,7 @@ snapshots:
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
       react-textarea-autosize: 8.5.9(@types/react@19.1.13)(react@19.1.0)
-      zod: 4.1.8
+      zod: 4.1.9
       zustand: 5.0.8(@types/react@19.1.13)(react@19.1.0)(use-sync-external-store@1.5.0(react@19.1.0))
     optionalDependencies:
       '@types/react': 19.1.13
@@ -3882,13 +3885,13 @@ snapshots:
 
   acorn@8.15.0: {}
 
-  ai@5.0.44(zod@4.1.8):
+  ai@5.0.44(zod@4.1.9):
     dependencies:
-      '@ai-sdk/gateway': 1.0.23(zod@4.1.8)
+      '@ai-sdk/gateway': 1.0.23(zod@4.1.9)
       '@ai-sdk/provider': 2.0.0
-      '@ai-sdk/provider-utils': 3.0.9(zod@4.1.8)
+      '@ai-sdk/provider-utils': 3.0.9(zod@4.1.9)
       '@opentelemetry/api': 1.9.0
-      zod: 4.1.8
+      zod: 4.1.9
 
   aria-hidden@1.2.6:
     dependencies:
@@ -5627,7 +5630,7 @@ snapshots:
 
   yallist@5.0.0: {}
 
-  zod@4.1.8: {}
+  zod@4.1.9: {}
 
   zustand@4.5.7(@types/react@19.1.13)(react@19.1.0):
     dependencies:
