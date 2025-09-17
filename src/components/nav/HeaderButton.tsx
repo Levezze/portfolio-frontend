@@ -15,7 +15,7 @@ export const HeaderButton = ({
 
     return (
         <button 
-            className='flex text-sm cursor-pointer text-opacity-50 text-white'
+            className='flex text-md cursor-pointer text-opacity-50 header-button'
             onClick={handleClick}
         >
             {buttonText}

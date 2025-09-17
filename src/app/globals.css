@@ -77,6 +77,7 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
   --face-size: 400px;
+  --header-color: #597374;
 }
 
 /* .dark {
@@ -133,6 +134,11 @@
   transform: translateZ(0); /* Force GPU acceleration */
   backface-visibility: hidden;
   /* transform: scale(2); */
+}
+
+.header-button {
+  /* color: var(--header-color); */
+  color: #324041;
 }
 
 @layer base {

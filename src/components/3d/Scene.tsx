@@ -35,18 +35,24 @@ export const Scene = () => {
                     samples={16}
                 />
                 <OrthographicCamera makeDefault position={[0, 0, 100]} />
-                <CameraController />      
-                <BowlGroundPlane position={[20, 65, 50]} color={"#1c1c1c"}/>          
+                <CameraController />
+                <Float    
+                    speed={1}
+                    rotationIntensity={1.2}
+                    floatIntensity={0.1}
+                    floatingRange={[0.1, 1.5]}
+                >
+                    <BowlGroundPlane position={[20, 65, 50]} color={"#1c1c1c"}/>          
+                </Float>    
                 <Float
-                    speed={0.5} // Animation speed, defaults to 1
-                    rotationIntensity={0.15} // XYZ rotation intensity, defaults to 1
-                    floatIntensity={0.1} // Up/down float intensity, works like a multiplier with floatingRange,defaults to 1
-                    floatingRange={[0.1, 2.5]} // Range of y-axis values the object will float within, defaults to [-0.1,0.1]
+                    speed={0.5}
+                    rotationIntensity={0.15}
+                    floatIntensity={0.1}
+                    floatingRange={[0.1, 2.5]}
                 >
                     <CubeWithFaces />
                 </Float>
-
-                <OrbitControls />
+                {/* <OrbitControls /> */}
             </Canvas>
 
         </div>
