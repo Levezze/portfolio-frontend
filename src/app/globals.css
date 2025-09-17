@@ -130,6 +130,7 @@
 .cube-face {
   width: var(--face-size);
   height: var(--face-size);
+  box-sizing: border-box;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transform: translateZ(0); /* Force GPU acceleration */

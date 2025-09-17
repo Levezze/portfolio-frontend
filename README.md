@@ -35,7 +35,7 @@ Welcome to my portfolio's frontend repository! This isn't your typical portfolio
 ### The Six Faces
 
 1. **Chat** - AI assistant for interactive Q&A about my experience
-2. **About** - Personal introduction and professional background
+2. **About** - Personal introduction, skills, and links
 3. **Projects** - Showcase of technical work and achievements
 4. **Contact** - Direct communication form
 5. **Resume** - Professional experience and skills
@@ -51,7 +51,7 @@ const frontend = {
   language: "TypeScript",
   rendering: "React Three Fiber + Drei",
   animations: "GSAP",
-  state: "Jotai + Zustand",
+  state: "Jotai",
   ui: {
     styling: "Tailwind CSS v4",
     components: "shadcn/ui",
@@ -69,7 +69,7 @@ const frontend = {
 backend = {
     "framework": "FastAPI",
     "language": "Python 3.12",
-    "ai": "OpenAI SDK + Custom Agents",
+    "ai": "OpenAI SDK + Agents SDK",
     "database": "PostgreSQL + SQLAlchemy",
     "caching": "Redis",
     "storage": "Cloudflare R2",
@@ -220,9 +220,8 @@ This project is shared under the principle of open learning. While the code is p
 
 ### Special Thanks
 
-- ☕ **Trade Coffee** - The fuel
-- ☕ **My modded Breville Barista Pro** - The real MVP of this project
-- 🌟 The open-source community for incredible tools and libraries
+- ☕ **My modded Breville Barista Pro & Trade Coffee** - The real MVP of this project
+- 🌟 The open-source community for incredible tools and libraries (seriously!)
 
 ### Key Dependencies
 
