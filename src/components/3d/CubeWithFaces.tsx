@@ -7,6 +7,7 @@ import { MyRuntimeProvider } from "../providers/MyRuntimeProvider";
 import { CubeFace } from "@/types/cubeTypes";
 import * as THREE from "three";
 import ChatUI from "../faces/ChatUI";
+import { Face } from "../faces/Face";
 // import AboutMe from "../faces/AboutMe";
 // import ContactForm from "../faces/ContactForm";
 // import Projects from "../faces/Projects";
@@ -30,7 +31,9 @@ export const CubeWithFaces = () => {
             htmlRotation: [0, 0, 0],
             page: (
                 <MyRuntimeProvider>
-                    <ChatUI />
+                    <Face>
+                        <ChatUI />
+                    </Face>
                 </MyRuntimeProvider>
             )
         },
@@ -40,7 +43,9 @@ export const CubeWithFaces = () => {
             htmlRotation: [0, Math.PI/2, 0],
             page: (
                 <MyRuntimeProvider>
-                    <ChatUI />
+                    <Face>
+                        <ChatUI />
+                    </Face>
                 </MyRuntimeProvider>
             )
         },
@@ -50,7 +55,9 @@ export const CubeWithFaces = () => {
             htmlRotation: [0, Math.PI, 0],
             page: (
                 <MyRuntimeProvider>
-                    <ChatUI />
+                    <Face>
+                        <ChatUI />
+                    </Face>
                 </MyRuntimeProvider>
             )
         },
@@ -60,7 +67,9 @@ export const CubeWithFaces = () => {
             htmlRotation: [0, -Math.PI/2, 0],
             page: (
                 <MyRuntimeProvider>
-                    <ChatUI />
+                    <Face>
+                        <ChatUI />
+                    </Face>
                 </MyRuntimeProvider>
             )
         },
@@ -70,7 +79,9 @@ export const CubeWithFaces = () => {
             htmlRotation: [Math.PI/2, 0, 0],
             page: (
                 <MyRuntimeProvider>
-                    <ChatUI />
+                    <Face>
+                        <ChatUI />
+                    </Face>
                 </MyRuntimeProvider>
             )
         },
@@ -80,7 +91,9 @@ export const CubeWithFaces = () => {
             htmlRotation: [-Math.PI/2, 0, 0],
             page: (
                 <MyRuntimeProvider>
-                    <ChatUI />
+                    <Face>
+                        <ChatUI />
+                    </Face>
                 </MyRuntimeProvider>
             )
         },
