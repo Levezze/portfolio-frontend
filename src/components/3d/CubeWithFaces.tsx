@@ -1,4 +1,4 @@
-import { Html, RenderTexture } from "@react-three/drei";
+import { Html, ContactShadows } from "@react-three/drei";
 import { useRef, useEffect, act, useState } from "react";
 import { activeFaceAtom, faceSizeAtom, cubeSizeAtom } from "@/atoms/atomStore";
 import { useAtomValue } from "jotai";
@@ -124,9 +124,9 @@ export const CubeWithFaces = () => {
 
     return (
         <group ref={cubeRef}>
-            <mesh>
+            <mesh castShadow>
                 <boxGeometry args={[cubeSize, cubeSize, cubeSize]} />
-                <meshBasicMaterial color={"#ffffff"} transparent opacity={1} />
+                <meshStandardMaterial color={"#ffffff"} transparent opacity={1} />
             </mesh>
 
             {Object.entries(cubeFaces).map(([face, data]) => (
@@ -142,7 +142,9 @@ export const CubeWithFaces = () => {
                     style={{
                         opacity: face === activeFace || isRotating ? 1 : 0,
                         pointerEvents: face === activeFace ? 'auto' : 'none',
-                        transition: "opacity 0.1s"
+                        transition: "opacity 1.3s ease-in-out",
+                        transform: 'translate3d(0, 0, 0)',
+                        willChange: 'transform'
                     }}
                 >
                     {data.page}
