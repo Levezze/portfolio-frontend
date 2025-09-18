@@ -1,8 +1,8 @@
 import { ChatModelAdapter, ChatModelRunResult } from "@assistant-ui/react";
 import { v4 as uuidv4 } from 'uuid';
+import { wsClient } from '@/lib/api/wsClient';
 
-export function createWebSocketAdapter(config?: { wsUrl?: string }): ChatModelAdapter {
-    const wsUrl = config?.wsUrl || 'ws://localhost:8000';
+export function createWebSocketAdapter(): ChatModelAdapter {
 
     return {
         async *run({ messages, abortSignal }): AsyncGenerator<ChatModelRunResult> {
@@ -21,7 +21,7 @@ export function createWebSocketAdapter(config?: { wsUrl?: string }): ChatModelAd
                 ? lastMessage.content[0].text
                 : '';
 
-            const ws = new WebSocket(`${wsUrl}/api/v1/chat/ws?visitor_id=${visitorId}`);
+            const ws = wsClient.connect(visitorId);
 
             const messageQueue: any[] = [];
             const messagePromises: ((value: any) => void)[] = [];
