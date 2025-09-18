@@ -19,6 +19,7 @@ import {
   Square,
 } from "lucide-react";
 import type { FC } from "react";
+import { useState, useEffect } from "react";
 
 import {
   ComposerAddAttachment,
@@ -33,11 +34,49 @@ import { cn } from "@/lib/utils";
 import { LazyMotion, MotionConfig, domAnimation } from "motion/react";
 import * as m from "motion/react-m";
 import { getChatConfig } from "@/lib/api/services/chat";
-import { type WelcomeMessage, type ChatSuggestion } from "@/lib/api/schemas/chat";
-
-const chatConfig = await getChatConfig();
+import { type WelcomeMessage, type ChatConfig } from "@/lib/api/schemas/chat";
 
 export const Thread: FC = () => {
+  const [chatConfig, setChatConfig] = useState<ChatConfig | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    getChatConfig()
+      .then(setChatConfig)
+      .catch((error) => {
+        console.error('Failed to load chat config:', error);
+        // Set default config on error
+        setChatConfig({
+          welcome_messages: [
+            {
+              id: '1',
+              message_text: 'Welcome to my portfolio!',
+              message_type: 'primary',
+              display_order: 1,
+              is_active: true
+            },
+            {
+              id: '2',
+              message_text: 'How can I help you today?',
+              message_type: 'secondary',
+              display_order: 2,
+              is_active: true
+            }
+          ],
+          suggestions: []
+        });
+      })
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex h-full items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   return (
     <LazyMotion features={domAnimation}>
       <MotionConfig reducedMotion="user">
@@ -48,7 +87,7 @@ export const Thread: FC = () => {
           }}
         >
           <ThreadPrimitive.Viewport className="aui-thread-viewport relative flex flex-1 flex-col overflow-x-auto overflow-y-scroll">
-            <ThreadWelcome />
+            <ThreadWelcome config={chatConfig!} />
 
             <ThreadPrimitive.Messages
               components={{
@@ -82,8 +121,8 @@ const ThreadScrollToBottom: FC = () => {
   );
 };
 
-const ThreadWelcome: FC = () => {
-  const welcomeMessages = chatConfig.welcomeMessages;
+const ThreadWelcome: FC<{ config: ChatConfig }> = ({ config }) => {
+  const welcome_messages = config.welcome_messages;
   return (
     <ThreadPrimitive.Empty>
       <div className="aui-thread-welcome-root mx-auto my-auto flex w-full max-w-[var(--thread-max-width)] flex-grow flex-col">
@@ -95,7 +134,7 @@ const ThreadWelcome: FC = () => {
               exit={{ opacity: 0, y: 10 }}
               className="aui-thread-welcome-message-motion-1 text-2xl font-semibold"
             >
-              {welcomeMessages.filter((message: WelcomeMessage) => message.message_type === 'primary')[0]?.message_text}
+              {welcome_messages.filter((message: WelcomeMessage) => message.message_type === 'primary')[0]?.message_text}
             </m.div>
             <m.div
               initial={{ opacity: 0, y: 10 }}
@@ -104,7 +143,7 @@ const ThreadWelcome: FC = () => {
               transition={{ delay: 0.1 }}
               className="aui-thread-welcome-message-motion-2 text-2xl text-muted-foreground/65"
             >
-              {welcomeMessages.filter((message: WelcomeMessage) => message.message_type === 'secondary')[0]?.message_text}
+              {welcome_messages.filter((message: WelcomeMessage) => message.message_type === 'secondary')[0]?.message_text}
             </m.div>
           </div>
         </div>

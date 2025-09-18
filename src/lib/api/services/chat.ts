@@ -1,5 +1,5 @@
 import { apiClient } from "../client";
-import { WelcomeMessageSchema, ChatSuggestionSchema, ChatConfigSchema } from "../schemas/chat";
+import { ChatConfigSchema } from "../schemas/chat";
 
 export const getChatConfig = async () => {
     const config = await apiClient.get('/chat/config');
@@ -7,14 +7,14 @@ export const getChatConfig = async () => {
     try {
         const chatConfig = ChatConfigSchema.parse(config);
         return {
-            welcomeMessages: chatConfig.welcome_messages,
-            chatSuggestions: chatConfig.suggestions,
+            welcome_messages: chatConfig.welcome_messages,
+            suggestions: chatConfig.suggestions,
         }
     } catch (e) {
         console.error('Invalid chat config', e);
         return {
-            welcomeMessages: [],
-            chatSuggestions: [],
+            welcome_messages: [],
+            suggestions: [],
         }
     }
 }
