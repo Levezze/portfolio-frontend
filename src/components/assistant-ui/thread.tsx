@@ -86,7 +86,7 @@ export const Thread: FC = () => {
           }}
         >
           <ThreadPrimitive.Viewport className="aui-thread-viewport relative flex flex-1 flex-col overflow-x-auto overflow-y-scroll">
-            <ThreadWelcome config={chatConfig!} />
+            {chatConfig && <ThreadWelcome config={chatConfig} />}
 
             <ThreadPrimitive.Messages
               components={{
