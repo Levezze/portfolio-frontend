@@ -1,6 +1,6 @@
 import { activeFaceAtom, faceSizeAtom, cubeSizeAtom } from "@/atoms/atomStore";
 import { MyRuntimeProvider } from "../providers/MyRuntimeProvider";
-import { useRef, useEffect, act, useState } from "react";
+import { useRef, useEffect, useState } from "react";
 import { cubeBackgroundColorAtom } from "@/atoms/atomStore";
 import { useFrame } from "@react-three/fiber";
 import { CubeFace } from "@/types/cubeTypes";
@@ -48,11 +48,9 @@ export const CubeWithFaces = () => {
             rotation: { x: 0, y: -Math.PI/2 },
             htmlRotation: [0, Math.PI/2, 0],
             page: (
-                <MyRuntimeProvider>
-                    <Face>
-                        <AboutMe />
-                    </Face>
-                </MyRuntimeProvider>
+                <Face>
+                    <AboutMe />
+                </Face>
             )
         },
         projects: {
@@ -60,11 +58,9 @@ export const CubeWithFaces = () => {
             rotation: { x: 0, y: Math.PI },
             htmlRotation: [0, Math.PI, 0],
             page: (
-                <MyRuntimeProvider>
-                    <Face>
-                        <Projects />
-                    </Face>
-                </MyRuntimeProvider>
+                <Face>
+                    <Projects />
+                </Face>
             )
         },
         contact: {
@@ -72,11 +68,9 @@ export const CubeWithFaces = () => {
             rotation: { x: 0, y: Math.PI/2 },
             htmlRotation: [0, -Math.PI/2, 0],
             page: (
-                <MyRuntimeProvider>
-                    <Face>
-                        <ContactForm />
-                    </Face>
-                </MyRuntimeProvider>
+                <Face>
+                    <ContactForm />
+                </Face>
             )
         },
         resume: {
@@ -84,11 +78,9 @@ export const CubeWithFaces = () => {
             rotation: { x: -Math.PI/2, y: 0 },
             htmlRotation: [Math.PI/2, 0, 0],
             page: (
-                <MyRuntimeProvider>
-                    <Face>
-                        <Resume />
-                    </Face>
-                </MyRuntimeProvider>
+                <Face>
+                    <Resume />
+                </Face>
             )
         },
         secret: {
@@ -96,11 +88,9 @@ export const CubeWithFaces = () => {
             rotation: { x: Math.PI/2, y: 0 },
             htmlRotation: [-Math.PI/2, 0, 0],
             page: (
-                <MyRuntimeProvider>
-                    <Face>
-                        <SecretPage />
-                    </Face>
-                </MyRuntimeProvider>
+                <Face>
+                    <SecretPage />
+                </Face>
             )
         },
     }

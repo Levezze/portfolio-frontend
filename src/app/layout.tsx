@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { MyRuntimeProvider } from "@/components/providers/MyRuntimeProvider";
 import { ThemeWrapper } from "@/components/ThemeWrapper";
 import "./globals.css";
 
@@ -25,16 +24,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <MyRuntimeProvider>
-      <html lang="en">
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-          >
-          <ThemeWrapper>
-            {children}
-          </ThemeWrapper>
-        </body>
-      </html>
-    </MyRuntimeProvider>
+    <html lang="en">
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        >
+        <ThemeWrapper>
+          {children}
+        </ThemeWrapper>
+      </body>
+    </html>
   );
 }
