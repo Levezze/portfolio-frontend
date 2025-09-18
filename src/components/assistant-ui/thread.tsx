@@ -19,7 +19,7 @@ import {
   Square,
 } from "lucide-react";
 import type { FC } from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import {
   ComposerAddAttachment,
@@ -39,14 +39,14 @@ import { type WelcomeMessage, type ChatConfig } from "@/lib/api/schemas/chat";
 export const Thread: FC = () => {
   const [chatConfig, setChatConfig] = useState<ChatConfig | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [hasFetched, setHasFetched] = useState(false);
+  const hasFetchedRef = useRef(false);
 
   useEffect(() => {
     // Prevent duplicate fetches
-    if (hasFetched) return;
+    if (hasFetchedRef.current) return;
+    hasFetchedRef.current = true;
 
     let isCancelled = false;
-    setHasFetched(true);
 
     getChatConfig()
       .then((config) => {
@@ -88,7 +88,7 @@ export const Thread: FC = () => {
     return () => {
       isCancelled = true;
     };
-  }, [hasFetched]);
+  }, []); // Empty dependency - only run once on mount
 
   return (
     <div className="relative h-full">
