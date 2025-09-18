@@ -7,9 +7,10 @@ export const visitorIdAtom = atomWithStorage('visitorId', '');
 
 // Cube Faces
 export const activeFaceAtom = atom<BoxFaces>('chat');
+export const cubeBackgroundColor = atom<string>('')  // Will be initialized from CSS
 
 // Styling
-export const lightThemeAtom = atom<boolean>(true);
+export const lightThemeAtom = atomWithStorage<boolean>('lightTheme', true);
 export const bgMotionAtom = atom<boolean>(true)
 export const cubeMotionAtom = atom<boolean>(true)
 
