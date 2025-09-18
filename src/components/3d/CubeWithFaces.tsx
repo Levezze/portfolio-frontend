@@ -11,11 +11,11 @@ import * as THREE from "three";
 import { gsap } from "gsap";
 
 import ChatUI from "../faces/ChatUI";
-// import AboutMe from "../faces/AboutMe";
-// import ContactForm from "../faces/ContactForm";
-// import Projects from "../faces/Projects";
-// import Resume from "../faces/Resume";
-// import SecretPage from "../faces/SecretPage";
+import AboutMe from "../faces/AboutMe";
+import ContactForm from "../faces/ContactForm";
+import Projects from "../faces/Projects";
+import Resume from "../faces/Resume";
+import SecretPage from "../faces/SecretPage";
 
 export const CubeWithFaces = () => {
     const activeFace = useAtomValue(activeFaceAtom);
@@ -50,7 +50,7 @@ export const CubeWithFaces = () => {
             page: (
                 <MyRuntimeProvider>
                     <Face>
-                        <ChatUI />
+                        <AboutMe />
                     </Face>
                 </MyRuntimeProvider>
             )
@@ -62,7 +62,7 @@ export const CubeWithFaces = () => {
             page: (
                 <MyRuntimeProvider>
                     <Face>
-                        <ChatUI />
+                        <Projects />
                     </Face>
                 </MyRuntimeProvider>
             )
@@ -74,7 +74,7 @@ export const CubeWithFaces = () => {
             page: (
                 <MyRuntimeProvider>
                     <Face>
-                        <ChatUI />
+                        <ContactForm />
                     </Face>
                 </MyRuntimeProvider>
             )
@@ -86,7 +86,7 @@ export const CubeWithFaces = () => {
             page: (
                 <MyRuntimeProvider>
                     <Face>
-                        <ChatUI />
+                        <Resume />
                     </Face>
                 </MyRuntimeProvider>
             )
@@ -98,7 +98,7 @@ export const CubeWithFaces = () => {
             page: (
                 <MyRuntimeProvider>
                     <Face>
-                        <ChatUI />
+                        <SecretPage />
                     </Face>
                 </MyRuntimeProvider>
             )
