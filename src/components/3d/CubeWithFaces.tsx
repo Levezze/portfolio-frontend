@@ -1,4 +1,4 @@
-import { Html, ContactShadows } from "@react-three/drei";
+import { Html } from "@react-three/drei";
 import { useRef, useEffect, act, useState } from "react";
 import { activeFaceAtom, faceSizeAtom, cubeSizeAtom } from "@/atoms/atomStore";
 import { useAtomValue } from "jotai";
@@ -8,6 +8,8 @@ import { CubeFace } from "@/types/cubeTypes";
 import * as THREE from "three";
 import ChatUI from "../faces/ChatUI";
 import { Face } from "../faces/Face";
+import { getCssColor } from "@/lib/utils";
+import { lightThemeAtom } from "@/atoms/atomStore";
 // import AboutMe from "../faces/AboutMe";
 // import ContactForm from "../faces/ContactForm";
 // import Projects from "../faces/Projects";
@@ -140,12 +142,15 @@ export const CubeWithFaces = () => {
             );
         }
     }, [activeFace])
+    
+    let bgColor: string | undefined = getCssColor("--background");
+    useAtomValue(lightThemeAtom);
 
     return (
         <group ref={cubeRef}>
             <mesh castShadow>
                 <boxGeometry args={[cubeSize, cubeSize, cubeSize]} />
-                <meshStandardMaterial color={"#ffffff"} transparent opacity={1} />
+                <meshStandardMaterial color={bgColor} transparent opacity={1} />
             </mesh>
 
             {Object.entries(cubeFaces).map(([face, data]) => (
