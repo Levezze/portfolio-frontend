@@ -6,12 +6,11 @@ import { createWebSocketAdapter } from '@/lib/chat/webSocketAdapter';
 
 interface MyRuntimeProviderProps {
     children: ReactNode;
-    wsUrl?: string;
 }
 
-export function MyRuntimeProvider({ children, wsUrl }: MyRuntimeProviderProps) {
-    // create the adapter with configuration -> (config?: { wsUrl?: string })
-    const adapter = createWebSocketAdapter({ wsUrl });
+export function MyRuntimeProvider({ children }: MyRuntimeProviderProps) {
+    // create the adapter - URL is handled in wsClient
+    const adapter = createWebSocketAdapter();
 
     // create runtime with the adapter
     const runtime = useLocalRuntime(adapter);
