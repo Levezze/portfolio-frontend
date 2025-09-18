@@ -39,35 +39,56 @@ import { type WelcomeMessage, type ChatConfig } from "@/lib/api/schemas/chat";
 export const Thread: FC = () => {
   const [chatConfig, setChatConfig] = useState<ChatConfig | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasFetched, setHasFetched] = useState(false);
 
   useEffect(() => {
+    // Prevent duplicate fetches
+    if (hasFetched) return;
+
+    let isCancelled = false;
+    setHasFetched(true);
+
     getChatConfig()
-      .then(setChatConfig)
+      .then((config) => {
+        if (!isCancelled) {
+          setChatConfig(config);
+        }
+      })
       .catch((error) => {
         console.error('Failed to load chat config:', error);
-        // Set default config on error
-        setChatConfig({
-          welcome_messages: [
-            {
-              id: '1',
-              message_text: 'Welcome to my portfolio!',
-              message_type: 'primary',
-              display_order: 1,
-              is_active: true
-            },
-            {
-              id: '2',
-              message_text: 'How can I help you today?',
-              message_type: 'secondary',
-              display_order: 2,
-              is_active: true
-            }
-          ],
-          suggestions: []
-        });
+        if (!isCancelled) {
+          // Set default config on error
+          setChatConfig({
+            welcome_messages: [
+              {
+                id: '1',
+                message_text: 'Welcome to my portfolio!',
+                message_type: 'primary',
+                display_order: 1,
+                is_active: true
+              },
+              {
+                id: '2',
+                message_text: 'How can I help you today?',
+                message_type: 'secondary',
+                display_order: 2,
+                is_active: true
+              }
+            ],
+            suggestions: []
+          });
+        }
       })
-      .finally(() => setIsLoading(false));
-  }, []);
+      .finally(() => {
+        if (!isCancelled) {
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [hasFetched]);
 
   return (
     <div className="relative h-full">
@@ -98,7 +119,7 @@ export const Thread: FC = () => {
             <ThreadPrimitive.If empty={false}>
               <div className="aui-thread-viewport-spacer min-h-8 grow" />
             </ThreadPrimitive.If>
-            <Composer />
+            <Composer chatConfig={chatConfig} />
           </ThreadPrimitive.Viewport>
         </ThreadPrimitive.Root>
       </MotionConfig>
@@ -153,31 +174,34 @@ const ThreadWelcome: FC<{ config: ChatConfig }> = ({ config }) => {
   );
 };
 
-const ThreadWelcomeSuggestions: FC = () => {
+const ThreadWelcomeSuggestions: FC<{ suggestions: any[] }> = ({ suggestions }) => {
+  // Use suggestions from config, or fallback to hardcoded if empty
+  const displaySuggestions = suggestions && suggestions.length > 0 ? suggestions : [
+    {
+      title: "Who am I?",
+      label: "My AI sales pitch",
+      action: "Write here about who I am, what I do, and why I'm doing it.",
+    },
+    {
+      title: "My resume",
+      label: "View my resume PDF",
+      action: "Go to the resume page",
+    },
+    {
+      title: "Projects",
+      label: "Some of my recent projects",
+      action: "Go to the contact page",
+    },
+    {
+      title: "Contact me!",
+      label: "Contact form submission",
+      action: "Go to the contact page",
+    },
+  ];
+
   return (
     <div className="aui-thread-welcome-suggestions grid w-full gap-2 @md:grid-cols-2">
-      {[
-        {
-          title: "Who am I?",
-          label: "My AI sales pitch",
-          action: "Write here about who I am, what I do, and why I'm doing it.",
-        },
-        {
-          title: "My resume",
-          label: "View my resume PDF",
-          action: "Go to the resume page",
-        },
-        {
-          title: "Projects",
-          label: "Some of my recent projects",
-          action: "Go to the contact page",
-        },
-        {
-          title: "Contact me!",
-          label: "Contact form submission",
-          action: "Go to the contact page",
-        },
-      ].map((suggestedAction, index) => (
+      {displaySuggestions.map((suggestedAction, index) => (
         <m.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -188,8 +212,8 @@ const ThreadWelcomeSuggestions: FC = () => {
         >
           <ThreadPrimitive.Suggestion
             prompt={suggestedAction.action}
-            method="replace"
-            autoSend
+            method={suggestedAction.method || "replace"}
+            autoSend={suggestedAction.auto_send !== undefined ? suggestedAction.auto_send : true}
             asChild
           >
             <Button
@@ -211,12 +235,12 @@ const ThreadWelcomeSuggestions: FC = () => {
   );
 };
 
-const Composer: FC = () => {
+const Composer: FC<{ chatConfig: ChatConfig | null }> = ({ chatConfig }) => {
   return (
     <div className="aui-composer-wrapper sticky bottom-0 mx-auto flex w-full max-w-[var(--thread-max-width)] flex-col gap-4 overflow-visible rounded-t-md bg-background pb-4 md:pb-6">
       <ThreadScrollToBottom />
       <ThreadPrimitive.Empty>
-        <ThreadWelcomeSuggestions />
+        <ThreadWelcomeSuggestions suggestions={chatConfig?.suggestions || []} />
       </ThreadPrimitive.Empty>
       <ComposerPrimitive.Root className="aui-composer-root relative flex w-full flex-col rounded-md border border-border bg-muted px-1 pt-2  dark:border-muted-foreground/15">
         <ComposerAttachments />
