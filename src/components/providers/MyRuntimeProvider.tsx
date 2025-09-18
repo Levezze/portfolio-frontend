@@ -2,7 +2,7 @@
 import { ReactNode } from 'react';
 import { AssistantRuntimeProvider } from '@assistant-ui/react';
 import { useLocalRuntime } from '@assistant-ui/react';
-import { createWebSocketAdapter } from '@/lib/chat/webSocketAdapter';
+import { createWebSocketAdapter } from '@/lib/api/adapters/webSocketAdapter';
 
 interface MyRuntimeProviderProps {
     children: ReactNode;
