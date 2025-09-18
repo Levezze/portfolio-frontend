@@ -5,10 +5,11 @@ import { type BoxFaces } from '@/types/atomTypes';
 // Visitor
 export const visitorIdAtom = atomWithStorage('visitorId', '');
 
-// Cube Faces
+// 3D Scene
+export const isLoadedAtom = atom<boolean>(false);
 export const activeFaceAtom = atom<BoxFaces>('chat');
-export const cubeBackgroundColorAtom = atom<string>('')  // Will be initialized from CSS
-export const pageColorAtom = atom<string>('#A8DADC')  // Current page color for gradient
+export const cubeColorAtom = atom<string>('')
+export const pageColorAtom = atom<string>('#A8DADC')
 
 // Styling
 export const lightThemeAtom = atomWithStorage<boolean>('lightTheme', true);

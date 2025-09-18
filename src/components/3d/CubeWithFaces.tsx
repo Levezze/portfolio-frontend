@@ -1,7 +1,7 @@
 import { activeFaceAtom, faceSizeAtom, cubeSizeAtom } from "@/atoms/atomStore";
 import { MyRuntimeProvider } from "../providers/MyRuntimeProvider";
-import { useRef, useEffect, useState } from "react";
-import { cubeBackgroundColorAtom } from "@/atoms/atomStore";
+import { useRef, useEffect, useState, useMemo } from "react";
+import { cubeColorAtom } from "@/atoms/atomStore";
 import { useFrame } from "@react-three/fiber";
 import { CubeFace } from "@/types/cubeTypes";
 import { Html } from "@react-three/drei";
@@ -30,7 +30,7 @@ export const CubeWithFaces = () => {
 
     let cubeHtmlSize = cubeSize / 2 + .02;
 
-    const cubeFaces: Record<string, CubeFace> = {
+    const cubeFaces: Record<string, CubeFace> = useMemo(() => ({
         chat: {
             position: [0, 0, cubeHtmlSize],
             rotation: { x: 0, y: 0 },
@@ -93,7 +93,7 @@ export const CubeWithFaces = () => {
                 </Face>
             )
         },
-    }
+    }), [cubeHtmlSize]);
 
     useEffect(() => {
         if (!isMounted.current) {
@@ -135,7 +135,7 @@ export const CubeWithFaces = () => {
         }
     }, [activeFace])
     
-    const targetColor = useAtomValue(cubeBackgroundColorAtom);
+    const targetColor = useAtomValue(cubeColorAtom);
     
     useFrame((_state, delta) => {
         if (cubeMaterialRef.current && targetColor && targetColor !== '') {
