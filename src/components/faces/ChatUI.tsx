@@ -2,7 +2,9 @@ import { Thread } from "../assistant-ui/thread";
 
 const ChatUI = () => {
     return (
-        <Thread />
+        <div className="w-full h-full">
+            <Thread />
+        </div>
     )
 };
 
