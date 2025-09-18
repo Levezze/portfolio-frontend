@@ -1,7 +1,7 @@
 import { activeFaceAtom, faceSizeAtom, cubeSizeAtom } from "@/atoms/atomStore";
 import { MyRuntimeProvider } from "../providers/MyRuntimeProvider";
 import { useRef, useEffect, act, useState } from "react";
-import { cubeBackgroundColor } from "@/atoms/atomStore";
+import { cubeBackgroundColorAtom } from "@/atoms/atomStore";
 import { useFrame } from "@react-three/fiber";
 import { CubeFace } from "@/types/cubeTypes";
 import { Html } from "@react-three/drei";
@@ -145,7 +145,7 @@ export const CubeWithFaces = () => {
         }
     }, [activeFace])
     
-    const targetColor = useAtomValue(cubeBackgroundColor);
+    const targetColor = useAtomValue(cubeBackgroundColorAtom);
     
     useFrame((_state, delta) => {
         if (cubeMaterialRef.current && targetColor && targetColor !== '') {

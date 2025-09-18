@@ -7,7 +7,8 @@ export const visitorIdAtom = atomWithStorage('visitorId', '');
 
 // Cube Faces
 export const activeFaceAtom = atom<BoxFaces>('chat');
-export const cubeBackgroundColor = atom<string>('')  // Will be initialized from CSS
+export const cubeBackgroundColorAtom = atom<string>('')  // Will be initialized from CSS
+export const pageColorAtom = atom<string>('#A8DADC')  // Current page color for gradient
 
 // Styling
 export const lightThemeAtom = atomWithStorage<boolean>('lightTheme', true);

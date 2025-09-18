@@ -1,12 +1,14 @@
 'use client'
 import { useSetAtom, useAtomValue } from 'jotai';
 import React, { useEffect } from 'react';
-import { lightThemeAtom, cubeBackgroundColor } from '@/atoms/atomStore';
+import { lightThemeAtom, cubeBackgroundColorAtom, pageColorAtom, activeFaceAtom } from '@/atoms/atomStore';
 import { getCssColor } from '@/lib/utils';
 
 export const ThemeWrapper = ({ children }:{ children: React.ReactNode }) => {
     const theme = useAtomValue(lightThemeAtom);
-    const setCubeBgColor = useSetAtom(cubeBackgroundColor);
+    const activeFace = useAtomValue(activeFaceAtom);
+    const setCubeBgColor = useSetAtom(cubeBackgroundColorAtom);
+    const setPageColor = useSetAtom(pageColorAtom);
 
     useEffect(() => {
         const initialColor = getCssColor('--background');
@@ -30,6 +32,14 @@ export const ThemeWrapper = ({ children }:{ children: React.ReactNode }) => {
             }
         }, 0);
     }, [theme, setCubeBgColor]);
+
+    // background gradient change
+    useEffect(() => {
+        const pageColor = getCssColor(`--page-${activeFace}`);
+        if (pageColor) {
+            setPageColor(pageColor);
+        }
+    }, [activeFace, setPageColor]);
 
     return (
         <>{children}</>

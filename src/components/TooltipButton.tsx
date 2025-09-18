@@ -25,13 +25,13 @@ export const TooltipButton = ({
     return (
         <Tooltip>
             <TooltipTrigger asChild>
-                    <Button 
-                        variant="outline" 
-                        className="tooltip-button" 
-                        style={style} 
-                        onClick={handleClick}>
-                        {inputIcon}
-                    </Button>
+                <Button 
+                    variant="outline" 
+                    className="tooltip-button" 
+                    style={style} 
+                    onClick={handleClick}>
+                    {inputIcon}
+                </Button>
             </TooltipTrigger>
             {tooltip ? (
                 <TooltipContent>
@@ -41,4 +41,3 @@ export const TooltipButton = ({
         </Tooltip>
     )
 }
-
