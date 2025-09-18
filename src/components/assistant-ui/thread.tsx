@@ -76,7 +76,7 @@ export const Thread: FC = () => {
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
       )}
-      <div className={isLoading ? "opacity-0" : "opacity-100 transition-opacity"}>
+      <div className={`h-full ${isLoading ? "opacity-0" : "opacity-100 transition-opacity"}`}>
         <LazyMotion features={domAnimation}>
           <MotionConfig reducedMotion="user">
         <ThreadPrimitive.Root
