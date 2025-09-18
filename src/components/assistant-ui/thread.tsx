@@ -69,17 +69,16 @@ export const Thread: FC = () => {
       .finally(() => setIsLoading(false));
   }, []);
 
-  if (isLoading) {
-    return (
-      <div className="flex h-full items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
   return (
-    <LazyMotion features={domAnimation}>
-      <MotionConfig reducedMotion="user">
+    <div className="relative h-full">
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center z-10 bg-background">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      )}
+      <div className={isLoading ? "opacity-0" : "opacity-100 transition-opacity"}>
+        <LazyMotion features={domAnimation}>
+          <MotionConfig reducedMotion="user">
         <ThreadPrimitive.Root
           className="aui-root aui-thread-root @container flex h-full flex-col bg-background"
           style={{
@@ -104,6 +103,8 @@ export const Thread: FC = () => {
         </ThreadPrimitive.Root>
       </MotionConfig>
     </LazyMotion>
+      </div>
+    </div>
   );
 };
 
