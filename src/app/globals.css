@@ -1,11 +1,18 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* @custom-variant dark (&:is(.dark *)); */
+@custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-hover-header-color: var(--hover-header-color);
+  --color-page-chat: var(--page-chat);
+  --color-page-about: var(--page-about);
+  --color-page-projects: var(--page-projects);
+  --color-page-contact: var(--page-contact);
+  --color-page-resume: var(--page-resume);
+  --color-page-secret: var(--page-secret);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --color-sidebar-ring: var(--sidebar-ring);
@@ -79,10 +86,16 @@
   --face-size: 400px;
   --header-color: #324041;
   --hover-header-color: #597374;
+  --page-chat: #A8DADC;
+  --page-about: #B8D4B3;
+  --page-projects: #C1666B;
+  --page-contact: #C7B8D4;
+  --page-resume: #E6C9B5;
+  --page-secret: #E4DFDA;
 }
 
-/* .dark {
-  --background: oklch(0.145 0 0);
+.dark {
+  --background: oklch(0.205 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
   --card-foreground: oklch(0.985 0 0);
@@ -113,7 +126,7 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
-} */
+}
 
 @media (min-width: 640px) or (min-height: 640px) {
   :root {
@@ -130,6 +143,7 @@
 .cube-face {
   width: var(--face-size);
   height: var(--face-size);
+  box-sizing: border-box;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transform: translateZ(0); /* Force GPU acceleration */
@@ -138,7 +152,7 @@
 }
 
 .header-button {
-  color: var(--header-color);
+  color: var(--background);
   transition: color 0.3s ease;
 }
 
@@ -149,7 +163,7 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border outline-ring/50 transition-colors duration-500;
   }
 
   body {

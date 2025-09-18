@@ -1,27 +1,32 @@
-import { Html, ContactShadows } from "@react-three/drei";
-import { useRef, useEffect, act, useState } from "react";
 import { activeFaceAtom, faceSizeAtom, cubeSizeAtom } from "@/atoms/atomStore";
-import { useAtomValue } from "jotai";
-import { gsap } from "gsap";
 import { MyRuntimeProvider } from "../providers/MyRuntimeProvider";
+import { useRef, useEffect, act, useState } from "react";
+import { cubeBackgroundColorAtom } from "@/atoms/atomStore";
+import { useFrame } from "@react-three/fiber";
 import { CubeFace } from "@/types/cubeTypes";
-import * as THREE from "three";
-import ChatUI from "../faces/ChatUI";
+import { Html } from "@react-three/drei";
+import { useAtomValue } from "jotai";
 import { Face } from "../faces/Face";
-// import AboutMe from "../faces/AboutMe";
-// import ContactForm from "../faces/ContactForm";
-// import Projects from "../faces/Projects";
-// import Resume from "../faces/Resume";
-// import SecretPage from "../faces/SecretPage";
+import * as THREE from "three";
+import { gsap } from "gsap";
+
+import ChatUI from "../faces/ChatUI";
+import AboutMe from "../faces/AboutMe";
+import ContactForm from "../faces/ContactForm";
+import Projects from "../faces/Projects";
+import Resume from "../faces/Resume";
+import SecretPage from "../faces/SecretPage";
 
 export const CubeWithFaces = () => {
     const activeFace = useAtomValue(activeFaceAtom);
+    const isFirstRender = useRef(true);
     const isMounted = useRef(false);
     const [isRotating, setIsRotating] = useState(false);
 
     const faceSize = useAtomValue(faceSizeAtom);
     const cubeSize = useAtomValue(cubeSizeAtom);
     const cubeRef = useRef<THREE.Group>(null);
+    const cubeMaterialRef = useRef<THREE.MeshStandardMaterial>(null);
 
     let cubeHtmlSize = cubeSize / 2 + .02;
 
@@ -45,7 +50,7 @@ export const CubeWithFaces = () => {
             page: (
                 <MyRuntimeProvider>
                     <Face>
-                        <ChatUI />
+                        <AboutMe />
                     </Face>
                 </MyRuntimeProvider>
             )
@@ -57,7 +62,7 @@ export const CubeWithFaces = () => {
             page: (
                 <MyRuntimeProvider>
                     <Face>
-                        <ChatUI />
+                        <Projects />
                     </Face>
                 </MyRuntimeProvider>
             )
@@ -69,7 +74,7 @@ export const CubeWithFaces = () => {
             page: (
                 <MyRuntimeProvider>
                     <Face>
-                        <ChatUI />
+                        <ContactForm />
                     </Face>
                 </MyRuntimeProvider>
             )
@@ -81,7 +86,7 @@ export const CubeWithFaces = () => {
             page: (
                 <MyRuntimeProvider>
                     <Face>
-                        <ChatUI />
+                        <Resume />
                     </Face>
                 </MyRuntimeProvider>
             )
@@ -93,7 +98,7 @@ export const CubeWithFaces = () => {
             page: (
                 <MyRuntimeProvider>
                     <Face>
-                        <ChatUI />
+                        <SecretPage />
                     </Face>
                 </MyRuntimeProvider>
             )
@@ -129,7 +134,6 @@ export const CubeWithFaces = () => {
                     duration: 0.8,
                     ease: "power2.inOut",
                     onComplete: () => {
-                        // Force the rotation to the expected value
                         if (cubeRef.current) {
                             cubeRef.current.rotation.y = targetRotation.y;
                             cubeRef.current.rotation.x = targetRotation.x;
@@ -140,12 +144,29 @@ export const CubeWithFaces = () => {
             );
         }
     }, [activeFace])
+    
+    const targetColor = useAtomValue(cubeBackgroundColorAtom);
+    
+    useFrame((_state, delta) => {
+        if (cubeMaterialRef.current && targetColor && targetColor !== '') {
+            cubeMaterialRef.current.color.r = THREE.MathUtils.damp(
+                cubeMaterialRef.current.color.r,
+                new THREE.Color(targetColor).r,
+                1.6,
+                delta
+            );
+        }
+    });
+
+    useEffect(() => {
+        isFirstRender.current = false;
+    }, []);
 
     return (
         <group ref={cubeRef}>
             <mesh castShadow>
                 <boxGeometry args={[cubeSize, cubeSize, cubeSize]} />
-                <meshStandardMaterial color={"#ffffff"} transparent opacity={1} />
+                <meshStandardMaterial ref={cubeMaterialRef} color={targetColor || undefined} transparent opacity={1} />
             </mesh>
 
             {Object.entries(cubeFaces).map(([face, data]) => (

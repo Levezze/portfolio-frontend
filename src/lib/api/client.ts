@@ -8,7 +8,7 @@ export class ApiError extends Error {
 }
 class ApiClient {
     private async request(endpoint: string, options: RequestInit = {}) {
-        const url = `${API_URL}${endpoint}`;
+        const url = `${API_URL}/api/v1${endpoint}`;
 
         const config: RequestInit = {
             ...options,

@@ -32,6 +32,10 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { LazyMotion, MotionConfig, domAnimation } from "motion/react";
 import * as m from "motion/react-m";
+import { getChatConfig } from "@/lib/api/services/chat";
+import { type WelcomeMessage, type ChatSuggestion } from "@/lib/api/schemas/chat";
+
+const chatConfig = await getChatConfig();
 
 export const Thread: FC = () => {
   return (
@@ -43,7 +47,7 @@ export const Thread: FC = () => {
             ["--thread-max-width" as string]: "44rem",
           }}
         >
-          <ThreadPrimitive.Viewport className="aui-thread-viewport relative flex flex-1 flex-col overflow-x-auto overflow-y-scroll px-4">
+          <ThreadPrimitive.Viewport className="aui-thread-viewport relative flex flex-1 flex-col overflow-x-auto overflow-y-scroll">
             <ThreadWelcome />
 
             <ThreadPrimitive.Messages
@@ -79,6 +83,7 @@ const ThreadScrollToBottom: FC = () => {
 };
 
 const ThreadWelcome: FC = () => {
+  const welcomeMessages = chatConfig.welcomeMessages;
   return (
     <ThreadPrimitive.Empty>
       <div className="aui-thread-welcome-root mx-auto my-auto flex w-full max-w-[var(--thread-max-width)] flex-grow flex-col">
@@ -90,7 +95,7 @@ const ThreadWelcome: FC = () => {
               exit={{ opacity: 0, y: 10 }}
               className="aui-thread-welcome-message-motion-1 text-2xl font-semibold"
             >
-              Hello there!
+              {welcomeMessages.filter((message: WelcomeMessage) => message.message_type === 'primary')[0]?.message_text}
             </m.div>
             <m.div
               initial={{ opacity: 0, y: 10 }}
@@ -99,7 +104,7 @@ const ThreadWelcome: FC = () => {
               transition={{ delay: 0.1 }}
               className="aui-thread-welcome-message-motion-2 text-2xl text-muted-foreground/65"
             >
-              How can I help you today?
+              {welcomeMessages.filter((message: WelcomeMessage) => message.message_type === 'secondary')[0]?.message_text}
             </m.div>
           </div>
         </div>
@@ -173,7 +178,7 @@ const Composer: FC = () => {
       <ThreadPrimitive.Empty>
         <ThreadWelcomeSuggestions />
       </ThreadPrimitive.Empty>
-      <ComposerPrimitive.Root className="aui-composer-root relative flex w-full flex-col rounded-md border border-border bg-muted px-1 pt-2 shadow-[0_9px_9px_0px_rgba(0,0,0,0.01),0_2px_5px_0px_rgba(0,0,0,0.06)] dark:border-muted-foreground/15">
+      <ComposerPrimitive.Root className="aui-composer-root relative flex w-full flex-col rounded-md border border-border bg-muted px-1 pt-2  dark:border-muted-foreground/15">
         <ComposerAttachments />
         <ComposerPrimitive.Input
           placeholder="Send a message..."
@@ -190,8 +195,8 @@ const Composer: FC = () => {
 
 const ComposerAction: FC = () => {
   return (
-    <div className="aui-composer-action-wrapper relative mx-1 mt-2 mb-2 flex items-center justify-between">
-      <ComposerAddAttachment />
+    <div className="aui-composer-action-wrapper relative mx-1 mt-2 mb-2 flex items-center ml-auto">
+      {/* <ComposerAddAttachment /> */}
 
       <ThreadPrimitive.If running={false}>
         <ComposerPrimitive.Send asChild>

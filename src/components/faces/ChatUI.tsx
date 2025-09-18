@@ -2,7 +2,7 @@ import { Thread } from "../assistant-ui/thread";
 
 const ChatUI = () => {
     return (
-        <div className={`chat-page cube-face`}>
+        <div className="w-full h-full">
             <Thread />
         </div>
     )
