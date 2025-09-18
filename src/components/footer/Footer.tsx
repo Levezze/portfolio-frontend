@@ -21,6 +21,7 @@ export const Footer = () => {
                 inputIcon={theme ? <SunIcon color={backgroundColor} /> : <MoonIcon color={backgroundColor} />}
                 tooltipText="Light/Dark Theme"
                 handleClick={() => setTheme(!theme)}
+                state={theme}
                 round={true}
             />
             <TooltipButton
@@ -28,6 +29,7 @@ export const Footer = () => {
                 inputIcon={<WallpaperIcon color={backgroundColor} />}
                 tooltipText="Stop Background Animation"
                 handleClick={() => setBgMotion(!bgMotion)}
+                state={bgMotion}
                 round={true}
             />
             <TooltipButton
@@ -35,6 +37,7 @@ export const Footer = () => {
                 inputIcon={<Box className="w-10 h-10" color={backgroundColor} />}
                 tooltipText="Stop Cube Animation"
                 handleClick={() => setCubeMotion(!cubeMotion)}
+                state={cubeMotion}
                 round={true}
             />
         </div>

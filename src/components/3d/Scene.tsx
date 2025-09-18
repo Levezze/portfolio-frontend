@@ -5,9 +5,15 @@ import { CameraController } from "./CameraController";
 import { BowlGroundPlane } from "./BowlGroundPlane";
 import { useResponsiveFaceSize } from "@/lib/hooks/useResponsiveFaceSize";
 import { Float } from "@react-three/drei";
+import { useAtomValue } from "jotai";
+import { bgMotionAtom, cubeMotionAtom } from "@/atoms/atomStore";
+
 
 export const Scene = () => {
     useResponsiveFaceSize();
+    const bgMotion = useAtomValue(bgMotionAtom);
+    const cubeMotion = useAtomValue(cubeMotionAtom);
+
 
     return (
         <div className="canvas w-full h-full">
@@ -36,25 +42,24 @@ export const Scene = () => {
                 />
                 <OrthographicCamera makeDefault position={[0, 0, 100]} />
                 <CameraController />
-                <Float    
+                {bgMotion ? <Float
                     speed={1}
                     rotationIntensity={1.2}
                     floatIntensity={0.1}
                     floatingRange={[0.1, 1.5]}
                 >
-                    <BowlGroundPlane position={[20, 65, 50]} color={"#1c1c1c"}/>          
-                </Float>    
-                <Float
+                    <BowlGroundPlane position={[20, 65, 50]} color={"#1c1c1c"}/>
+                </Float> : <BowlGroundPlane position={[20, 65, 50]} color={"#1c1c1c"}/>}
+                {cubeMotion ? <Float
                     speed={0.5}
                     rotationIntensity={0.15}
                     floatIntensity={0.1}
                     floatingRange={[0.1, 2.5]}
                 >
                     <CubeWithFaces />
-                </Float>
-                {/* <OrbitControls /> */}
+                </Float> : <CubeWithFaces />}
+                <OrbitControls enabled={false}/>
             </Canvas>
-
         </div>
     );
 }

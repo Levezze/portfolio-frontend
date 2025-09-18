@@ -9,6 +9,7 @@ export const TooltipButton = ({
     size = 10,
     round = false,
     handleClick,
+    state,
 } : {
     tooltip: boolean,
     inputIcon?: any, 
@@ -16,6 +17,7 @@ export const TooltipButton = ({
     size?: number,
     round?: boolean,
     handleClick?: () => void,
+    state?: boolean,
 }) => {
     const style = { 
         width: `${size/4}rem`, 
@@ -26,7 +28,7 @@ export const TooltipButton = ({
         <Tooltip>
             <TooltipTrigger asChild>
                 <Button 
-                    variant="outline" 
+                    variant={state ? "outline" : "outline_pressed"}
                     className="tooltip-button" 
                     style={style} 
                     onClick={handleClick}>

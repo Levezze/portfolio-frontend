@@ -12,8 +12,8 @@ export const pageColorAtom = atom<string>('#A8DADC')  // Current page color for 
 
 // Styling
 export const lightThemeAtom = atomWithStorage<boolean>('lightTheme', true);
-export const bgMotionAtom = atom<boolean>(true)
-export const cubeMotionAtom = atom<boolean>(true)
+export const bgMotionAtom = atomWithStorage<boolean>('bgMotion', true)
+export const cubeMotionAtom = atomWithStorage<boolean>('cubeMotion', true)
 
 // Sizing
 export const cubeSizeAtom = atom<number>(10);
