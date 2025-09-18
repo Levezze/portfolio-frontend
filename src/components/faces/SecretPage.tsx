@@ -2,7 +2,7 @@ import React from 'react'
 
 const SecretPage = () => {
   return (
-    <div>SecretPage</div>
+    <div>Down for maintenance, come back later!</div>
   )
 }
 

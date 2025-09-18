@@ -2,7 +2,7 @@ import React from 'react'
 
 const Resume = () => {
   return (
-    <div>Resume</div>
+    <div>Down for maintenance, come back later!</div>
   )
 }
 
