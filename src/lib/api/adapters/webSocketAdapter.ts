@@ -32,11 +32,11 @@ export function createWebSocketAdapter(): ChatModelAdapter {
                 }
             });
 
-            wsManager.send(JSON.stringify({
+            wsManager.send({
                 type: "message",
                 content: userContent,
                 message_id: messageId,
-            }));
+            });
 
             let accumulatedText = '';
             let isDone = false;

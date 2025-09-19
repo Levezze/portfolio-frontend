@@ -16,11 +16,15 @@ class WebSocketManager {
     private state: 'disconnected' | 'connecting' | 'connected' | 'reconnecting' = 'disconnected';
 
     constructor() {
-        this.visitorId = this.getOrCreateVisitorId();
+        this.visitorId = '';
     }
 
     // LIFECYCLE: Connect to ws
     connect() {
+        if (!this.visitorId && typeof window !== 'undefined') {
+            this.visitorId = this.getOrCreateVisitorId();
+        }
+
         if (this.state === 'connected' && this.ws?.readyState === WebSocket.OPEN) {
             return this.ws
         }
@@ -30,7 +34,7 @@ class WebSocketManager {
         }
 
         this.state = 'connecting';
-        this.ws = new WebSocket(`${WS_URL}/chat/ws?visitor_id=${this.visitorId}`);
+        this.ws = new WebSocket(`${WS_URL}/api/v1/chat/ws?visitor_id=${this.visitorId}`);
         this.setupEventHandlers();
         return this.ws;
     }
@@ -129,7 +133,7 @@ class WebSocketManager {
     // MESSAGE QUEUE
     send(message: any) {
         if (this.ws?.readyState === WebSocket.OPEN) {
-            this.ws.send(message);
+            this.ws.send(JSON.stringify(message));
         } else {
             console.log('Websocket not connected, queueing message');
             this.messageQueue.push(message);
@@ -147,8 +151,8 @@ class WebSocketManager {
 
     on(e: string, callback: Function) {
         if (!this.listeners.has(e)) {
-            this.listeners.get(e)!.add(callback);
-        }
+            this.listeners.set(e, new Set());
+        }        
         this.listeners.get(e)!.add(callback);
 
         // unsubscribe
