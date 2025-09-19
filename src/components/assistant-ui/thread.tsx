@@ -28,6 +28,7 @@ import { MarkdownText } from "@/components/assistant-ui/markdown-text";
 import { ToolFallback } from "@/components/assistant-ui/tool-fallback";
 import { TooltipIconButton } from "@/components/assistant-ui/tooltip-icon-button";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { LazyMotion, MotionConfig, domAnimation } from "motion/react";
 import * as m from "motion/react-m";
@@ -293,6 +294,24 @@ const MessageError: FC = () => {
   );
 };
 
+const gimlaiGenerator = () => {
+  const result = Math.ceil(Math.random() * 3);
+
+  switch (result) {
+    case 1:
+      console.log('GimlAI state: Drunk');
+      break
+    case 2:
+      console.log('GimlAI state: Serious');
+      break
+    case 3:
+      console.log('GimlAI state: Heroic');
+      break
+  }
+
+  return result;
+}
+
 const AssistantMessage: FC = () => {
   return (
     <MessagePrimitive.Root asChild>
@@ -300,14 +319,21 @@ const AssistantMessage: FC = () => {
         className="aui-assistant-message-root relative mx-auto w-full max-w-[var(--thread-max-width)] animate-in py-4 duration-200 fade-in slide-in-from-bottom-1 last:mb-24"
         data-role="assistant"
       >
-        <div className="aui-assistant-message-content mx-2 leading-7 break-words text-foreground">
-          <MessagePrimitive.Parts
-            components={{
-              Text: MarkdownText,
-              tools: { Fallback: ToolFallback },
-            }}
-          />
-          <MessageError />
+        <div className="flex">
+
+          <Avatar className="mr-3 mt-1 h-10 w-10">
+            <AvatarImage src={`/gimlai/gimlai-avatar-${gimlaiGenerator()}.webp`} alt="GimlAI, Lev's dwarf sidekick" className="object-cover"/>
+            <AvatarFallback>G</AvatarFallback>
+          </Avatar>
+          <div className="aui-assistant-message-content mx-2 leading-7 break-words text-foreground">
+            <MessagePrimitive.Parts
+              components={{
+                Text: MarkdownText,
+                tools: { Fallback: ToolFallback },
+              }}
+              />
+            <MessageError />
+          </div>
         </div>
 
         <div className="aui-assistant-message-footer mt-2 ml-2 flex">
