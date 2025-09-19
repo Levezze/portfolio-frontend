@@ -1,6 +1,6 @@
 import { ChatModelAdapter, ChatModelRunResult } from "@assistant-ui/react";
 import { v4 as uuidv4 } from 'uuid';
-import { wsClient } from '@/lib/api/wsClient';
+import { wsManager } from '@/lib/api/core/wsManager';
 
 export function createWebSocketAdapter(): ChatModelAdapter {
 
@@ -27,6 +27,7 @@ export function createWebSocketAdapter(): ChatModelAdapter {
             const messagePromises: ((value: any) => void)[] = [];
 
             ws.onmessage = (event) => {
+                console.log(event)
                 const data = JSON.parse(event.data);
                 if (messagePromises.length > 0) {
                     const resolve = messagePromises.shift()!;
