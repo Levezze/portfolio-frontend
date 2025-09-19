@@ -44,7 +44,7 @@ class WebSocketManager {
         if (!this.ws) return;
 
         this.ws.onopen = () => {
-            console.log('Websocket connecter');
+            console.log('Websocket connected');
             this.state = 'connected';
             this.reconnectAttempts = 0
 
