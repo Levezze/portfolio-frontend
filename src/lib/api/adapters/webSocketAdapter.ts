@@ -18,6 +18,10 @@ export function createWebSocketAdapter(): ChatModelAdapter {
             const userContent = lastMessage.content?.[0]?.type === 'text' ?
                 lastMessage.content[0].text : '';
 
+            if (!userContent) {
+                throw new Error('Empty message');
+            }
+
             const messageQueue: any[] = [];
             const messagePromises: ((value: any) => void)[] = [];
 
@@ -34,7 +38,7 @@ export function createWebSocketAdapter(): ChatModelAdapter {
 
             wsManager.send({
                 type: "message",
-                content: userContent,
+                content: messages,
                 message_id: messageId,
             });
 
