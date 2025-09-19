@@ -19,10 +19,8 @@ import {
   Square,
 } from "lucide-react";
 import type { FC } from "react";
-import { useState, useEffect, useRef } from "react";
 
 import {
-  ComposerAddAttachment,
   ComposerAttachments,
   UserMessageAttachments,
 } from "@/components/assistant-ui/attachment";
@@ -33,62 +31,52 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { LazyMotion, MotionConfig, domAnimation } from "motion/react";
 import * as m from "motion/react-m";
-import { getChatConfig } from "@/lib/api/services/chat";
+import { getChatConfig } from "@/lib/api/services/chatService";
 import { type WelcomeMessage, type ChatConfig } from "@/lib/api/schemas/chat";
+import useSWR from 'swr';
 
 export const Thread: FC = () => {
-  const [chatConfig, setChatConfig] = useState<ChatConfig | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const hasFetchedRef = useRef(false);
-
-  useEffect(() => {
-    // Prevent duplicate fetches
-    if (hasFetchedRef.current) return;
-    hasFetchedRef.current = true;
-
-    let isCancelled = false;
-
-    getChatConfig()
-      .then((config) => {
-        if (!isCancelled) {
-          setChatConfig(config);
-        }
-      })
-      .catch((error) => {
-        console.error('Failed to load chat config:', error);
-        if (!isCancelled) {
-          // Set default config on error
-          setChatConfig({
-            welcome_messages: [
-              {
-                id: '1',
-                message_text: 'Welcome to my portfolio!',
-                message_type: 'primary',
-                display_order: 1,
-                is_active: true
-              },
-              {
-                id: '2',
-                message_text: 'How can I help you today?',
-                message_type: 'secondary',
-                display_order: 2,
-                is_active: true
-              }
-            ],
-            suggestions: []
-          });
-        }
-      })
-      .finally(() => {
-        if (!isCancelled) {
-          setIsLoading(false);
-        }
-      });
-
-    return () => {
-      isCancelled = true;
-    };
-  }, []); // Empty dependency - only run once on mount
+  const { data: chatConfig, isLoading } = useSWR(
+    'chat-config',
+    getChatConfig,
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 300000,
+      fallbackData: {
+        welcome_messages: [
+          {
+            id: '1',
+            message_text: 'Welcome to my portfolio!',
+            message_type: 'primary',
+            display_order: 1,
+            is_active: true,
+          },
+          {
+            id: '2',
+            message_text: 'How can I help you today?',
+            message_type: 'secondary',
+            display_order: 2,
+            is_active: true,
+          }
+        ],
+        suggestions: [
+          {
+            id: '1',
+            title: 'Who is Lev?',
+            action: 'Write here about who I am, what I do, and why I\'m doing it.',
+            action_type: "prompt",
+            method: "replace",
+            auto_send: true,
+            display_order: 1,
+            is_active: true,
+          },
+        ]
+      } satisfies ChatConfig,
+      onError: (err) => {
+        console.error('Failed to load chat config:', err);
+      }
+    }
+  );
 
   return (
     <div className="relative h-full">
