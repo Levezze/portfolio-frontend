@@ -6,51 +6,36 @@ export function createWebSocketAdapter(): ChatModelAdapter {
 
     return {
         async *run({ messages, abortSignal }): AsyncGenerator<ChatModelRunResult> {
-            let visitorId = localStorage.getItem('visitor_id');
-            if (!visitorId) {
-                visitorId = uuidv4();
-                localStorage.setItem('visitor_id', visitorId)
-            }
+            wsManager.connect();
+            
+            const messageId = uuidv4();
+            const lastMessage = messages.at(-1);
 
-            const lastMessage = messages[messages.length - 1];
             if (!lastMessage || lastMessage.role !== 'user') {
                 throw new Error('No user message to send');
             }
 
-            const userContent = lastMessage.content?.[0]?.type === 'text'
-                ? lastMessage.content[0].text
-                : '';
-
-            const ws = wsClient.connect(visitorId);
+            const userContent = lastMessage.content?.[0]?.type === 'text' ?
+                lastMessage.content[0].text : '';
 
             const messageQueue: any[] = [];
             const messagePromises: ((value: any) => void)[] = [];
 
-            ws.onmessage = (event) => {
-                console.log(event)
-                const data = JSON.parse(event.data);
+            const unsubscribe = wsManager.on('message', (data: any) => {
+                if (data.message_id !== messageId) return;
+
                 if (messagePromises.length > 0) {
                     const resolve = messagePromises.shift()!;
                     resolve(data);
                 } else {
-                    messageQueue.push(data)
+                    messageQueue.push(data);
                 }
-            }
-
-            ws.onerror = (error) => {
-                console.log('Websocket error:', error);
-                ws.close();
-            }
-
-            await new Promise<void>((resolve, reject) => {
-                ws.onopen = () => resolve();
-                ws.onerror = () => reject(new Error('Websocket connection failed'));
-                setTimeout(() => reject(new Error('Connection timeout')), 5000);
             });
 
-            ws.send(JSON.stringify({
+            wsManager.send(JSON.stringify({
                 type: "message",
                 content: userContent,
+                message_id: messageId,
             }));
 
             let accumulatedText = '';
@@ -98,7 +83,7 @@ export function createWebSocketAdapter(): ChatModelAdapter {
                 }
             }
 
-            ws.close()
+            unsubscribe();
         }
     }
 }
