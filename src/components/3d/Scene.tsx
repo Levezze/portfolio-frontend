@@ -6,17 +6,20 @@ import { BowlGroundPlane } from "./BowlGroundPlane";
 import { useResponsiveFaceSize } from "@/lib/hooks/useResponsiveFaceSize";
 import { Float } from "@react-three/drei";
 import { useAtomValue } from "jotai";
-import { bgMotionAtom, cubeMotionAtom } from "@/atoms/atomStore";
+import { isLoadedAtom, bgMotionAtom, cubeMotionAtom } from "@/atoms/atomStore";
+import { useState } from "react";
 
 
 export const Scene = () => {
     useResponsiveFaceSize();
+    const isLoaded = useAtomValue(isLoadedAtom)
     const bgMotion = useAtomValue(bgMotionAtom);
     const cubeMotion = useAtomValue(cubeMotionAtom);
+    
 
 
     return (
-        <div className="canvas w-full h-full">
+        <div className={`canvas w-full h-full ${isLoaded ? "opacity-100" : "opacity-0"}`}>
             <Canvas
                 shadows
                 gl={{
@@ -40,7 +43,7 @@ export const Scene = () => {
                     size={4}
                     samples={16}
                 />
-                <OrthographicCamera makeDefault position={[0, 0, 100]} />
+                <OrthographicCamera makeDefault position={[0, 0, 100]}/>
                 <CameraController />
                 {bgMotion ? <Float
                     speed={1}

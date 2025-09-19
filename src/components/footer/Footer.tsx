@@ -1,12 +1,12 @@
 import { TooltipButton } from "../TooltipButton";
 import { Box, WallpaperIcon, SunIcon, MoonIcon } from "lucide-react";
 import { useAtom, useAtomValue } from "jotai";
-import { lightThemeAtom, bgMotionAtom, cubeMotionAtom, cubeBackgroundColorAtom } from "@/atoms/atomStore";
+import { lightThemeAtom, bgMotionAtom, cubeMotionAtom, cubeColorAtom } from "@/atoms/atomStore";
 import React, { useEffect } from 'react';
 
 export const Footer = () => {
     const [theme, setTheme] = useAtom(lightThemeAtom);
-    const backgroundColor = useAtomValue(cubeBackgroundColorAtom);
+    const backgroundColor = useAtomValue(cubeColorAtom);
     const [bgMotion, setBgMotion] = useAtom(bgMotionAtom);
     const [cubeMotion, setCubeMotion] = useAtom(cubeMotionAtom);
 

@@ -1,13 +1,13 @@
 'use client'
 import { useSetAtom, useAtomValue } from 'jotai';
 import React, { useEffect } from 'react';
-import { lightThemeAtom, cubeBackgroundColorAtom, pageColorAtom, activeFaceAtom } from '@/atoms/atomStore';
+import { lightThemeAtom, cubeColorAtom, pageColorAtom, activeFaceAtom } from '@/atoms/atomStore';
 import { getCssColor } from '@/lib/utils';
 
 export const ThemeWrapper = ({ children }:{ children: React.ReactNode }) => {
     const theme = useAtomValue(lightThemeAtom);
     const activeFace = useAtomValue(activeFaceAtom);
-    const setCubeBgColor = useSetAtom(cubeBackgroundColorAtom);
+    const setCubeBgColor = useSetAtom(cubeColorAtom);
     const setPageColor = useSetAtom(pageColorAtom);
 
     useEffect(() => {
