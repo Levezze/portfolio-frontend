@@ -1,6 +1,7 @@
 import { ChatModelAdapter, ChatModelRunResult } from "@assistant-ui/react";
 import { v4 as uuidv4 } from 'uuid';
 import { wsManager } from '@/lib/api/core/wsManager';
+import { transformTool } from "../services/chatService";
 
 export function createWebSocketAdapter(): ChatModelAdapter {
 
@@ -67,10 +68,9 @@ export function createWebSocketAdapter(): ChatModelAdapter {
                         break;
 
                     case 'tool_call':
-                        // Build content array with both text and tool call
+                        // content array with both text and tool call
                         const content: any[] = [];
 
-                        // Include any accumulated text
                         if (accumulatedText) {
                             content.push({
                                 type: 'text' as const,
@@ -78,18 +78,10 @@ export function createWebSocketAdapter(): ChatModelAdapter {
                             });
                         }
 
-                        // Add the tool call
-                        content.push({
-                            type: 'tool-call' as const,
-                            toolCallId: message.tool_id || 'tool-' + Date.now(),
-                            toolName: message.tool_name || 'navigate',
-                            args: message.arguments || {},
-                            argsText: JSON.stringify(message.arguments || {}),
-                        });
+                        content.push(await transformTool(message));
 
                         yield { content };
 
-                        // Don't end the stream - backend might send more
                         break;
 
                     case 'end':

@@ -4,6 +4,7 @@ export const toolCallBaseSchema = z.object({
     type: z.literal('tool_call'),
     tool_name: z.enum(['navigate_page','trigger_download', 'contact_form']),
     tool_id: z.string(),
+    message_id: z.string(),
 });
 
 const pagesEnum = ["chat", "about", "projects", "contact", "resume", "secret"] as const;
@@ -35,6 +36,7 @@ export const contactParamsSchema = toolCallBaseSchema.extend({
     })
 });
 
+export type BaseToolParams = z.infer<typeof toolCallBaseSchema>;
 export type NavigateParams = z.infer<typeof navigateParamsSchema>;
 export type DownloadParams = z.infer<typeof downloadParamsSchema>;
 export type ContactParams = z.infer<typeof contactParamsSchema>;
