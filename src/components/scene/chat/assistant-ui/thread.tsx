@@ -183,7 +183,7 @@ const FakeAssistantMessage: FC<{ text: string }> = ({ text }) => {
             </Avatar>
           </TooltipTrigger>
           <TooltipContent>
-            <p>GimlAI, Lev's sidekick</p>
+            <p>Gimli-AI, Lev's sidekick</p>
           </TooltipContent>
         </Tooltip>
         <div className="aui-assistant-message-content mx-2 leading-7 break-words text-foreground">
@@ -381,7 +381,7 @@ const AssistantMessage: FC = () => {
               </Avatar>
             </TooltipTrigger>
             <TooltipContent>
-              <p>GimlAI, Lev's sidekick</p>
+              <p>Gimli-AI, Lev's sidekick</p>
             </TooltipContent>
           </Tooltip>
           <div className="aui-assistant-message-content mx-2 leading-7 break-words text-foreground">
