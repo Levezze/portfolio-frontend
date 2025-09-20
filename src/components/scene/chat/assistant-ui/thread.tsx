@@ -18,6 +18,7 @@ import {
   RefreshCwIcon,
   Square,
 } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import type { FC } from "react";
 
 import {
@@ -170,14 +171,21 @@ const FakeAssistantMessage: FC<{ text: string }> = ({ text }) => {
       data-role="assistant"
     >
       <div className="flex">
-        <Avatar className="mr-3 mt-1 h-12 w-12">
-          <AvatarImage 
-            src={`/gimli-ai/gimli-ai-avatar-${gimliChoice}.webp`} 
-            alt="GimlAI, Lev's dwarf sidekick" 
-            className="object-cover"
-          />
-          <AvatarFallback>G</AvatarFallback>
-        </Avatar>
+        <Tooltip>
+          <TooltipTrigger>
+            <Avatar className="mr-3 mt-1 h-12 w-12">
+              <AvatarImage 
+                src={`/gimli-ai/gimli-ai-avatar-${gimliChoice}.webp`} 
+                alt="GimlAI, Lev's dwarf sidekick" 
+                className="object-cover"
+              />
+              <AvatarFallback>G</AvatarFallback>
+            </Avatar>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Gimli-AI, Lev's sidekick</p>
+          </TooltipContent>
+        </Tooltip>
         <div className="aui-assistant-message-content mx-2 leading-7 break-words text-foreground">
           <p>{text}</p>
         </div>
@@ -214,7 +222,7 @@ const ThreadWelcome: FC<{ config: ChatConfig }> = ({ config }) => {
         </div>
         <Separator />
         <FakeAssistantMessage 
-          text={"I'm Gimli-AI, Lev's portfolio assistant and dwarf. Feel free to ask me questions or tell me to navigate to another page!"} 
+          text={welcome_messages.filter((message: WelcomeMessage) => message.message_type === 'assistant')[0]?.message_text} 
         />
       </div>
     </ThreadPrimitive.Empty>
@@ -361,11 +369,21 @@ const AssistantMessage: FC = () => {
         data-role="assistant"
       >
         <div className="flex">
-
-          <Avatar className="mr-3 mt-1 h-10 w-10">
-            <AvatarImage src={`/gimli-ai/gimli-ai-avatar-${gimliChoice}.webp`} alt="GimlAI, Lev's dwarf sidekick" className="object-cover"/>
-            <AvatarFallback>G</AvatarFallback>
-          </Avatar>
+          <Tooltip>
+            <TooltipTrigger>
+              <Avatar className="mr-3 mt-1 h-10 w-10">
+                <AvatarImage 
+                  src={`/gimli-ai/gimli-ai-avatar-${gimliChoice}.webp`} 
+                  alt="GimlAI, Lev's dwarf sidekick" 
+                  className="object-cover"
+                />
+                <AvatarFallback>G</AvatarFallback>
+              </Avatar>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Gimli-AI, Lev's sidekick</p>
+            </TooltipContent>
+          </Tooltip>
           <div className="aui-assistant-message-content mx-2 leading-7 break-words text-foreground">
             <MessagePrimitive.Parts
               components={{
