@@ -44,7 +44,7 @@ const buttonVariants = cva(
       {
         variant: "ghost",
         matchBgColor: true,
-        class: "bg-[var(--dynamic-bg)] hover:bg-[var(--dynamic-bg)]/50 transition-colors ease-in-out duration-900",
+        class: "bg-[var(--dynamic-bg)] hover:bg-[var(--dynamic-bg)]/50 dark:hover:!bg-white/70 transition-colors ease-in-out duration-300",
       }
     ],
     defaultVariants: {

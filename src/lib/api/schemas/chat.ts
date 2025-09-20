@@ -3,7 +3,7 @@ import * as z from 'zod';
 export const WelcomeMessageSchema = z.object({
     id: z.string(),
     message_text: z.string(),
-    message_type: z.enum(['primary','secondary']),
+    message_type: z.enum(['primary','secondary', 'assistant']),
     display_order: z.number().int(),
     is_active: z.boolean(),
 });
@@ -11,6 +11,7 @@ export const WelcomeMessageSchema = z.object({
 export const ChatSuggestionSchema = z.object({
     id: z.string(),
     title: z.string(),
+    label: z.string(),
     action: z.string(),
     action_type: z.enum(['prompt','navigation', 'system']),
     method: z.enum(['replace','append']),
