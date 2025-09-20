@@ -35,6 +35,8 @@ import * as m from "motion/react-m";
 import { getChatConfig } from "@/lib/api/services/chatService";
 import { type WelcomeMessage, type ChatConfig } from "@/lib/api/schemas/chat";
 import useSWR from 'swr';
+import { useAtomValue } from "jotai";
+import { pageColorAtom } from "@/atoms/atomStore";
 
 export const Thread: FC = () => {
   const { data: chatConfig, isLoading } = useSWR(
@@ -207,8 +209,9 @@ const ThreadWelcomeSuggestions: FC<{ suggestions: any[] }> = ({ suggestions }) =
           >
             <Button
               variant="ghost"
-              className="aui-thread-welcome-suggestion h-auto w-full flex-1 flex-wrap items-start justify-start gap-1 rounded-md border px-5 py-4 text-left text-sm @md:flex-col dark:hover:bg-accent/60"
+              className="aui-thread-welcome-suggestion h-auto w-full flex-1 flex-wrap items-start justify-start gap-1 rounded-none border px-5 py-4 text-left text-sm @md:flex-col dark:hover:bg-accent/60"
               aria-label={suggestedAction.action}
+              matchBgColor={true}
             >
               <span className="aui-thread-welcome-suggestion-text-1 font-medium">
                 {suggestedAction.title}
@@ -231,7 +234,7 @@ const Composer: FC<{ chatConfig: ChatConfig | null }> = ({ chatConfig }) => {
       <ThreadPrimitive.Empty>
         <ThreadWelcomeSuggestions suggestions={chatConfig?.suggestions || []} />
       </ThreadPrimitive.Empty>
-      <ComposerPrimitive.Root className="aui-composer-root relative flex w-full flex-col rounded-md border border-border bg-muted px-1 pt-2  dark:border-muted-foreground/15">
+      <ComposerPrimitive.Root className="aui-composer-root relative flex w-full flex-col border border-border bg-muted px-1 pt-2  dark:border-muted-foreground/15">
         <ComposerAttachments />
         <ComposerPrimitive.Input
           placeholder="Send a message..."
