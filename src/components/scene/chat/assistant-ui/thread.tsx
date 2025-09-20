@@ -23,10 +23,10 @@ import type { FC } from "react";
 import {
   ComposerAttachments,
   UserMessageAttachments,
-} from "@/components/assistant-ui/attachment";
-import { MarkdownText } from "@/components/assistant-ui/markdown-text";
-import { ToolFallback } from "@/components/assistant-ui/tool-fallback";
-import { TooltipIconButton } from "@/components/assistant-ui/tooltip-icon-button";
+} from "@/components/scene/chat/assistant-ui/attachment";
+import { MarkdownText } from "@/components/scene/chat/assistant-ui/markdown-text";
+import { ToolFallback } from "@/components/scene/chat/assistant-ui/tool-fallback";
+import { TooltipIconButton } from "@/components/scene/chat/assistant-ui/tooltip-icon-button";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
@@ -42,7 +42,7 @@ export const Thread: FC = () => {
     getChatConfig,
     {
       revalidateOnFocus: false,
-      dedupingInterval: 300000,
+      dedupingInterval: 50000,
       fallbackData: {
         welcome_messages: [
           {

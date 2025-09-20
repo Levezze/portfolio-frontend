@@ -1,21 +1,21 @@
 import { activeFaceAtom, faceSizeAtom, cubeSizeAtom } from "@/atoms/atomStore";
-import { MyRuntimeProvider } from "../providers/MyRuntimeProvider";
+import { MyRuntimeProvider } from "./chat/MyRuntimeProvider";
 import { useRef, useEffect, useState, useMemo } from "react";
 import { cubeColorAtom } from "@/atoms/atomStore";
 import { useFrame } from "@react-three/fiber";
 import { CubeFace } from "@/types/cubeTypes";
 import { Html } from "@react-three/drei";
 import { useAtomValue } from "jotai";
-import { Face } from "../faces/Face";
+import { Face } from "../shared/Face";
 import * as THREE from "three";
 import { gsap } from "gsap";
 
-import ChatUI from "../faces/ChatUI";
-import AboutMe from "../faces/AboutMe";
-import ContactForm from "../faces/ContactForm";
-import Projects from "../faces/Projects";
-import Resume from "../faces/Resume";
-import SecretPage from "../faces/SecretPage";
+import ChatUI from "./chat/ChatUI";
+import AboutMe from "./about/AboutMe";
+import ContactForm from "./contact/ContactForm";
+import Projects from "./projects/Projects";
+import Resume from "./resume/Resume";
+import SecretPage from "./secret/SecretPage";
 
 export const CubeWithFaces = () => {
     const activeFace = useAtomValue(activeFaceAtom);

@@ -1,4 +1,4 @@
-import { TooltipButton } from "../TooltipButton";
+import { TooltipButton } from "./shared/TooltipButton";
 import { Box, WallpaperIcon, SunIcon, MoonIcon } from "lucide-react";
 import { useAtom, useAtomValue } from "jotai";
 import { lightThemeAtom, bgMotionAtom, cubeMotionAtom, cubeColorAtom } from "@/atoms/atomStore";

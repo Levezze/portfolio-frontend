@@ -1,8 +1,8 @@
 'use client'
-import { Scene } from "@/components/3d/Scene";
-import { LoadingScene } from "@/components/3d/LoadingScene";
-import { Header } from "@/components/nav/Header";
-import { Footer } from "@/components/footer/Footer";
+import { Scene } from "@/components/Scene";
+import { LoadingScene } from "@/components/LoadingScene";
+import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
 import { useAtomValue } from "jotai";
 import { isLoadedAtom } from "@/atoms/atomStore";
 

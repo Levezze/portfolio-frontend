@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import { useSetAtom, useAtomValue } from 'jotai';
 import React, { useEffect } from 'react';
 import { lightThemeAtom, cubeColorAtom, pageColorAtom, activeFaceAtom } from '@/atoms/atomStore';

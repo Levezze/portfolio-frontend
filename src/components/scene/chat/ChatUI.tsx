@@ -1,4 +1,4 @@
-import { Thread } from "../assistant-ui/thread";
+import { Thread } from "./assistant-ui/thread";
 
 const ChatUI = () => {
     return (
