@@ -214,7 +214,7 @@ const ThreadWelcome: FC<{ config: ChatConfig }> = ({ config }) => {
         </div>
         <Separator />
         <FakeAssistantMessage 
-          text={"I'm Gimli-AI, Lev's portfolio assistant and dwarf. Feel free to ask me questions or tell me to navigate to another page!"} 
+          text={welcome_messages.filter((message: WelcomeMessage) => message.message_type === 'assistant')[0]?.message_text} 
         />
       </div>
     </ThreadPrimitive.Empty>
