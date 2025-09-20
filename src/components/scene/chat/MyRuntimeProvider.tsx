@@ -3,7 +3,7 @@ import { ReactNode } from 'react';
 import { AssistantRuntimeProvider } from '@assistant-ui/react';
 import { useLocalRuntime } from '@assistant-ui/react';
 import { createWebSocketAdapter } from '@/lib/api/adapters/webSocketAdapter';
-import { NavigationToolUI } from './tools/ToolExecutor';
+import { NavigationToolUI } from './ToolExecutor';
 
 interface MyRuntimeProviderProps {
     children: ReactNode;

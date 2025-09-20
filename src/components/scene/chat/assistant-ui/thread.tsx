@@ -314,7 +314,7 @@ const gimliGenerator = () => {
   return result;
 }
 
-
+const gimliChoice = gimliGenerator()
 
 const AssistantMessage: FC = () => {
   return (
@@ -326,7 +326,7 @@ const AssistantMessage: FC = () => {
         <div className="flex">
 
           <Avatar className="mr-3 mt-1 h-10 w-10">
-            <AvatarImage src={`/gimli-ai/gimli-ai-avatar-${gimliGenerator()}.webp`} alt="GimlAI, Lev's dwarf sidekick" className="object-cover"/>
+            <AvatarImage src={`/gimli-ai/gimli-ai-avatar-${gimliChoice}.webp`} alt="GimlAI, Lev's dwarf sidekick" className="object-cover"/>
             <AvatarFallback>G</AvatarFallback>
           </Avatar>
           <div className="aui-assistant-message-content mx-2 leading-7 break-words text-foreground">
