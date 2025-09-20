@@ -19,7 +19,7 @@ export const Footer = () => {
             <TooltipButton
                 tooltip={true}
                 inputIcon={theme ? <SunIcon color={backgroundColor} /> : <MoonIcon color={backgroundColor} />}
-                tooltipText="Light/Dark Theme"
+                tooltipText={theme ? "Dark Theme" : "Light Theme"}
                 handleClick={() => setTheme(!theme)}
                 state={theme}
                 round={true}
@@ -27,7 +27,7 @@ export const Footer = () => {
             <TooltipButton
                 tooltip={true}
                 inputIcon={<WallpaperIcon color={backgroundColor} />}
-                tooltipText="Stop Background Animation"
+                tooltipText={bgMotion ? "Stop Background Animation" : "Resume Background Animation"}
                 handleClick={() => setBgMotion(!bgMotion)}
                 state={bgMotion}
                 round={true}
@@ -35,7 +35,7 @@ export const Footer = () => {
             <TooltipButton
                 tooltip={true}
                 inputIcon={<Box className="w-10 h-10" color={backgroundColor} />}
-                tooltipText="Stop Cube Animation"
+                tooltipText={cubeMotion ? "Stop Cube Sway" : "Resume Cube Sway"}
                 handleClick={() => setCubeMotion(!cubeMotion)}
                 state={cubeMotion}
                 round={true}
