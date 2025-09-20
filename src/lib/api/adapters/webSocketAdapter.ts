@@ -67,15 +67,29 @@ export function createWebSocketAdapter(): ChatModelAdapter {
                         break;
 
                     case 'tool_call':
-                        yield {
-                            content: [{
-                                type: 'tool-call',
-                                toolCallId: message.tool_id || 'tool-' + Date.now(),
-                                toolName: message.tool_name || 'navigate',
-                                args: message.arguments || {},
-                                argsText: JSON.stringify(message.arguments || {}),
-                            }]
+                        // Build content array with both text and tool call
+                        const content: any[] = [];
+
+                        // Include any accumulated text
+                        if (accumulatedText) {
+                            content.push({
+                                type: 'text' as const,
+                                text: accumulatedText,
+                            });
                         }
+
+                        // Add the tool call
+                        content.push({
+                            type: 'tool-call' as const,
+                            toolCallId: message.tool_id || 'tool-' + Date.now(),
+                            toolName: message.tool_name || 'navigate',
+                            args: message.arguments || {},
+                            argsText: JSON.stringify(message.arguments || {}),
+                        });
+
+                        yield { content };
+
+                        // Don't end the stream - backend might send more
                         break;
 
                     case 'end':

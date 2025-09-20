@@ -294,23 +294,27 @@ const MessageError: FC = () => {
   );
 };
 
-const gimlaiGenerator = () => {
+const gimliGenerator = () => {
   const result = Math.ceil(Math.random() * 3);
 
   switch (result) {
     case 1:
-      console.log('GimlAI state: Drunk');
+      console.log('Gimli-AI state: Drunk');
       break
     case 2:
-      console.log('GimlAI state: Serious');
+      console.log('Gimli-AI state: Serious');
       break
     case 3:
-      console.log('GimlAI state: Heroic');
+      console.log('Gimli-AI state: Heroic');
       break
-  }
-
+    }
+    
+    console.log('Gimli-AI state: ', result);
+  
   return result;
 }
+
+
 
 const AssistantMessage: FC = () => {
   return (
@@ -322,7 +326,7 @@ const AssistantMessage: FC = () => {
         <div className="flex">
 
           <Avatar className="mr-3 mt-1 h-10 w-10">
-            <AvatarImage src={`/gimlai/gimlai-avatar-${gimlaiGenerator()}.webp`} alt="GimlAI, Lev's dwarf sidekick" className="object-cover"/>
+            <AvatarImage src={`/gimli-ai/gimli-ai-avatar-${gimliGenerator()}.webp`} alt="GimlAI, Lev's dwarf sidekick" className="object-cover"/>
             <AvatarFallback>G</AvatarFallback>
           </Avatar>
           <div className="aui-assistant-message-content mx-2 leading-7 break-words text-foreground">

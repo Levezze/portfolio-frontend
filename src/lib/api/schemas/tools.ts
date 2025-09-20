@@ -1,18 +1,40 @@
 import * as z from "zod";
 
-const ToolResult = z.object({
+export const toolCallBaseSchema = z.object({
     type: z.literal('tool_call'),
-    tool: z.enum(['navigate_page','trigger_download', 'contact_form']),
+    tool_name: z.enum(['navigate_page','trigger_download', 'contact_form']),
     tool_id: z.string(),
-    tool_name: z.string(),
-    arguments: z.any(),
+});
+
+const pagesEnum = ["chat", "about", "projects", "contact", "resume", "secret"] as const;
+export type PagesType = z.infer<typeof pagesEnum>;
+
+export const navigateParamsSchema = toolCallBaseSchema.extend({
     parameters: z.object({
-        page: z.enum(['chat', 'resume', 'contact', 'projects', 'about', 'secret']).optional(),
-        reason: z.string().optional(),
-        file_type: z.string().optional(),
-        message: z.string().optional(),
+        page: z.enum(pagesEnum),
+        reason: z.string(),
+    })
+});
+
+const fileTypeEnum = ["resume"] as const;
+export type FileType = z.infer<typeof fileTypeEnum>;
+
+export const downloadParamsSchema = toolCallBaseSchema.extend({
+    parameters: z.object({
+        file_type: z.enum(fileTypeEnum),
+        message: z.string(),
+    })
+});
+
+export const contactParamsSchema = toolCallBaseSchema.extend({
+    parameters: z.object({
+        message: z.string(),
         prefill: z.object({
-            subject: z.string().optional()
+            subject: z.string().optional(),
         }).optional(),
     })
-})
+});
+
+export type NavigateParams = z.infer<typeof navigateParamsSchema>;
+export type DownloadParams = z.infer<typeof downloadParamsSchema>;
+export type ContactParams = z.infer<typeof contactParamsSchema>;
