@@ -8,7 +8,6 @@ export const toolCallBaseSchema = z.object({
 });
 
 const pagesEnum = z.enum(["chat", "about", "projects", "contact", "resume", "secret"]);
-export type PagesType = z.infer<typeof pagesEnum>;
 
 export const navigateParamsSchema = toolCallBaseSchema.extend({
     parameters: z.object({
@@ -18,7 +17,6 @@ export const navigateParamsSchema = toolCallBaseSchema.extend({
 });
 
 const fileTypeEnum = ["resume"] as const;
-export type FileType = z.infer<typeof fileTypeEnum>;
 
 export const downloadParamsSchema = toolCallBaseSchema.extend({
     parameters: z.object({
@@ -35,6 +33,9 @@ export const contactParamsSchema = toolCallBaseSchema.extend({
         }).optional(),
     })
 });
+
+export type PagesType = z.infer<typeof pagesEnum>;
+export type FileType = z.infer<typeof fileTypeEnum>;
 
 export type BaseToolParams = z.infer<typeof toolCallBaseSchema>;
 export type NavigateParams = z.infer<typeof navigateParamsSchema>;

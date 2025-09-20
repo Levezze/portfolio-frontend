@@ -27,6 +27,9 @@ export function createWebSocketAdapter(): ChatModelAdapter {
             const messagePromises: ((value: any) => void)[] = [];
 
             const unsubscribe = wsManager.on('message', (data: any) => {
+                if (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_DEBUG) {
+                    console.log('🔴 RAW WebSocket message:', JSON.stringify(data, null, 2));
+                }
                 if (data.message_id !== messageId) return;
 
                 if (messagePromises.length > 0) {
@@ -80,7 +83,11 @@ export function createWebSocketAdapter(): ChatModelAdapter {
 
                         content.push(await transformTool(message));
 
+                        if (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_DEBUG) {
+                            console.log('🟡 YIELDING tool call:', JSON.stringify(content, null, 2));
+                        }
                         yield { content };
+                        accumulatedText = '';
 
                         break;
 

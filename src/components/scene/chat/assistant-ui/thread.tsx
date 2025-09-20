@@ -35,6 +35,7 @@ import * as m from "motion/react-m";
 import { getChatConfig } from "@/lib/api/services/chatService";
 import { type WelcomeMessage, type ChatConfig } from "@/lib/api/schemas/chat";
 import useSWR from 'swr';
+import { Separator } from "@/components/ui/separator";
 
 export const Thread: FC = () => {
   const { data: chatConfig, isLoading } = useSWR(
@@ -47,23 +48,31 @@ export const Thread: FC = () => {
         welcome_messages: [
           {
             id: '1',
-            message_text: 'Welcome to my portfolio!',
+            message_text: 'Lev Zhitnik',
             message_type: 'primary',
             display_order: 1,
             is_active: true,
           },
           {
             id: '2',
-            message_text: 'How can I help you today?',
+            message_text: "Perpetually curious, endlessly building, constantly shipping. I approach engineering with an architect's eye for structure and scale, transforming complex problems into elegant solutions, combining systems thinking with modern AI to build what matters.",
             message_type: 'secondary',
             display_order: 2,
+            is_active: true,
+          },
+          {
+            id: '3',
+            message_text: "I'm Gimli-AI, Lev's portfolio assistant and dwarf. Feel free to ask me questions or tell me to navigate to another page!",
+            message_type: 'assistant',
+            display_order: 3,
             is_active: true,
           }
         ],
         suggestions: [
           {
             id: '1',
-            title: 'Who is Lev?',
+            title: 'More about me',
+            label: 'Introduction',
             action: 'Write here about who I am, what I do, and why I\'m doing it.',
             action_type: "prompt",
             method: "replace",
@@ -118,6 +127,28 @@ export const Thread: FC = () => {
   );
 };
 
+const gimliGenerator = () => {
+  const result = Math.ceil(Math.random() * 3);
+
+  switch (result) {
+    case 1:
+      console.log('Gimli-AI state: Drunk');
+      break
+    case 2:
+      console.log('Gimli-AI state: Serious');
+      break
+    case 3:
+      console.log('Gimli-AI state: Heroic');
+      break
+    }
+    
+    console.log('Gimli-AI state: ', result);
+  
+  return result;
+}
+
+const gimliChoice = gimliGenerator();
+
 const ThreadScrollToBottom: FC = () => {
   return (
     <ThreadPrimitive.ScrollToBottom asChild>
@@ -132,13 +163,36 @@ const ThreadScrollToBottom: FC = () => {
   );
 };
 
+const FakeAssistantMessage: FC<{ text: string }> = ({ text }) => {
+  return (
+    <div
+      className="aui-assistant-message-root relative mx-auto w-full max-w-[var(--thread-max-width)] animate-in py-4 duration-200 fade-in slide-in-from-bottom-1"
+      data-role="assistant"
+    >
+      <div className="flex">
+        <Avatar className="mr-3 mt-1 h-12 w-12">
+          <AvatarImage 
+            src={`/gimli-ai/gimli-ai-avatar-${gimliChoice}.webp`} 
+            alt="GimlAI, Lev's dwarf sidekick" 
+            className="object-cover"
+          />
+          <AvatarFallback>G</AvatarFallback>
+        </Avatar>
+        <div className="aui-assistant-message-content mx-2 leading-7 break-words text-foreground">
+          <p>{text}</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const ThreadWelcome: FC<{ config: ChatConfig }> = ({ config }) => {
   const welcome_messages = config.welcome_messages;
   return (
     <ThreadPrimitive.Empty>
-      <div className="aui-thread-welcome-root mx-auto my-auto flex w-full max-w-[var(--thread-max-width)] flex-grow flex-col">
+      <div className="aui-thread-welcome-root mx-auto my-auto flex w-full max-w-[var(--thread-max-width)] flex-col justify-between gap-8">
         <div className="aui-thread-welcome-center flex w-full flex-grow flex-col items-center justify-center">
-          <div className="aui-thread-welcome-message flex size-full flex-col justify-center px-8">
+          <div className="aui-thread-welcome-message flex size-full flex-col justify-center px-4">
             <m.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -152,12 +206,16 @@ const ThreadWelcome: FC<{ config: ChatConfig }> = ({ config }) => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
               transition={{ delay: 0.1 }}
-              className="aui-thread-welcome-message-motion-2 text-2xl text-muted-foreground/65"
+              className="aui-thread-welcome-message-motion-2 text-xl text-muted-foreground/90"
             >
               {welcome_messages.filter((message: WelcomeMessage) => message.message_type === 'secondary')[0]?.message_text}
             </m.div>
           </div>
         </div>
+        <Separator />
+        <FakeAssistantMessage 
+          text={"I'm Gimli-AI, Lev's portfolio assistant and dwarf. Feel free to ask me questions or tell me to navigate to another page!"} 
+        />
       </div>
     </ThreadPrimitive.Empty>
   );
@@ -167,7 +225,7 @@ const ThreadWelcomeSuggestions: FC<{ suggestions: any[] }> = ({ suggestions }) =
   // Use suggestions from config, or fallback to hardcoded if empty
   const displaySuggestions = suggestions && suggestions.length > 0 ? suggestions : [
     {
-      title: "Who am I?",
+      title: "More about me?",
       label: "My AI sales pitch",
       action: "Write here about who I am, what I do, and why I'm doing it.",
     },
@@ -189,7 +247,7 @@ const ThreadWelcomeSuggestions: FC<{ suggestions: any[] }> = ({ suggestions }) =
   ];
 
   return (
-    <div className="aui-thread-welcome-suggestions grid w-full gap-2 @md:grid-cols-2">
+    <div className="aui-thread-welcome-suggestions grid w-full gap-4 @md:grid-cols-2">
       {displaySuggestions.map((suggestedAction, index) => (
         <m.div
           initial={{ opacity: 0, y: 20 }}
@@ -207,8 +265,9 @@ const ThreadWelcomeSuggestions: FC<{ suggestions: any[] }> = ({ suggestions }) =
           >
             <Button
               variant="ghost"
-              className="aui-thread-welcome-suggestion h-auto w-full flex-1 flex-wrap items-start justify-start gap-1 rounded-md border px-5 py-4 text-left text-sm @md:flex-col dark:hover:bg-accent/60"
+              className="aui-thread-welcome-suggestion h-auto w-full flex-1 flex-wrap items-start justify-start gap-1 rounded-none border px-5 py-4 text-left text-sm @md:flex-col dark:hover:bg-accent/60 dark:text-background"
               aria-label={suggestedAction.action}
+              matchBgColor={true}
             >
               <span className="aui-thread-welcome-suggestion-text-1 font-medium">
                 {suggestedAction.title}
@@ -231,7 +290,7 @@ const Composer: FC<{ chatConfig: ChatConfig | null }> = ({ chatConfig }) => {
       <ThreadPrimitive.Empty>
         <ThreadWelcomeSuggestions suggestions={chatConfig?.suggestions || []} />
       </ThreadPrimitive.Empty>
-      <ComposerPrimitive.Root className="aui-composer-root relative flex w-full flex-col rounded-md border border-border bg-muted px-1 pt-2  dark:border-muted-foreground/15">
+      <ComposerPrimitive.Root className="aui-composer-root relative flex w-full flex-col border border-border bg-muted px-1 pt-2  dark:border-muted-foreground/15">
         <ComposerAttachments />
         <ComposerPrimitive.Input
           placeholder="Send a message..."
@@ -293,28 +352,6 @@ const MessageError: FC = () => {
     </MessagePrimitive.Error>
   );
 };
-
-const gimliGenerator = () => {
-  const result = Math.ceil(Math.random() * 3);
-
-  switch (result) {
-    case 1:
-      console.log('Gimli-AI state: Drunk');
-      break
-    case 2:
-      console.log('Gimli-AI state: Serious');
-      break
-    case 3:
-      console.log('Gimli-AI state: Heroic');
-      break
-    }
-    
-    console.log('Gimli-AI state: ', result);
-  
-  return result;
-}
-
-const gimliChoice = gimliGenerator()
 
 const AssistantMessage: FC = () => {
   return (
