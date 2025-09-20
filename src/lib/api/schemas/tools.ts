@@ -7,12 +7,12 @@ export const toolCallBaseSchema = z.object({
     message_id: z.string(),
 });
 
-const pagesEnum = ["chat", "about", "projects", "contact", "resume", "secret"] as const;
+const pagesEnum = z.enum(["chat", "about", "projects", "contact", "resume", "secret"]);
 export type PagesType = z.infer<typeof pagesEnum>;
 
 export const navigateParamsSchema = toolCallBaseSchema.extend({
     parameters: z.object({
-        page: z.enum(pagesEnum),
+        page: pagesEnum,
         reason: z.string(),
     })
 });
