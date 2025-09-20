@@ -72,6 +72,7 @@ export const Thread: FC = () => {
           {
             id: '1',
             title: 'More about me',
+            label: 'Introduction',
             action: 'Write here about who I am, what I do, and why I\'m doing it.',
             action_type: "prompt",
             method: "replace",
