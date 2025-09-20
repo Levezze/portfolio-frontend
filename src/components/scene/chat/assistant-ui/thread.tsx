@@ -23,11 +23,12 @@ import type { FC } from "react";
 import {
   ComposerAttachments,
   UserMessageAttachments,
-} from "@/components/assistant-ui/attachment";
-import { MarkdownText } from "@/components/assistant-ui/markdown-text";
-import { ToolFallback } from "@/components/assistant-ui/tool-fallback";
-import { TooltipIconButton } from "@/components/assistant-ui/tooltip-icon-button";
+} from "@/components/scene/chat/assistant-ui/attachment";
+import { MarkdownText } from "@/components/scene/chat/assistant-ui/markdown-text";
+import { ToolFallback } from "@/components/scene/chat/assistant-ui/tool-fallback";
+import { TooltipIconButton } from "@/components/scene/chat/assistant-ui/tooltip-icon-button";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { LazyMotion, MotionConfig, domAnimation } from "motion/react";
 import * as m from "motion/react-m";
@@ -41,7 +42,7 @@ export const Thread: FC = () => {
     getChatConfig,
     {
       revalidateOnFocus: false,
-      dedupingInterval: 300000,
+      dedupingInterval: 50000,
       fallbackData: {
         welcome_messages: [
           {
@@ -293,6 +294,28 @@ const MessageError: FC = () => {
   );
 };
 
+const gimliGenerator = () => {
+  const result = Math.ceil(Math.random() * 3);
+
+  switch (result) {
+    case 1:
+      console.log('Gimli-AI state: Drunk');
+      break
+    case 2:
+      console.log('Gimli-AI state: Serious');
+      break
+    case 3:
+      console.log('Gimli-AI state: Heroic');
+      break
+    }
+    
+    console.log('Gimli-AI state: ', result);
+  
+  return result;
+}
+
+const gimliChoice = gimliGenerator()
+
 const AssistantMessage: FC = () => {
   return (
     <MessagePrimitive.Root asChild>
@@ -300,14 +323,21 @@ const AssistantMessage: FC = () => {
         className="aui-assistant-message-root relative mx-auto w-full max-w-[var(--thread-max-width)] animate-in py-4 duration-200 fade-in slide-in-from-bottom-1 last:mb-24"
         data-role="assistant"
       >
-        <div className="aui-assistant-message-content mx-2 leading-7 break-words text-foreground">
-          <MessagePrimitive.Parts
-            components={{
-              Text: MarkdownText,
-              tools: { Fallback: ToolFallback },
-            }}
-          />
-          <MessageError />
+        <div className="flex">
+
+          <Avatar className="mr-3 mt-1 h-10 w-10">
+            <AvatarImage src={`/gimli-ai/gimli-ai-avatar-${gimliChoice}.webp`} alt="GimlAI, Lev's dwarf sidekick" className="object-cover"/>
+            <AvatarFallback>G</AvatarFallback>
+          </Avatar>
+          <div className="aui-assistant-message-content mx-2 leading-7 break-words text-foreground">
+            <MessagePrimitive.Parts
+              components={{
+                Text: MarkdownText,
+                tools: { Fallback: ToolFallback },
+              }}
+              />
+            <MessageError />
+          </div>
         </div>
 
         <div className="aui-assistant-message-footer mt-2 ml-2 flex">

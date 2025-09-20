@@ -1,5 +1,5 @@
 import React from 'react';
-import { HeaderButton } from './HeaderButton';
+import { HeaderButton } from './shared/HeaderButton';
 
 export const Header = () => {
   return (

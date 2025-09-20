@@ -1,6 +1,7 @@
 import { ChatModelAdapter, ChatModelRunResult } from "@assistant-ui/react";
 import { v4 as uuidv4 } from 'uuid';
 import { wsManager } from '@/lib/api/core/wsManager';
+import { transformTool } from "../services/chatService";
 
 export function createWebSocketAdapter(): ChatModelAdapter {
 
@@ -67,15 +68,20 @@ export function createWebSocketAdapter(): ChatModelAdapter {
                         break;
 
                     case 'tool_call':
-                        yield {
-                            content: [{
-                                type: 'tool-call',
-                                toolCallId: message.tool_id || 'tool-' + Date.now(),
-                                toolName: message.tool_name || 'navigate',
-                                args: message.arguments || {},
-                                argsText: JSON.stringify(message.arguments || {}),
-                            }]
+                        // content array with both text and tool call
+                        const content: any[] = [];
+
+                        if (accumulatedText) {
+                            content.push({
+                                type: 'text' as const,
+                                text: accumulatedText,
+                            });
                         }
+
+                        content.push(await transformTool(message));
+
+                        yield { content };
+
                         break;
 
                     case 'end':

@@ -1,8 +1,8 @@
 import { isLoadedAtom, cubeSizeAtom, faceSizeAtom } from '@/atoms/atomStore';
-import { useThree } from '@react-three/fiber'
+import { useThree } from '@react-three/fiber';
 import { useAtom, useAtomValue } from 'jotai';
 import * as THREE from 'three';
-import { useEffect } from 'react'
+import { useEffect } from 'react';
 
 export const CameraController = () => {
     const { camera } = useThree();

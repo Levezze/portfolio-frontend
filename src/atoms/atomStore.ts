@@ -1,13 +1,13 @@
 import { atom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
-import { type BoxFaces } from '@/types/atomTypes';
+import { type PagesType } from '@/lib/api/schemas/tools';
 
 // Visitor
 export const visitorIdAtom = atomWithStorage('visitorId', '');
 
 // 3D Scene
 export const isLoadedAtom = atom<boolean>(false);
-export const activeFaceAtom = atom<BoxFaces>('chat');
+export const activeFaceAtom = atom<PagesType>('chat');
 export const cubeColorAtom = atom<string>('')
 export const pageColorAtom = atom<string>('#A8DADC')
 

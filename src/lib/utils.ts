@@ -12,3 +12,7 @@ export const getCssColor = (cssVar: string) => {
 
   return formatHex(bgVar);
 }
+
+export const capitalFirstLetter = (word: string) => {
+  return String(word).charAt(0).toUpperCase() + String(word).slice(1);
+}
