@@ -48,6 +48,10 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --font-merriweather: var(--font-mw);
+  /* --font-merriweather-semibold: var(--font-mw-600); */
+  --font-inter: var(--font-inter);
+  /* --font-inter-semibold: var(--font-inter-600); */
 }
 
 :root {
@@ -163,7 +167,7 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50 transition-colors duration-500 transition-opacity duration-500;
+    @apply border-border outline-ring/50;
   }
 
   body {
