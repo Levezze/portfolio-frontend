@@ -91,11 +91,11 @@ export const Thread: FC = () => {
 
   return (
     <div className="relative h-full">
-      {isLoading && (
+      {/* {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center z-10 bg-background">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
-      )}
+      )} */}
       <div className={`h-full ${isLoading ? "opacity-0" : "opacity-100 transition-opacity"}`}>
         <LazyMotion features={domAnimation}>
           <MotionConfig reducedMotion="user">
@@ -166,40 +166,45 @@ const FakeAssistantMessage: FC<{ text: string }> = ({ text }) => {
   const [displayText, setDisplayText] = useState('');
 
   useEffect(()=> {
+    setDisplayText('');
     let count = 0;
+    let interval: NodeJS.Timeout;
+
     const timeout = setTimeout(() => {
-      const interval = setInterval(() => {
+      interval = setInterval(() => {
         if (count < text.length) {
           setDisplayText(prev => prev + text[count]);
           count++;
         } else {
           clearInterval(interval);
         }
-      }, 10);
+      }, 7);
 
-      return () => clearInterval(interval);
-    }, 300);
-
-    return () => clearTimeout(timeout);
+    }, 200);
+    
+    return () => {
+      clearTimeout(timeout);
+      if (interval) clearInterval(interval);
+    }
   }, [text]);
 
   return (
     <div
-      className="aui-assistant-message-root relative mx-auto w-full max-w-[var(--thread-max-width)] animate-in py-4 duration-200 fade-in slide-in-from-bottom-1"
+      className="aui-assistant-message-root relative mx-auto w-full max-w-[var(--thread-max-width)] animate-in duration-200 fade-in slide-in-from-bottom-1"
       data-role="assistant"
     >
       <div className="flex">
         <Tooltip>
-          <TooltipTrigger>
             <Avatar className="mr-3 mt-1 h-12 w-12">
+            <TooltipTrigger>
               <AvatarImage 
                 src={`/gimli-ai/gimli-ai-avatar-${gimliChoice}.webp`} 
                 alt="GimlAI, Lev's dwarf sidekick" 
                 className="object-cover"
               />
               <AvatarFallback>G</AvatarFallback>
+            </TooltipTrigger>
             </Avatar>
-          </TooltipTrigger>
           <TooltipContent>
             <p>Gimli-AI, Lev's sidekick</p>
           </TooltipContent>
@@ -223,7 +228,7 @@ const ThreadWelcome: FC<{ config: ChatConfig }> = ({ config }) => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
-              className="aui-thread-welcome-message-motion-1 font-merriweather font-bold text-2xl"
+              className="aui-thread-welcome-message-motion-1 font-merriweather font-bold text-2xl mb-2"
             >
               {welcome_messages.filter((message: WelcomeMessage) => message.message_type === 'primary')[0]?.message_text}
             </m.div>
@@ -388,16 +393,16 @@ const AssistantMessage: FC = () => {
       >
         <div className="flex">
           <Tooltip>
-            <TooltipTrigger className="flex align-top justify-start">
               <Avatar className="mr-3 mt-1 h-10 w-10">
+              <TooltipTrigger className="flex align-top justify-start">
                 <AvatarImage 
                   src={`/gimli-ai/gimli-ai-avatar-${gimliChoice}.webp`} 
                   alt="GimlAI, Lev's dwarf sidekick" 
                   className="object-cover"
                 />
                 <AvatarFallback>G</AvatarFallback>
+              </TooltipTrigger>
               </Avatar>
-            </TooltipTrigger>
             <TooltipContent>
               <p>Gimli-AI, Lev's sidekick</p>
             </TooltipContent>
