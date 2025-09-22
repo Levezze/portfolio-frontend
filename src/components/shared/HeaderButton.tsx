@@ -1,24 +1,30 @@
 import React from 'react';
-import { useSetAtom } from 'jotai';
-import { activeFaceAtom } from '@/atoms/atomStore';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { activeFaceAtom, pageTransitionManagerAtom } from '@/atoms/atomStore';
 import { type PagesType } from '@/lib/api/schemas/tools';
+import { Button } from '../ui/button';
 
 export const HeaderButton = ({ 
     buttonText,
     navigate,
 }: { buttonText: string, navigate: PagesType }) => {
     const setActiveFace = useSetAtom(activeFaceAtom);
-
+    const setPageTransition = useSetAtom(pageTransitionManagerAtom);
     const handleClick = () => {
-        setActiveFace(navigate)
+        setPageTransition(null);
+        setActiveFace(navigate);
     }
 
     return (
-        <button 
+        <Button 
+            variant="link"
             className='flex text-md cursor-pointer text-opacity-50 header-button'
             onClick={handleClick}
         >
-            {buttonText}
-        </button>
+            <div className=''>
+                {buttonText}
+
+            </div>
+        </Button>
     )
 }

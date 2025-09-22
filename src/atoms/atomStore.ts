@@ -15,6 +15,24 @@ export const pageColorAtom = atom<string>('#A8DADC')
 export const lightThemeAtom = atomWithStorage<boolean>('lightTheme', true);
 export const bgMotionAtom = atomWithStorage<boolean>('bgMotion', true)
 export const cubeMotionAtom = atomWithStorage<boolean>('cubeMotion', true)
+export const transitionDurationAtom = atom<number>(200);
+
+let currentTimeout: NodeJS.Timeout | null = null;
+export const pageTransitionManagerAtom = atom(
+    get => get(transitionDurationAtom),
+    (_get, set, _update) => {
+        const SHORT_TRANSITION = 200;
+        const LONG_TRANSITION = 3000;
+
+        if (currentTimeout) clearTimeout(currentTimeout);
+        
+        set(transitionDurationAtom, LONG_TRANSITION);
+        
+        currentTimeout = setTimeout(() => {
+            set(transitionDurationAtom, SHORT_TRANSITION);
+        }, LONG_TRANSITION);
+    }
+);
 
 // Sizing
 export const cubeSizeAtom = atom<number>(10);

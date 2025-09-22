@@ -4,12 +4,13 @@ import React, { useState, useEffect } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { ZoomOutIcon, ZoomInIcon, MaximizeIcon, MinimizeIcon, DownloadIcon } from 'lucide-react';
+import { ZoomOutIcon, ZoomInIcon, MaximizeIcon, MinimizeIcon, DownloadIcon, Box } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 // Import PDF.js styles
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
+import { TooltipButton } from '@/components/shared/TooltipButton';
 
 // Configure PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
@@ -70,7 +71,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
               matchBgColor={true}
               disabled={pageNumber <= 1}
               onClick={() => setPageNumber(pageNumber - 1)}
-              className="px-5 py-2 cursor-pointer rounded-none rounded-tl-2xl rounded-br-2xl border border-border disabled:opacity-50 disabled:cursor-not-allowed font-normal text-background"
+              className="w-10 h-10 cursor-pointer rounded-none rounded-tl-2xl rounded-br-2xl border-none disabled:opacity-50 disabled:cursor-not-allowed font-normal text-background"
             >
               Previous
             </Button>
@@ -82,7 +83,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
               matchBgColor={true}
               disabled={pageNumber >= numPages}
               onClick={() => setPageNumber(pageNumber + 1)}
-              className="px-5 py-2 cursor-pointer rounded-none rounded-tl-2xl rounded-br-2xl border border-border disabled:opacity-50 disabled:cursor-not-allowed font-normal text-background"
+              className="w-10 h-10 cursor-pointer rounded-none rounded-tl-2xl rounded-br-2xl border-none disabled:opacity-50 disabled:cursor-not-allowed font-normal text-background"
             >
               Next
             </Button>
@@ -93,13 +94,20 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
       <Separator />
 
       <div className="flex justify-center items-center gap-3 p-4 bg-background">
+        {/* <TooltipButton
+          tooltip={true}
+          inputIcon={<ZoomOutIcon />}
+          tooltipText={"Zoom Out"}
+          handleClick={() => setScale(s => Math.max(0.5, s - 0.2))}
+          round={true}
+        /> */}
         <Tooltip>
           <TooltipTrigger>
             <Button
               variant="ghost"
               matchBgColor={true}
               onClick={() => setScale(s => Math.max(0.5, s - 0.2))}
-              className="px-5 py-2 cursor-pointer rounded-none rounded-tl-2xl rounded-br-2xl border border-border font-normal text-sm text-background"
+              className="w-10 h-10 cursor-pointer rounded-full border-none font-normal text-sm text-background shadow-sm shadow-muted-foreground/10"
             >
               <ZoomOutIcon />
             </Button>
@@ -108,7 +116,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
             <p>Zoom Out</p>
           </TooltipContent>
         </Tooltip>
-        <span className="text-muted-foreground min-w-[60px] text-center font-medium text-sm">
+        <span className="text-muted-foreground min-w-[40px] text-center font-semibold text-sm">
           {Math.round(scale * 100)}%
         </span>
         <Tooltip>
@@ -117,7 +125,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
               variant="ghost"
               matchBgColor={true}
               onClick={() => setScale(s => Math.min(2, s + 0.2))}
-              className="px-5 py-2 cursor-pointer rounded-none rounded-tl-2xl rounded-br-2xl border border-border font-normal text-sm text-background"
+              className="w-10 h-10 cursor-pointer rounded-full border-none font-normal text-sm text-background shadow-sm shadow-muted-foreground/10"
             >
               <ZoomInIcon />
             </Button>
@@ -133,7 +141,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
               variant="ghost"
               matchBgColor={true}
               onClick={handleFullscreen}
-              className="px-5 py-2 cursor-pointer rounded-none rounded-tl-2xl rounded-br-2xl border border-border font-normal text-sm text-background"
+              className="w-10 h-10 cursor-pointer rounded-full border-none font-normal text-sm text-background shadow-sm shadow-muted-foreground/10"
             >
               {isFullscreen ? <MinimizeIcon /> : <MaximizeIcon />}
             </Button>
@@ -149,7 +157,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
               variant="ghost"
               matchBgColor={true}
               asChild
-              className="px-5 py-2 cursor-pointer rounded-none rounded-tl-2xl rounded-br-2xl border border-border font-normal text-sm text-background"
+              className="w-10 h-10 cursor-pointer rounded-full border-none font-normal text-sm text-background shadow-sm shadow-muted-foreground/10"
             >
               <a
                 href={url}

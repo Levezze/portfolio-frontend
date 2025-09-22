@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { apiClient } from '@/lib/api/core/client';
 import { resumeDownloadSchema } from '@/lib/api/schemas/resume';
 
-// Dynamically import PDFViewer to avoid SSR issues
+// dynamic import to avoid SSR issues
 const PDFViewer = dynamic(() => import('./PDFViewer').then(mod => ({ default: mod.PDFViewer })), {
   ssr: false,
   loading: () => <div className="flex items-center justify-center h-full p-4">Loading PDF viewer...</div>
@@ -37,7 +37,6 @@ const Resume = () => {
     }
   );
 
-  // Always return within Face component to maintain cube structure
   return (
     <Face>
       <div className="flex flex-col h-full w-full">

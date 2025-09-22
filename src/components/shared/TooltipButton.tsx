@@ -1,11 +1,13 @@
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { Toggle } from "@/components/ui/toggle";
 import { Button } from "@/components/ui/button";
 
 export const TooltipButton = ({
     tooltip = true,
     inputIcon, 
+    inputText,
     tooltipText = '',
+    width,
+    height,
     size = 10,
     round = false,
     handleClick,
@@ -13,16 +15,20 @@ export const TooltipButton = ({
 } : {
     tooltip: boolean,
     inputIcon?: any, 
+    inputText?: string,
     tooltipText?: string,
+    width?: number,
+    height?: number,
     size?: number,
     round?: boolean,
     handleClick?: () => void,
     state?: boolean,
 }) => {
-    const style = { 
-        width: `${size/4}rem`, 
-        height: `${size/4}rem`, 
-        "border-radius": `${round ? "50%" : ""}`,
+    const style = {
+        width: `${width || size/4}rem`, 
+        height: `${height || size/4}rem`, 
+        "border-radius": `${round ? "50%" : "0 35% 0 35%"}`,
+        cursor: "pointer",
     };
     return (
         <Tooltip>
@@ -31,8 +37,9 @@ export const TooltipButton = ({
                     variant={state ? "outline" : "outline_pressed"}
                     className="tooltip-button" 
                     style={style} 
-                    onClick={handleClick}>
-                    {inputIcon}
+                    onClick={handleClick}
+                >
+                    {inputIcon ? inputIcon : inputText}
                 </Button>
             </TooltipTrigger>
             {tooltip ? (
