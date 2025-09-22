@@ -52,10 +52,12 @@ const frontend = {
   rendering: "React Three Fiber + Drei",
   animations: "GSAP",
   state: "Jotai",
+  data: "SWR",
   ui: {
     styling: "Tailwind CSS v4",
     components: "shadcn/ui",
     assistant: "assistant-ui",
+    documents: "react-pdf",
   },
   validation: "Zod",
   package: "pnpm",
@@ -174,6 +176,28 @@ apiClient.post("/endpoint", data);
 portfolioService.getProjects();
 portfolioService.submitContact(formData);
 ```
+
+### Data Flow Architecture
+
+#### Client API with Zod Validation
+
+```
+[React Component] → [SWR Hook] → [API Client] → [HTTP Request]
+                                      ↓
+[Type-safe Data] ← [Zod Validation] ← [API Response]
+```
+
+All API responses are validated through Zod schemas ensuring runtime type safety and early error detection.
+
+#### Chat WebSocket Architecture
+
+```
+[Thread UI] → [WebSocket Adapter] → [WS Manager] → [WebSocket] → [Backend API]
+                      ↓                    ↓
+              [Tool Transformation]   [Heartbeat/Reconnect]
+```
+
+Real-time chat flows through an adapter pattern with automatic reconnection and message queuing for reliable communication.
 
 ## Design Philosophy
 
