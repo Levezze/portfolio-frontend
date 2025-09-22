@@ -102,7 +102,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
           round={true}
         /> */}
         <Tooltip>
-          <TooltipTrigger>
+          <TooltipTrigger asChild>
             <Button
               variant="ghost"
               matchBgColor={true}
@@ -120,7 +120,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
           {Math.round(scale * 100)}%
         </span>
         <Tooltip>
-          <TooltipTrigger>
+          <TooltipTrigger asChild>
             <Button
               variant="ghost"
               matchBgColor={true}
@@ -136,7 +136,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
         </Tooltip>
 
         <Tooltip>
-          <TooltipTrigger>
+          <TooltipTrigger asChild>
             <Button
               variant="ghost"
               matchBgColor={true}
@@ -152,7 +152,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
         </Tooltip>
 
         <Tooltip>
-          <TooltipTrigger>
+          <TooltipTrigger asChild>
             <Button
               variant="ghost"
               matchBgColor={true}

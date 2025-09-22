@@ -25,9 +25,9 @@ export const TooltipButton = ({
     state?: boolean,
 }) => {
     const style = {
-        width: `${width || size/4}rem`, 
-        height: `${height || size/4}rem`, 
-        "border-radius": `${round ? "50%" : "0 35% 0 35%"}`,
+        width: `${width || size/4}rem`,
+        height: `${height || size/4}rem`,
+        borderRadius: `${round ? "50%" : "0 35% 0 35%"}`,
         cursor: "pointer",
     };
     return (

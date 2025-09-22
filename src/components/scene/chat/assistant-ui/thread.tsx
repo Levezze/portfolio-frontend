@@ -19,7 +19,7 @@ import {
   Square,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useEffect, useState, type FC } from "react";
+import { useEffect, useState, useRef, type FC } from "react";
 
 import {
   ComposerAttachments,
@@ -128,25 +128,29 @@ export const Thread: FC = () => {
   );
 };
 
-const gimliGenerator = () => {
-  const result = Math.ceil(Math.random() * 3);
+const useGimliChoice = () => {
+  const [gimliChoice, setGimliChoice] = useState(1); // Default to 1 for SSR consistency
 
-  switch (result) {
-    case 1:
-      console.log('Gimli-AI state: Drunk');
-      break
-    case 2:
-      console.log('Gimli-AI state: Serious');
-      break
-    case 3:
-      console.log('Gimli-AI state: Heroic');
-      break
+  useEffect(() => {
+    const result = Math.ceil(Math.random() * 3);
+
+    switch (result) {
+      case 1:
+        console.log('Gimli-AI state: Drunk');
+        break
+      case 2:
+        console.log('Gimli-AI state: Serious');
+        break
+      case 3:
+        console.log('Gimli-AI state: Heroic');
+        break
     }
-      
-  return result;
-}
 
-const gimliChoice = gimliGenerator();
+    setGimliChoice(result);
+  }, []); // Only run once after mount
+
+  return gimliChoice;
+};
 
 const ThreadScrollToBottom: FC = () => {
   return (
@@ -164,6 +168,24 @@ const ThreadScrollToBottom: FC = () => {
 
 const FakeAssistantMessage: FC<{ text: string }> = ({ text }) => {
   const [displayText, setDisplayText] = useState('');
+  const gimliChoiceRef = useRef<number>();
+
+  // Initialize gimli choice once
+  if (gimliChoiceRef.current === undefined) {
+    const result = Math.ceil(Math.random() * 3);
+    switch (result) {
+      case 1:
+        console.log('Gimli-AI state: Drunk');
+        break
+      case 2:
+        console.log('Gimli-AI state: Serious');
+        break
+      case 3:
+        console.log('Gimli-AI state: Heroic');
+        break
+    }
+    gimliChoiceRef.current = result;
+  }
 
   useEffect(()=> {
     setDisplayText('');
@@ -197,9 +219,9 @@ const FakeAssistantMessage: FC<{ text: string }> = ({ text }) => {
         <Tooltip>
             <Avatar className="mr-3 mt-1 h-12 w-12 shadow-sm shadow-muted-foreground/10">
             <TooltipTrigger>
-              <AvatarImage 
-                src={`/gimli-ai/gimli-ai-avatar-${gimliChoice}.webp`} 
-                alt="GimlAI, Lev's dwarf sidekick" 
+              <AvatarImage
+                src={`/gimli-ai/gimli-ai-avatar-${gimliChoiceRef.current}.webp`}
+                alt="GimlAI, Lev's dwarf sidekick"
                 className="object-cover"
               />
               <AvatarFallback>G</AvatarFallback>
@@ -388,6 +410,8 @@ const MessageError: FC = () => {
 };
 
 const AssistantMessage: FC = () => {
+  const gimliChoice = useGimliChoice();
+
   return (
     <MessagePrimitive.Root asChild>
       <div
