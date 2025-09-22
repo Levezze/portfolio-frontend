@@ -19,7 +19,7 @@ import {
   Square,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useEffect, useState, type FC } from "react";
+import { useEffect, useState, useRef, type FC } from "react";
 
 import {
   ComposerAttachments,
@@ -128,25 +128,29 @@ export const Thread: FC = () => {
   );
 };
 
-const gimliGenerator = () => {
-  const result = Math.ceil(Math.random() * 3);
+const useGimliChoice = () => {
+  const [gimliChoice, setGimliChoice] = useState(1); // Default to 1 for SSR consistency
 
-  switch (result) {
-    case 1:
-      console.log('Gimli-AI state: Drunk');
-      break
-    case 2:
-      console.log('Gimli-AI state: Serious');
-      break
-    case 3:
-      console.log('Gimli-AI state: Heroic');
-      break
+  useEffect(() => {
+    const result = Math.ceil(Math.random() * 3);
+
+    switch (result) {
+      case 1:
+        console.log('Gimli-AI state: Drunk');
+        break
+      case 2:
+        console.log('Gimli-AI state: Serious');
+        break
+      case 3:
+        console.log('Gimli-AI state: Heroic');
+        break
     }
-      
-  return result;
-}
 
-const gimliChoice = gimliGenerator();
+    setGimliChoice(result);
+  }, []); // Only run once after mount
+
+  return gimliChoice;
+};
 
 const ThreadScrollToBottom: FC = () => {
   return (
@@ -164,6 +168,24 @@ const ThreadScrollToBottom: FC = () => {
 
 const FakeAssistantMessage: FC<{ text: string }> = ({ text }) => {
   const [displayText, setDisplayText] = useState('');
+  const gimliChoiceRef = useRef<number | undefined>(undefined);
+
+  // Initialize gimli choice once
+  if (gimliChoiceRef.current === undefined) {
+    const result = Math.ceil(Math.random() * 3);
+    switch (result) {
+      case 1:
+        console.log('Gimli-AI state: Drunk');
+        break
+      case 2:
+        console.log('Gimli-AI state: Serious');
+        break
+      case 3:
+        console.log('Gimli-AI state: Heroic');
+        break
+    }
+    gimliChoiceRef.current = result;
+  }
 
   useEffect(()=> {
     setDisplayText('');
@@ -195,11 +217,11 @@ const FakeAssistantMessage: FC<{ text: string }> = ({ text }) => {
     >
       <div className="flex">
         <Tooltip>
-            <Avatar className="mr-3 mt-1 h-12 w-12">
+            <Avatar className="mr-3 mt-1 h-12 w-12 shadow-sm shadow-muted-foreground/10">
             <TooltipTrigger>
-              <AvatarImage 
-                src={`/gimli-ai/gimli-ai-avatar-${gimliChoice}.webp`} 
-                alt="GimlAI, Lev's dwarf sidekick" 
+              <AvatarImage
+                src={`/gimli-ai/gimli-ai-avatar-${gimliChoiceRef.current}.webp`}
+                alt="GimlAI, Lev's dwarf sidekick"
                 className="object-cover"
               />
               <AvatarFallback>G</AvatarFallback>
@@ -221,8 +243,8 @@ const ThreadWelcome: FC<{ config: ChatConfig }> = ({ config }) => {
   const welcome_messages = config.welcome_messages;
   return (
     <ThreadPrimitive.Empty>
-      <div className="aui-thread-welcome-root mx-auto my-auto flex w-full max-w-[var(--thread-max-width)] flex-col justify-between gap-8">
-        <div className="aui-thread-welcome-center flex w-full flex-grow flex-col items-center justify-center">
+      <div className="aui-thread-welcome-root mx-auto my-auto flex w-full max-w-[var(--thread-max-width)] flex-col h-full justify-between">
+        <div className="aui-thread-welcome-center flex w-full flex-col justify-center my-auto px-12">
           <div className="aui-thread-welcome-message flex size-full flex-col justify-center">
             <m.div
               initial={{ opacity: 0, y: 10 }}
@@ -243,10 +265,13 @@ const ThreadWelcome: FC<{ config: ChatConfig }> = ({ config }) => {
             </m.div>
           </div>
         </div>
-        <Separator />
-        <FakeAssistantMessage 
-          text={welcome_messages.filter((message: WelcomeMessage) => message.message_type === 'assistant')[0]?.message_text} 
-        />
+        <div className="flex flex-col items-center justify-center mb-4">
+          <Separator className="mb-4" />
+          <FakeAssistantMessage 
+            text={welcome_messages.filter((message: WelcomeMessage) => message.message_type === 'assistant')[0]?.message_text}
+
+          />
+        </div>
       </div>
     </ThreadPrimitive.Empty>
   );
@@ -296,7 +321,7 @@ const ThreadWelcomeSuggestions: FC<{ suggestions: any[] }> = ({ suggestions }) =
           >
             <Button
               variant="ghost"
-              className="aui-thread-welcome-suggestion rounded-none rounded-tl-2xl rounded-br-2xl h-auto w-full flex-1 flex-wrap items-start justify-start gap-0 border px-5 py-3 text-left text-sm @md:flex-col dark:hover:bg-accent/60 dark:text-background cursor-pointer"
+              className="aui-thread-welcome-suggestion rounded-none h-auto w-full flex-1 flex-wrap items-start justify-start gap-0 border-none px-5 py-3 text-left text-sm @md:flex-col dark:hover:bg-accent/60 dark:text-background shadow-sm shadow-muted-foreground/10 cursor-pointer"
               aria-label={suggestedAction.action}
               matchBgColor={true}
             >
@@ -321,11 +346,11 @@ const Composer: FC<{ chatConfig: ChatConfig | null }> = ({ chatConfig }) => {
       <ThreadPrimitive.Empty>
         <ThreadWelcomeSuggestions suggestions={chatConfig?.suggestions || []} />
       </ThreadPrimitive.Empty>
-      <ComposerPrimitive.Root className="aui-composer-root relative rounded-none rounded-tl-2xl rounded-br-2xl flex w-full flex-col border border-border bg-muted px-1 pt-2 dark:border-muted-foreground/15">
+      <ComposerPrimitive.Root className="aui-composer-root relative rounded-none flex w-full flex-col border-none bg-muted px-1 pt-2 dark:border-muted-foreground/15 shadow-inner shadow-muted-foreground/10">
         <ComposerAttachments />
         <ComposerPrimitive.Input
           placeholder="Send a message..."
-          className="aui-composer-input mb-1 max-h-32 min-h-16 w-full resize-none bg-transparent px-3.5 pt-1.5 pb-3 text-base outline-none placeholder:text-muted-foreground focus:outline-primary"
+          className="aui-composer-input mb-1 max-h-32 min-h-16 w-full resize-none bg-transparent px-3.5 pt-1.5 pb-3 text-base outline-none placeholder:text-muted-foreground focus:outline-primary text-sm"
           rows={1}
           autoFocus
           aria-label="Message input"
@@ -385,6 +410,8 @@ const MessageError: FC = () => {
 };
 
 const AssistantMessage: FC = () => {
+  const gimliChoice = useGimliChoice();
+
   return (
     <MessagePrimitive.Root asChild>
       <div
@@ -393,7 +420,7 @@ const AssistantMessage: FC = () => {
       >
         <div className="flex">
           <Tooltip>
-              <Avatar className="mr-3 mt-1 h-10 w-10">
+              <Avatar className="mr-3 mt-1 h-10 w-10 shadow-sm shadow-muted-foreground/10">
               <TooltipTrigger className="flex align-top justify-start">
                 <AvatarImage 
                   src={`/gimli-ai/gimli-ai-avatar-${gimliChoice}.webp`} 

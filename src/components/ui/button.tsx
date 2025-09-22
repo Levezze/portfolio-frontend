@@ -2,7 +2,8 @@ import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
 
-import { cn, getCssColor } from "@/lib/utils"
+import { transitionDurationAtom } from "@/atoms/atomStore"
+import { cn } from "@/lib/utils"
 import { pageColorAtom } from "@/atoms/atomStore"
 import { useAtomValue } from "jotai"
 
@@ -44,7 +45,7 @@ const buttonVariants = cva(
       {
         variant: "ghost",
         matchBgColor: true,
-        class: "bg-[var(--dynamic-bg)] hover:bg-[var(--dynamic-bg)]/50 dark:hover:!bg-white/70 transition-colors ease-in-out duration-300",
+        class: "bg-[var(--dynamic-bg)] hover:bg-[var(--dynamic-bg)]/50 dark:hover:!bg-white/70 transition-colors ease-in-out",
       }
     ],
     defaultVariants: {
@@ -59,14 +60,17 @@ function Button({
   variant,
   size,
   matchBgColor = false,
+  colorTransition = "3000",
   asChild = false,
   ...props
 }: React.ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean
     matchBgColor?: boolean
+    colorTransition?: string
   }) {
-  const Comp = asChild ? Slot : "button"
+  const Comp = asChild ? Slot : "button";
+  const transitionDuration = useAtomValue(transitionDurationAtom)
   const pageColor = useAtomValue(pageColorAtom);
   const bgColor = matchBgColor ? pageColor : undefined;
 
@@ -75,8 +79,10 @@ function Button({
       data-slot="button"
       className={cn(buttonVariants({ variant, size, className, matchBgColor }))}
       style={
-        matchBgColor ?
-          { '--dynamic-bg': bgColor } as React.CSSProperties : undefined
+        matchBgColor ? { 
+            '--dynamic-bg': bgColor,
+            transitionDuration: `background-color ${transitionDuration}ms`
+          } as React.CSSProperties : undefined
       }
       {...props}
     />
