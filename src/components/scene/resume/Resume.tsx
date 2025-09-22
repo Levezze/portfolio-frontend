@@ -8,12 +8,13 @@ import { useAtomValue } from 'jotai';
 import { pageColorAtom } from '@/atoms/atomStore';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { ZoomOutIcon, ZoomInIcon } from 'lucide-react';
+import { ZoomOutIcon, ZoomInIcon, MaximizeIcon, MinimizeIcon, DownloadIcon } from 'lucide-react';
 
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 import { apiClient } from '@/lib/api/core/client';
 import { resumeDownloadSchema } from '@/lib/api/schemas/resume';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 // Use local worker to avoid CORS issues
 pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
@@ -30,8 +31,6 @@ const resumeFetcher = async (url: string) => {
 };
 
 const Resume = () => {
-  const pageColor = useAtomValue(pageColorAtom);
-
   const { data: resumeUrl, error, isLoading } = useSWR<string, Error>(
     '/public/resume',
     resumeFetcher,
@@ -161,46 +160,76 @@ const Resume = () => {
             <Separator />
 
             <div className="flex justify-center items-center gap-3 p-4 bg-background">
-              <Button
-                variant="ghost"
-                matchBgColor={true}
-                onClick={() => setScale(s => Math.max(0.5, s - 0.2))}
-                className="px-5 py-2 cursor-pointer rounded-none rounded-tl-2xl rounded-br-2xl border border-border font-normal text-sm text-background"
-              >
-                <ZoomOutIcon />
-              </Button>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Button
+                    variant="ghost"
+                    matchBgColor={true}
+                    onClick={() => setScale(s => Math.max(0.5, s - 0.2))}
+                    className="px-5 py-2 cursor-pointer rounded-none rounded-tl-2xl rounded-br-2xl border border-border font-normal text-sm text-background"
+                  >
+                    <ZoomOutIcon />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Zoom Out</p>
+                </TooltipContent>
+              </Tooltip>
               <span className="text-muted-foreground min-w-[60px] text-center font-medium text-sm">
                 {Math.round(scale * 100)}%
               </span>
-              <Button
-                variant="ghost"
-                matchBgColor={true}
-                onClick={() => setScale(s => Math.min(2, s + 0.2))}
-                className="px-5 py-2 cursor-pointer rounded-none rounded-tl-2xl rounded-br-2xl border border-border font-normal text-sm text-background"
-              >
-                <ZoomInIcon />
-              </Button>
-              <Button
-                variant="ghost"
-                matchBgColor={true}
-                onClick={handleFullscreen}
-                className="px-5 py-2 cursor-pointer rounded-none rounded-tl-2xl rounded-br-2xl border border-border font-normal text-sm text-background"
-              >
-                {isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
-              </Button>
-              <Button
-                variant="ghost"
-                matchBgColor={true}
-                asChild
-                className="px-5 py-2 cursor-pointer rounded-none rounded-tl-2xl rounded-br-2xl border border-border font-normal text-sm text-background"
-              >
-                <a
-                  href={resumeUrl}
-                  download="Lev_Zhitnik_Resume.pdf"
-                >
-                  Download
-                </a>
-              </Button>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Button
+                    variant="ghost"
+                    matchBgColor={true}
+                    onClick={() => setScale(s => Math.min(2, s + 0.2))}
+                    className="px-5 py-2 cursor-pointer rounded-none rounded-tl-2xl rounded-br-2xl border border-border font-normal text-sm text-background"
+                  >
+                    <ZoomInIcon />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Zoom In</p>
+                </TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger>
+                  <Button
+                    variant="ghost"
+                    matchBgColor={true}
+                    onClick={handleFullscreen}
+                    className="px-5 py-2 cursor-pointer rounded-none rounded-tl-2xl rounded-br-2xl border border-border font-normal text-sm text-background"
+                  >
+                    {isFullscreen ? <MinimizeIcon /> : <MaximizeIcon />}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}</p>
+                </TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger>
+                  <Button
+                    variant="ghost"
+                    matchBgColor={true}
+                    asChild
+                    className="px-5 py-2 cursor-pointer rounded-none rounded-tl-2xl rounded-br-2xl border border-border font-normal text-sm text-background"
+                  >
+                    <a
+                      href={resumeUrl}
+                      download="Lev_Zhitnik_Resume.pdf"
+                    >
+                      <DownloadIcon />
+                    </a>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Download</p>
+                </TooltipContent>
+              </Tooltip>
             </div>
           </>
         )}
