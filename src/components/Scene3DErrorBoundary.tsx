@@ -60,7 +60,7 @@ export class Scene3DErrorBoundary extends Component<
     }
 
     this.setState({
-      errorInfo: errorInfo.componentStack,
+      errorInfo: errorInfo.componentStack || null,
       error
     });
 

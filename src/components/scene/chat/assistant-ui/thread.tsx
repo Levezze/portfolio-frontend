@@ -168,7 +168,7 @@ const ThreadScrollToBottom: FC = () => {
 
 const FakeAssistantMessage: FC<{ text: string }> = ({ text }) => {
   const [displayText, setDisplayText] = useState('');
-  const gimliChoiceRef = useRef<number>();
+  const gimliChoiceRef = useRef<number | undefined>(undefined);
 
   // Initialize gimli choice once
   if (gimliChoiceRef.current === undefined) {
