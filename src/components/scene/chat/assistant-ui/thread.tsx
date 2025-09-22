@@ -296,11 +296,11 @@ const ThreadWelcomeSuggestions: FC<{ suggestions: any[] }> = ({ suggestions }) =
           >
             <Button
               variant="ghost"
-              className="aui-thread-welcome-suggestion rounded-none rounded-tl-2xl rounded-br-2xl h-auto w-full flex-1 flex-wrap items-start justify-start gap-1 border px-5 py-4 text-left text-sm @md:flex-col dark:hover:bg-accent/60 dark:text-background cursor-pointer"
+              className="aui-thread-welcome-suggestion rounded-none rounded-tl-2xl rounded-br-2xl h-auto w-full flex-1 flex-wrap items-start justify-start gap-0 border px-5 py-3 text-left text-sm @md:flex-col dark:hover:bg-accent/60 dark:text-background cursor-pointer"
               aria-label={suggestedAction.action}
               matchBgColor={true}
             >
-              <span className="aui-thread-welcome-suggestion-text-1 text-lg font-inter font-semibold text-background">
+              <span className="aui-thread-welcome-suggestion-text-1 text-lg font-inter font-medium text-background">
                 {suggestedAction.title}
               </span>
               <span className="aui-thread-welcome-suggestion-text-2 text-muted-foreground">

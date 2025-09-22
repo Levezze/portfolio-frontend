@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 import { ZoomOutIcon, ZoomInIcon, MaximizeIcon, MinimizeIcon, DownloadIcon } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -88,6 +89,8 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
           </div>
         )}
       </div>
+
+      <Separator />
 
       <div className="flex justify-center items-center gap-3 p-4 bg-background">
         <Tooltip>
