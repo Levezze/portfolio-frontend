@@ -21,7 +21,7 @@ export const CameraController = () => {
                 if (!isLoaded) {
                     setIsLoaded(true);
                 }
-            }, 1000);
+            }, 0);
         }
     }, [camera, cubeSize, faceSize, isLoaded, setIsLoaded])
 

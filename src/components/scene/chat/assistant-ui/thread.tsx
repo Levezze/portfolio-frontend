@@ -19,7 +19,7 @@ import {
   Square,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import type { FC } from "react";
+import { useEffect, useState, type FC } from "react";
 
 import {
   ComposerAttachments,
@@ -91,11 +91,11 @@ export const Thread: FC = () => {
 
   return (
     <div className="relative h-full">
-      {isLoading && (
+      {/* {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center z-10 bg-background">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
-      )}
+      )} */}
       <div className={`h-full ${isLoading ? "opacity-0" : "opacity-100 transition-opacity"}`}>
         <LazyMotion features={domAnimation}>
           <MotionConfig reducedMotion="user">
@@ -142,9 +142,7 @@ const gimliGenerator = () => {
       console.log('Gimli-AI state: Heroic');
       break
     }
-    
-    console.log('Gimli-AI state: ', result);
-  
+      
   return result;
 }
 
@@ -165,29 +163,54 @@ const ThreadScrollToBottom: FC = () => {
 };
 
 const FakeAssistantMessage: FC<{ text: string }> = ({ text }) => {
+  const [displayText, setDisplayText] = useState('');
+
+  useEffect(()=> {
+    setDisplayText('');
+    let count = 0;
+    let interval: NodeJS.Timeout;
+
+    const timeout = setTimeout(() => {
+      interval = setInterval(() => {
+        if (count < text.length) {
+          setDisplayText(prev => prev + text[count]);
+          count++;
+        } else {
+          clearInterval(interval);
+        }
+      }, 7);
+
+    }, 200);
+    
+    return () => {
+      clearTimeout(timeout);
+      if (interval) clearInterval(interval);
+    }
+  }, [text]);
+
   return (
     <div
-      className="aui-assistant-message-root relative mx-auto w-full max-w-[var(--thread-max-width)] animate-in py-4 duration-200 fade-in slide-in-from-bottom-1"
+      className="aui-assistant-message-root relative mx-auto w-full max-w-[var(--thread-max-width)] animate-in duration-200 fade-in slide-in-from-bottom-1"
       data-role="assistant"
     >
       <div className="flex">
         <Tooltip>
-          <TooltipTrigger>
             <Avatar className="mr-3 mt-1 h-12 w-12">
+            <TooltipTrigger>
               <AvatarImage 
                 src={`/gimli-ai/gimli-ai-avatar-${gimliChoice}.webp`} 
                 alt="GimlAI, Lev's dwarf sidekick" 
                 className="object-cover"
               />
               <AvatarFallback>G</AvatarFallback>
+            </TooltipTrigger>
             </Avatar>
-          </TooltipTrigger>
           <TooltipContent>
             <p>Gimli-AI, Lev's sidekick</p>
           </TooltipContent>
         </Tooltip>
         <div className="aui-assistant-message-content mx-2 leading-7 break-words text-foreground">
-          <p>{text}</p>
+          <p>{displayText}</p>
         </div>
       </div>
     </div>
@@ -200,12 +223,12 @@ const ThreadWelcome: FC<{ config: ChatConfig }> = ({ config }) => {
     <ThreadPrimitive.Empty>
       <div className="aui-thread-welcome-root mx-auto my-auto flex w-full max-w-[var(--thread-max-width)] flex-col justify-between gap-8">
         <div className="aui-thread-welcome-center flex w-full flex-grow flex-col items-center justify-center">
-          <div className="aui-thread-welcome-message flex size-full flex-col justify-center px-4">
+          <div className="aui-thread-welcome-message flex size-full flex-col justify-center">
             <m.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
-              className="aui-thread-welcome-message-motion-1 text-2xl font-semibold"
+              className="aui-thread-welcome-message-motion-1 font-merriweather font-bold text-2xl mb-2"
             >
               {welcome_messages.filter((message: WelcomeMessage) => message.message_type === 'primary')[0]?.message_text}
             </m.div>
@@ -214,7 +237,7 @@ const ThreadWelcome: FC<{ config: ChatConfig }> = ({ config }) => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
               transition={{ delay: 0.1 }}
-              className="aui-thread-welcome-message-motion-2 text-xl text-muted-foreground/90"
+              className="aui-thread-welcome-message-motion-2 font-merriweather text-xl text-muted-foreground/90"
             >
               {welcome_messages.filter((message: WelcomeMessage) => message.message_type === 'secondary')[0]?.message_text}
             </m.div>
@@ -273,11 +296,11 @@ const ThreadWelcomeSuggestions: FC<{ suggestions: any[] }> = ({ suggestions }) =
           >
             <Button
               variant="ghost"
-              className="aui-thread-welcome-suggestion h-auto w-full flex-1 flex-wrap items-start justify-start gap-1 rounded-none border px-5 py-4 text-left text-sm @md:flex-col dark:hover:bg-accent/60 dark:text-background"
+              className="aui-thread-welcome-suggestion rounded-none rounded-tl-2xl rounded-br-2xl h-auto w-full flex-1 flex-wrap items-start justify-start gap-1 border px-5 py-4 text-left text-sm @md:flex-col dark:hover:bg-accent/60 dark:text-background cursor-pointer"
               aria-label={suggestedAction.action}
               matchBgColor={true}
             >
-              <span className="aui-thread-welcome-suggestion-text-1 font-medium">
+              <span className="aui-thread-welcome-suggestion-text-1 text-lg font-inter font-semibold text-background">
                 {suggestedAction.title}
               </span>
               <span className="aui-thread-welcome-suggestion-text-2 text-muted-foreground">
@@ -298,7 +321,7 @@ const Composer: FC<{ chatConfig: ChatConfig | null }> = ({ chatConfig }) => {
       <ThreadPrimitive.Empty>
         <ThreadWelcomeSuggestions suggestions={chatConfig?.suggestions || []} />
       </ThreadPrimitive.Empty>
-      <ComposerPrimitive.Root className="aui-composer-root relative flex w-full flex-col border border-border bg-muted px-1 pt-2  dark:border-muted-foreground/15">
+      <ComposerPrimitive.Root className="aui-composer-root relative rounded-none rounded-tl-2xl rounded-br-2xl flex w-full flex-col border border-border bg-muted px-1 pt-2 dark:border-muted-foreground/15">
         <ComposerAttachments />
         <ComposerPrimitive.Input
           placeholder="Send a message..."
@@ -370,16 +393,16 @@ const AssistantMessage: FC = () => {
       >
         <div className="flex">
           <Tooltip>
-            <TooltipTrigger>
               <Avatar className="mr-3 mt-1 h-10 w-10">
+              <TooltipTrigger className="flex align-top justify-start">
                 <AvatarImage 
                   src={`/gimli-ai/gimli-ai-avatar-${gimliChoice}.webp`} 
                   alt="GimlAI, Lev's dwarf sidekick" 
                   className="object-cover"
                 />
                 <AvatarFallback>G</AvatarFallback>
+              </TooltipTrigger>
               </Avatar>
-            </TooltipTrigger>
             <TooltipContent>
               <p>Gimli-AI, Lev's sidekick</p>
             </TooltipContent>

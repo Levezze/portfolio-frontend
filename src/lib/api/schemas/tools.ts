@@ -1,4 +1,5 @@
 import * as z from "zod";
+import { resumeDownloadSchema } from "./resume";
 
 export const toolCallBaseSchema = z.object({
     type: z.literal('tool_call'),
