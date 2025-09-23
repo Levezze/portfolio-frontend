@@ -1,7 +1,6 @@
 'use client';
 
 import React, { Component, ReactNode } from 'react';
-import { RefreshCw, AlertCircle } from 'lucide-react';
 
 interface Scene3DErrorBoundaryState {
   hasError: boolean;

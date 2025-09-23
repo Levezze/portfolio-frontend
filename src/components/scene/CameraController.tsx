@@ -15,6 +15,7 @@ export const CameraController = () => {
         if (camera.type === 'OrthographicCamera') {
             const ortho = camera as THREE.OrthographicCamera;
             ortho.zoom = faceSize / cubeSize;
+            // ortho.zoom = faceSize / cubeSize * 0.5;
             ortho.updateProjectionMatrix();
 
             setTimeout(() => {
