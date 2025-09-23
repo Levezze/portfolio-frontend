@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 
 export const TooltipButton = ({
     tooltip = true,
+    disabled = false,
     inputIcon, 
     inputText,
     tooltipText = '',
@@ -14,6 +15,7 @@ export const TooltipButton = ({
     state,
 } : {
     tooltip: boolean,
+    disabled?: boolean,
     inputIcon?: any, 
     inputText?: string,
     tooltipText?: string,
@@ -38,6 +40,7 @@ export const TooltipButton = ({
                     className="tooltip-button" 
                     style={style} 
                     onClick={handleClick}
+                    disabled={disabled}
                 >
                     {inputIcon ? inputIcon : inputText}
                 </Button>
