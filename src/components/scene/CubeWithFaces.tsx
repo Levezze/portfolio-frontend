@@ -168,7 +168,8 @@ export const CubeWithFaces = () => {
                     transform
                     occlude
                     sprite={false}
-                    distanceFactor={(400 * cubeSize) / faceSize}
+                    // distanceFactor={(400 * cubeSize) / faceSize}
+                    distanceFactor={5}
                     style={{
                         opacity: face === activeFace || isRotating ? 1 : 0,
                         pointerEvents: face === activeFace ? 'auto' : 'none',

@@ -5,6 +5,25 @@ import { type PagesType } from '@/lib/api/schemas/tools';
 // Visitor
 export const visitorIdAtom = atomWithStorage('visitorId', '');
 
+// Gimli-AI
+export const gimliChoiceAtom = atom<number>(
+    () => {
+        const result = Math.ceil(Math.random() * 3);
+        switch (result) {
+            case 1:
+                console.log('Gimli-AI state: Drunk');
+                break
+            case 2:
+                console.log('Gimli-AI state: Serious');
+                break
+            case 3:
+                console.log('Gimli-AI state: Heroic');
+                break
+        }
+        return result;
+    }
+);
+
 // 3D Scene
 export const isLoadedAtom = atom<boolean>(false);
 export const activeFaceAtom = atom<PagesType>('chat');

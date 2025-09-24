@@ -37,6 +37,8 @@ import { getChatConfig } from "@/lib/api/services/chatService";
 import { type WelcomeMessage, type ChatConfig } from "@/lib/api/schemas/chat";
 import useSWR from 'swr';
 import { Separator } from "@/components/ui/separator";
+import { useAtomValue } from "jotai";
+import { gimliChoiceAtom } from "@/atoms/atomStore";
 
 export const Thread: FC = () => {
   const { data: chatConfig, isLoading } = useSWR(
@@ -128,30 +130,6 @@ export const Thread: FC = () => {
   );
 };
 
-const useGimliChoice = () => {
-  const [gimliChoice, setGimliChoice] = useState(1); // Default to 1 for SSR consistency
-
-  useEffect(() => {
-    const result = Math.ceil(Math.random() * 3);
-
-    switch (result) {
-      case 1:
-        console.log('Gimli-AI state: Drunk');
-        break
-      case 2:
-        console.log('Gimli-AI state: Serious');
-        break
-      case 3:
-        console.log('Gimli-AI state: Heroic');
-        break
-    }
-
-    setGimliChoice(result);
-  }, []); // Only run once after mount
-
-  return gimliChoice;
-};
-
 const ThreadScrollToBottom: FC = () => {
   return (
     <ThreadPrimitive.ScrollToBottom asChild>
@@ -168,24 +146,7 @@ const ThreadScrollToBottom: FC = () => {
 
 const FakeAssistantMessage: FC<{ text: string }> = ({ text }) => {
   const [displayText, setDisplayText] = useState('');
-  const gimliChoiceRef = useRef<number | undefined>(undefined);
-
-  // Initialize gimli choice once
-  if (gimliChoiceRef.current === undefined) {
-    const result = Math.ceil(Math.random() * 3);
-    switch (result) {
-      case 1:
-        console.log('Gimli-AI state: Drunk');
-        break
-      case 2:
-        console.log('Gimli-AI state: Serious');
-        break
-      case 3:
-        console.log('Gimli-AI state: Heroic');
-        break
-    }
-    gimliChoiceRef.current = result;
-  }
+  const gimliChoice = useAtomValue(gimliChoiceAtom);
 
   useEffect(()=> {
     setDisplayText('');
@@ -220,7 +181,7 @@ const FakeAssistantMessage: FC<{ text: string }> = ({ text }) => {
             <Avatar className="mr-3 mt-1 h-12 w-12 shadow-sm shadow-muted-foreground/10">
             <TooltipTrigger>
               <AvatarImage
-                src={`/gimli-ai/gimli-ai-avatar-${gimliChoiceRef.current}.webp`}
+                src={`/gimli-ai/gimli-ai-avatar-${gimliChoice}.webp`}
                 alt="GimlAI, Lev's dwarf sidekick"
                 className="object-cover"
               />
@@ -410,7 +371,7 @@ const MessageError: FC = () => {
 };
 
 const AssistantMessage: FC = () => {
-  const gimliChoice = useGimliChoice();
+  const gimliChoice = useAtomValue(gimliChoiceAtom);
 
   return (
     <MessagePrimitive.Root asChild>

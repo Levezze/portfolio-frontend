@@ -1,13 +1,20 @@
 import { TooltipButton } from "./shared/TooltipButton";
-import { Box, WallpaperIcon, SunIcon, MoonIcon } from "lucide-react";
+import { Box, WallpaperIcon, SunIcon, MoonIcon, MessageSquareCodeIcon } from "lucide-react";
 import { useAtom, useAtomValue } from "jotai";
-import { lightThemeAtom, bgMotionAtom, cubeMotionAtom, cubeColorAtom } from "@/atoms/atomStore";
+import { 
+    lightThemeAtom, 
+    bgMotionAtom, 
+    activeFaceAtom, 
+    cubeMotionAtom, 
+    cubeColorAtom 
+} from "@/atoms/atomStore";
 import React, { useEffect } from 'react';
 
 export const Footer = () => {
-    const [theme, setTheme] = useAtom(lightThemeAtom);
     const backgroundColor = useAtomValue(cubeColorAtom);
+    const [theme, setTheme] = useAtom(lightThemeAtom);
     const [bgMotion, setBgMotion] = useAtom(bgMotionAtom);
+    const [activePage, setActiveFace] = useAtom(activeFaceAtom);
     const [cubeMotion, setCubeMotion] = useAtom(cubeMotionAtom);
 
     useEffect(() => {
@@ -38,6 +45,15 @@ export const Footer = () => {
                 tooltipText={cubeMotion ? "Stop Cube Sway" : "Resume Cube Sway"}
                 handleClick={() => setCubeMotion(!cubeMotion)}
                 state={cubeMotion}
+                round={true}
+            />
+            <TooltipButton
+                tooltip={activePage === 'chat' ? false : true}
+                disabled={activePage === 'chat'}
+                inputIcon={<MessageSquareCodeIcon className="w-10 h-10" color={backgroundColor} />}
+                tooltipText={activePage !== 'chat' ? "Open Chat" : ''}
+                handleClick={() => setActiveFace('chat')}
+                state={activePage === 'chat'}
                 round={true}
             />
         </div>
