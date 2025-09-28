@@ -9,6 +9,7 @@ import {
     cubeColorAtom 
 } from "@/atoms/atomStore";
 import React, { useEffect } from 'react';
+import { Separator } from "./ui/separator";
 
 export const Footer = () => {
     const backgroundColor = useAtomValue(cubeColorAtom);
@@ -22,7 +23,7 @@ export const Footer = () => {
     }, [theme, bgMotion, cubeMotion])
 
     return (
-        <div className="footer gap-6 fixed bottom-5 flex flex-row justify-around z-100">
+        <div className="footer gap-2 fixed bottom-5 flex flex-row justify-between z-100 p-1 border border-white rounded-full">
             <TooltipButton
                 tooltip={true}
                 inputIcon={theme ? <SunIcon color={backgroundColor} /> : <MoonIcon color={backgroundColor} />}
@@ -30,7 +31,9 @@ export const Footer = () => {
                 handleClick={() => setTheme(!theme)}
                 state={theme}
                 round={true}
+                size={8}
             />
+            <Separator orientation="vertical" className="bg-white color-white h-full" />
             <TooltipButton
                 tooltip={true}
                 inputIcon={<WallpaperIcon color={backgroundColor} />}
@@ -38,6 +41,7 @@ export const Footer = () => {
                 handleClick={() => setBgMotion(!bgMotion)}
                 state={bgMotion}
                 round={true}
+                size={8}
             />
             <TooltipButton
                 tooltip={true}
@@ -46,6 +50,7 @@ export const Footer = () => {
                 handleClick={() => setCubeMotion(!cubeMotion)}
                 state={cubeMotion}
                 round={true}
+                size={8}
             />
             <TooltipButton
                 tooltip={activePage === 'chat' ? false : true}
@@ -55,6 +60,7 @@ export const Footer = () => {
                 handleClick={() => setActiveFace('chat')}
                 state={activePage === 'chat'}
                 round={true}
+                size={8}
             />
         </div>
     )

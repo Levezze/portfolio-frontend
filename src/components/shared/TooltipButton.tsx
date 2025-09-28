@@ -36,7 +36,7 @@ export const TooltipButton = ({
         <Tooltip>
             <TooltipTrigger asChild>
                 <Button 
-                    variant={state ? "outline" : "outline_pressed"}
+                    variant={state ? "footer" : "outline_pressed"}
                     className="tooltip-button" 
                     style={style} 
                     onClick={handleClick}

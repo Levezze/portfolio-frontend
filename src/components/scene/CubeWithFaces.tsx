@@ -168,15 +168,19 @@ export const CubeWithFaces = () => {
                     transform
                     occlude
                     sprite={false}
-                    // distanceFactor={(400 * cubeSize) / faceSize}
-                    distanceFactor={5}
                     style={{
-                        opacity: face === activeFace || isRotating ? 1 : 0,
-                        pointerEvents: face === activeFace ? 'auto' : 'none',
-                        transition: "opacity 1.3s ease-in-out",
-                        transform: 'translate3d(0, 0, 0)',
-                        willChange: 'transform'
+                        fontSize: '1rem',
+                        imageRendering: 'crisp-edges',
+                        WebkitFontSmoothing: 'antialiased',
                     }}
+                    // distanceFactor={10}
+                    // style={{
+                    //     opacity: face === activeFace || isRotating ? 1 : 0,
+                    //     pointerEvents: face === activeFace ? 'auto' : 'none',
+                    //     transition: "opacity 1.3s ease-in-out",
+                    //     transform: 'translate3d(0, 0, 0)',
+                    //     willChange: 'transform'
+                    // }}
                 >
                     {data.page}
                 </Html>
