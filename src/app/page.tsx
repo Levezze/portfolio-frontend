@@ -2,7 +2,7 @@
 import { Scene } from "@/components/Scene";
 import { LoadingScene } from "@/components/LoadingScene";
 import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
+import { Footer } from "@/components/footer/Footer";
 import { ExtensionWarning } from "@/components/ExtensionWarning";
 import { Scene3DErrorBoundary } from "@/components/scene/Scene3DErrorBoundary";
 import { useAtomValue } from "jotai";

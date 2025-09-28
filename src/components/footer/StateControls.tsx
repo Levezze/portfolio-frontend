@@ -1,4 +1,5 @@
-import { TooltipButton } from "./shared/TooltipButton";
+import React from 'react';
+import { TooltipButton } from "../shared/TooltipButton";
 import { Box, WallpaperIcon, SunIcon, MoonIcon, MessageSquareCodeIcon } from "lucide-react";
 import { useAtom, useAtomValue } from "jotai";
 import { 
@@ -8,22 +9,17 @@ import {
     cubeMotionAtom, 
     cubeColorAtom 
 } from "@/atoms/atomStore";
-import React, { useEffect } from 'react';
-import { Separator } from "./ui/separator";
+import { FooterFrame } from "../shared/FooterFrame";
 
-export const Footer = () => {
+export const StateControls = () => {
     const backgroundColor = useAtomValue(cubeColorAtom);
     const [theme, setTheme] = useAtom(lightThemeAtom);
     const [bgMotion, setBgMotion] = useAtom(bgMotionAtom);
     const [activePage, setActiveFace] = useAtom(activeFaceAtom);
     const [cubeMotion, setCubeMotion] = useAtom(cubeMotionAtom);
 
-    useEffect(() => {
-        console.log('States:', { theme, bgMotion, cubeMotion });
-    }, [theme, bgMotion, cubeMotion])
-
     return (
-        <div className="footer gap-2 fixed bottom-5 flex flex-row justify-between z-100 p-1 border border-white rounded-full">
+        <FooterFrame>
             <TooltipButton
                 tooltip={true}
                 inputIcon={theme ? <SunIcon color={backgroundColor} /> : <MoonIcon color={backgroundColor} />}
@@ -33,7 +29,6 @@ export const Footer = () => {
                 round={true}
                 size={8}
             />
-            <Separator orientation="vertical" className="bg-white color-white h-full" />
             <TooltipButton
                 tooltip={true}
                 inputIcon={<WallpaperIcon color={backgroundColor} />}
@@ -62,6 +57,7 @@ export const Footer = () => {
                 round={true}
                 size={8}
             />
-        </div>
-    )
+        </FooterFrame>
+  )
 }
+
