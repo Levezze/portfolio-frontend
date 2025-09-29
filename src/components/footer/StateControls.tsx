@@ -1,6 +1,6 @@
 import React from 'react';
 import { TooltipButton } from "../shared/TooltipButton";
-import { Box, WallpaperIcon, SunIcon, MoonIcon, MessageSquareCodeIcon } from "lucide-react";
+import { Box, WallpaperIcon, SunIcon, MoonIcon, MessageSquareTextIcon } from "lucide-react";
 import { useAtom, useAtomValue } from "jotai";
 import { 
     lightThemeAtom, 
@@ -22,40 +22,47 @@ export const StateControls = () => {
         <FooterFrame>
             <TooltipButton
                 tooltip={true}
-                inputIcon={theme ? <SunIcon color={backgroundColor} /> : <MoonIcon color={backgroundColor} />}
+                inputIcon={
+                    theme ? <SunIcon 
+                        color={backgroundColor} 
+                        style={{ width: '18px', height: '18px' }} 
+                    /> 
+                    : <MoonIcon 
+                        color={backgroundColor} 
+                        style={{ width: '18px', height: '18px' }} 
+                    />
+                }
                 tooltipText={theme ? "Dark Theme" : "Light Theme"}
                 handleClick={() => setTheme(!theme)}
                 state={theme}
                 round={true}
-                size={8}
+                size={10}
             />
             <TooltipButton
                 tooltip={true}
-                inputIcon={<WallpaperIcon color={backgroundColor} />}
+                inputIcon={
+                    <WallpaperIcon 
+                        color={backgroundColor} 
+                        style={{ width: '18px', height: '18px' }} 
+                    />
+                }
                 tooltipText={bgMotion ? "Stop Background Animation" : "Resume Background Animation"}
                 handleClick={() => setBgMotion(!bgMotion)}
                 state={bgMotion}
                 round={true}
-                size={8}
+                size={10}
             />
             <TooltipButton
                 tooltip={true}
-                inputIcon={<Box className="w-10 h-10" color={backgroundColor} />}
+                inputIcon={<Box 
+                    color={backgroundColor} 
+                    style={{ width: '18px', height: '18px' }} 
+                />}
                 tooltipText={cubeMotion ? "Stop Cube Sway" : "Resume Cube Sway"}
                 handleClick={() => setCubeMotion(!cubeMotion)}
                 state={cubeMotion}
                 round={true}
-                size={8}
-            />
-            <TooltipButton
-                tooltip={activePage === 'chat' ? false : true}
-                disabled={activePage === 'chat'}
-                inputIcon={<MessageSquareCodeIcon className="w-10 h-10" color={backgroundColor} />}
-                tooltipText={activePage !== 'chat' ? "Open Chat" : ''}
-                handleClick={() => setActiveFace('chat')}
-                state={activePage === 'chat'}
-                round={true}
-                size={8}
+                size={10}
             />
         </FooterFrame>
   )
