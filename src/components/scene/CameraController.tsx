@@ -5,27 +5,46 @@ import * as THREE from 'three';
 import { useEffect } from 'react';
 
 export const CameraController = () => {
-    const { camera } = useThree();
+    const { camera, size } = useThree();
     const [isLoaded, setIsLoaded] = useAtom(isLoadedAtom);
     const cubeSize = useAtomValue(cubeSizeAtom);
     const faceSize = useAtomValue(faceSizeAtom);
-    console.log(isLoaded);
 
     useEffect(() => {
-        if (camera.type === 'OrthographicCamera') {
-            const ortho = camera as THREE.OrthographicCamera;
-            const pixelsWorldUnit = faceSize / cubeSize;
-            ortho.zoom = 40;
-            // ortho.zoom = pixelsWorldUnit * 0.5;
-            ortho.updateProjectionMatrix();
-
-            setTimeout(() => {
-                if (!isLoaded) {
-                    setIsLoaded(true);
-                }
-            }, 0);
+        if (camera.type !== 'PerspectiveCamera' || !faceSize) {
+            return;
         }
-    }, [camera, cubeSize, faceSize, isLoaded, setIsLoaded])
+
+        const perspCamera = camera as THREE.PerspectiveCamera;
+        const viewportHeight = size.height || window.innerHeight || 1;
+        const distance = calculateDistanceForSize(cubeSize, faceSize, perspCamera, viewportHeight);
+
+        perspCamera.position.set(0, 0, distance);
+        perspCamera.lookAt(0, 0, 0);
+        perspCamera.updateProjectionMatrix();
+
+        if (isLoaded) {
+            return;
+        }
+
+        const timeout = setTimeout(() => {
+            setIsLoaded(true);
+        }, 0);
+
+        return () => {
+            clearTimeout(timeout);
+        }
+    }, [camera, cubeSize, faceSize, size.height, isLoaded, setIsLoaded]);
 
     return null;
+}
+
+function calculateDistanceForSize(
+    cubeWorldSize: number, 
+    targetPixelSize: number, 
+    camera: THREE.PerspectiveCamera,
+    viewportHeight: number
+) {
+    const fov = camera.fov * (Math.PI / 180);
+    return (cubeWorldSize * viewportHeight) / (2 * Math.tan(fov / 2) * targetPixelSize);
 }

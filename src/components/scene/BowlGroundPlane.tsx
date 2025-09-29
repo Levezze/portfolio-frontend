@@ -49,7 +49,7 @@ export const BowlGroundPlane = ({position, color}:
     <group>
         <mesh receiveShadow position={position} rotation={[Math.PI / 4, 0, 0]}>
             <sphereGeometry args={[
-                100,  // radius
+                200,  // radius
                 32,   // widthSegments
                 16,   // heightSegments
                 0,    // phiStart

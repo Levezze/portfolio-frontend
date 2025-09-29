@@ -1,5 +1,5 @@
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls, OrthographicCamera, Sky, SoftShadows } from "@react-three/drei";
+import { OrbitControls, OrthographicCamera, PerspectiveCamera, SoftShadows } from "@react-three/drei";
 import { CubeWithFaces } from "./scene/CubeWithFaces";
 import { CameraController } from "./scene/CameraController";
 import { BowlGroundPlane } from "./scene/BowlGroundPlane";
@@ -114,7 +114,7 @@ export const Scene = () => {
                 <ambientLight intensity={6} />
                 <directionalLight
                     castShadow
-                    position={[8, 7, 15]}
+                    position={[10, 9, 15]}
                     intensity={2}
                     shadow-mapSize={[2048, 2048]}
                     shadow-camera-far={50}
@@ -127,7 +127,8 @@ export const Scene = () => {
                     size={4}
                     samples={16}
                 />
-                <OrthographicCamera makeDefault position={[0, 0, 100]}/>
+                {/* <OrthographicCamera makeDefault position={[0, 0, 100]}/> */}
+                <PerspectiveCamera makeDefault position={[0, 0, 100]}/>
                 <CameraController />
                 {bgMotion ? <Float
                     speed={1}
@@ -135,7 +136,7 @@ export const Scene = () => {
                     floatIntensity={0.1}
                     floatingRange={[0.1, 1.5]}
                 >
-                    <BowlGroundPlane position={[20, 65, 50]} color={"#1c1c1c"}/>
+                    <BowlGroundPlane position={[30, 150, 100]} color={"#1c1c1c"}/>
                 </Float> : <BowlGroundPlane position={[20, 65, 50]} color={"#1c1c1c"}/>}
                 {cubeMotion ? <Float
                     speed={0.5}
@@ -145,7 +146,7 @@ export const Scene = () => {
                 >
                     <CubeWithFaces />
                 </Float> : <CubeWithFaces />}
-                <OrbitControls enabled={false}/>
+                <OrbitControls enabled={true}/>
             </Canvas>
         </div>
     );
