@@ -199,8 +199,8 @@ const ThreadWelcome: FC<{ config: ChatConfig }> = ({ config }) => {
   const welcome_messages = config.welcome_messages;
   return (
     <ThreadPrimitive.Empty>
-      <div className="aui-thread-welcome-root mx-auto my-auto flex w-full max-w-[var(--thread-max-width)] flex-col h-full justify-between px-12">
-        <div className="aui-thread-welcome-center flex w-full flex-col justify-center my-auto">
+      <div className="aui-thread-welcome-root mx-auto my-auto flex w-full max-w-[var(--thread-max-width)] flex-col h-full justify-around px-8">
+        <div className="aui-thread-welcome-center flex w-full flex-col justify-center">
           <div className="aui-thread-welcome-message flex size-full flex-col justify-center">
             <m.div
               initial={{ opacity: 0, y: 10 }}
@@ -296,18 +296,20 @@ const Composer: FC<{ chatConfig: ChatConfig | null }> = ({ chatConfig }) => {
   return (
     <div className="aui-composer-wrapper sticky bottom-0 mx-auto flex w-full max-w-[var(--thread-max-width)] flex-col overflow-visible rounded-t-md bg-background pb-4 md:pb-6">
       <ThreadScrollToBottom />
-      <div className="flex flex-col items-center justify-center mb-4">
-        <Separator className="my-4 w-full" />
-        <FakeAssistantMessage 
-          text={chatConfig?.welcome_messages.filter(
-            (message: WelcomeMessage) => message.message_type === 'assistant'
-          )[0]?.message_text as string}
-        />
-      </div>
-      <ComposerPrimitive.Root className="aui-composer-root relative rounded-none flex w-full flex-col bg-muted px-1 pt-2 dark:border-muted-foreground/15 shadow-inner shadow-muted-foreground/5">
+      <ThreadPrimitive.Empty>
+        <div className="flex flex-col items-center justify-center mb-4">
+          <Separator className="my-4 w-full" />
+          <FakeAssistantMessage 
+            text={chatConfig?.welcome_messages.filter(
+              (message: WelcomeMessage) => message.message_type === 'assistant'
+            )[0]?.message_text as string}
+          />
+        </div>
+      </ThreadPrimitive.Empty>
+      <ComposerPrimitive.Root className="aui-composer-root relative rounded-full flex w-full flex-col bg-muted px-1 pt-2 dark:border-muted-foreground/15 shadow-inner shadow-muted-foreground/5">
         <ComposerPrimitive.Input
           placeholder="Send a message..."
-          className="aui-composer-input mb-1 max-h-32 min-h-16 w-full resize-none bg-transparent px-3.5 pt-1.5 pb-3 text-sm outline-none placeholder:text-muted-foreground focus:outline-primary"
+          className="aui-composer-input flex items-center justify-center mb-1 h-16 w-full resize-none bg-transparent px-3.5 pt-1.5 pb-3 text-sm outline-none placeholder:text-muted-foreground focus:outline-primary"
           rows={1}
           autoFocus
           aria-label="Message input"
@@ -320,7 +322,7 @@ const Composer: FC<{ chatConfig: ChatConfig | null }> = ({ chatConfig }) => {
 
 const ComposerAction: FC = () => {
   return (
-    <div className="aui-composer-action-wrapper absolute bottom-1 right-2 mx-1 mt-2 mb-2 flex items-center ml-auto">
+    <div className="aui-composer-action-wrapper absolute bottom-1 right-2 mb-1 flex items-center ml-auto">
       <ThreadPrimitive.If running={false}>
         <ComposerPrimitive.Send asChild>
           <TooltipIconButton
