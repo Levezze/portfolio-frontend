@@ -188,6 +188,7 @@ export const CubeWithFaces = () => {
           transform
           occlude
           sprite={false}
+          scale={0.5}
           style={{
             fontSize: "1rem",
             imageRendering: "crisp-edges",

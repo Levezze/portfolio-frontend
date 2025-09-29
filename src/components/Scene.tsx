@@ -86,6 +86,8 @@ export const Scene = () => {
         );
     }
 
+    const bowlPosition = [50, 155, 100] as [number, number, number];
+
     return (
         <div className={`canvas w-full h-full ${isLoaded ? "opacity-100" : "opacity-0"} z-0 relative`}>
             {/* Context recovery notification */}
@@ -114,7 +116,7 @@ export const Scene = () => {
                 <ambientLight intensity={6} />
                 <directionalLight
                     castShadow
-                    position={[10, 9, 15]}
+                    position={[20, 15, 15]}
                     intensity={2}
                     shadow-mapSize={[2048, 2048]}
                     shadow-camera-far={50}
@@ -136,8 +138,8 @@ export const Scene = () => {
                     floatIntensity={0.1}
                     floatingRange={[0.1, 1.5]}
                 >
-                    <BowlGroundPlane position={[30, 150, 100]} color={"#1c1c1c"}/>
-                </Float> : <BowlGroundPlane position={[20, 65, 50]} color={"#1c1c1c"}/>}
+                    <BowlGroundPlane position={bowlPosition} color={"#1c1c1c"}/>
+                </Float> : <BowlGroundPlane position={bowlPosition} color={"#1c1c1c"}/>}
                 {cubeMotion ? <Float
                     speed={0.5}
                     rotationIntensity={0.15}

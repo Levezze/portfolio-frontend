@@ -60,7 +60,7 @@ export const BowlGroundPlane = ({position, color}:
             <meshStandardMaterial side={THREE.DoubleSide}>
                 <GradientTexture
                     attach="map"
-                    stops={[0, 0.99]}
+                    stops={[0, 0.999]}
                     colors={[currentColor, '#1c1c1c']}
                     size={1024}
                 />
