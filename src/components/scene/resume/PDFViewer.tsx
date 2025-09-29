@@ -47,9 +47,9 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
           <Document
             file={url}
             onLoadSuccess={({ numPages }) => setNumPages(numPages)}
-            loading={<div className="text-center p-4">Loading PDF...</div>}
+            loading={<div className="flex text-center h-full justify-center items-center p-4">Loading PDF...</div>}
             error={
-              <div className="text-center p-4 text-red-500">
+              <div className="flex text-center h-full justify-center items-center p-4 text-red-500">
                 Failed to load PDF. Please try downloading it instead.
               </div>
             }

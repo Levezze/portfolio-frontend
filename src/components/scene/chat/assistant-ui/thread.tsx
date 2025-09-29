@@ -115,7 +115,7 @@ export const Thread: FC = () => {
             <ThreadPrimitive.If empty={false}>
               <div className="aui-thread-viewport-spacer min-h-8 grow" />
             </ThreadPrimitive.If>
-            <Composer chatConfig={chatConfig} />
+            <Composer chatConfig={chatConfig} isLoading={isLoading} />
           </ThreadPrimitive.Viewport>
         </ThreadPrimitive.Root>
       </MotionConfig>
@@ -141,17 +141,35 @@ const ThreadScrollToBottom: FC = () => {
 
 const FakeAssistantMessage: FC<{ text: string }> = ({ text }) => {
   const [displayText, setDisplayText] = useState('');
+  const [finalText, setFinalText] = useState(text);
   const gimliChoice = useAtomValue(gimliChoiceAtom);
 
+  useEffect(() => {
+    if (!text || text.length === 0) return;
+
+    const timeout = setTimeout(() => {
+      setFinalText(text);
+    }, 1500);
+
+    return () => clearTimeout(timeout);
+  }, [text]);
+
   useEffect(()=> {
+    if (!finalText || finalText.length === 0) return;
+    
     setDisplayText('');
     let count = 0;
     let interval: NodeJS.Timeout;
 
     const timeout = setTimeout(() => {
       interval = setInterval(() => {
-        if (count < text.length) {
-          setDisplayText(prev => prev + text[count]);
+        if (count < finalText.length) {
+          setDisplayText(prev => {
+            if (prev.length < finalText.length) {
+              return finalText.slice(0, prev.length + 1);
+            }
+            return prev;
+          });
           count++;
         } else {
           clearInterval(interval);
@@ -164,7 +182,7 @@ const FakeAssistantMessage: FC<{ text: string }> = ({ text }) => {
       clearTimeout(timeout);
       if (interval) clearInterval(interval);
     }
-  }, [text]);
+  }, [finalText]);
 
   return (
     <div
@@ -292,18 +310,20 @@ const ThreadWelcomeSuggestions: FC<{ suggestions: any[] }> = ({ suggestions }) =
   );
 };
 
-const Composer: FC<{ chatConfig: ChatConfig | null }> = ({ chatConfig }) => {
+const Composer: FC<{ chatConfig: ChatConfig | null, isLoading: boolean }> = ({ chatConfig, isLoading }) => {
   return (
     <div className="aui-composer-wrapper sticky bottom-0 mx-auto flex w-full max-w-[var(--thread-max-width)] flex-col overflow-visible rounded-t-md bg-background pb-4 md:pb-6">
       <ThreadScrollToBottom />
       <ThreadPrimitive.Empty>
         <div className="flex flex-col items-center justify-center mb-4">
           <Separator className="my-4 w-full" />
+          {chatConfig && !isLoading && (
           <FakeAssistantMessage 
-            text={chatConfig?.welcome_messages.filter(
+            text={chatConfig.welcome_messages.filter(
               (message: WelcomeMessage) => message.message_type === 'assistant'
             )[0]?.message_text as string}
           />
+          )}
         </div>
       </ThreadPrimitive.Empty>
       <ComposerPrimitive.Root className="aui-composer-root relative rounded-full flex w-full flex-col bg-muted px-1 pt-2 dark:border-muted-foreground/15 shadow-inner shadow-muted-foreground/5">
