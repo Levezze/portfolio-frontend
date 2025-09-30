@@ -49,7 +49,7 @@ export interface BreakpointConfig {
  *
  * Note: Requiring both dimensions prevents cube oversizing on extreme aspect ratios
  */
-export const RESPONSIVE_CONFIG = {
+export const RESPONSIVE_CONFIG: Record<string, BreakpointConfig> = {
   /**
    * Desktop Large - Large displays
    * Width ≥ 1000px AND Height ≥ 1000px → 800×800px cube
@@ -94,9 +94,10 @@ export const RESPONSIVE_CONFIG = {
    */
   mobile: {
     isMobile: true,
-    targetPixelSizeCalculator: (dimension: number) => dimension * 0.9,
+    marginPercentage: 0.15,
+    targetPixelSizeCalculator: (dimension: number) =>
+      dimension * (1 - (RESPONSIVE_CONFIG.mobile.marginPercentage ?? 0.15)),
     controlsLayout: "drawer",
-    marginPercentage: 0.1,
     description: "Mobile phones (portrait and landscape)",
   },
 } as const satisfies Record<string, BreakpointConfig>;
@@ -208,12 +209,7 @@ export function hasBreakpointChanged(
  * @returns Array of breakpoint keys from largest to smallest
  */
 export function getAllBreakpoints(): BreakpointKey[] {
-  return [
-    "large",
-    "medium",
-    "small",
-    "mobile",
-  ];
+  return ["large", "medium", "small", "mobile"];
 }
 
 /**

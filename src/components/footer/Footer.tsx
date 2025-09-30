@@ -18,7 +18,7 @@ export const Footer = () => {
     const isMobile = useIsMobile();
     const cubeColor = useAtomValue(cubeColorAtom);
 
-    // Desktop/Tablet: Fixed footer
+    // desktop / tablet
     if (!isMobile) {
         return (
             <div className='footer fixed bottom-5 z-100 gap-4 flex flex-row justify-between'>
@@ -28,7 +28,7 @@ export const Footer = () => {
         );
     }
 
-    // Mobile: Drawer
+    // mobile:
     return (
         <Drawer>
             <DrawerTrigger asChild>
@@ -40,11 +40,17 @@ export const Footer = () => {
                     <MenuIcon className="h-5 w-5" />
                 </Button>
             </DrawerTrigger>
-            <DrawerContent style={{ backgroundColor: cubeColor || '#A8DADC' }}>
+            <DrawerContent 
+                style={{ 
+                    backgroundColor: cubeColor || '#A8DADC',
+                    transition: 'background-color 300ms ease-in-out'
+                }}
+                className="z-200" 
+            >
                 <DrawerHeader>
-                    <DrawerTitle className="text-foreground">Menu</DrawerTitle>
+                    <DrawerTitle className="text-foreground">Controls</DrawerTitle>
                 </DrawerHeader>
-                <div className="flex flex-col gap-4 p-6">
+                <div className="flex flex-col gap-4 p-6 pt-0">
                     <Navigation variant="mobile" />
                     <StateControls variant="mobile" />
                 </div>
