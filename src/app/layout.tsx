@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Inter, Merriweather } from "next/font/google";
 import { ThemeWrapper } from "@/components/ThemeWrapper";
 import "./globals.css";
@@ -13,23 +13,11 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// const inter400 = Inter({
-//   variable: "--font-inter-400",
-//   weight: "400",
-//   subsets: ["latin"],
-// });
-
 const inter = Inter({
   variable: "--font-inter",
   weight: ["400", "600"],
   subsets: ["latin"],
 });
-
-// const merriweather400 = Merriweather({
-//   variable: "--font-mw-400",
-//   weight: "400",
-//   subsets: ["latin"],
-// });
 
 const merriweather = Merriweather({
   variable: "--font-mw",
@@ -39,7 +27,13 @@ const merriweather = Merriweather({
 
 export const metadata: Metadata = {
   title: "Levezze | Portfolio",
-  description: "Lev Zhitnik | Full Stack & AI Engineer, Coffee Enthusiast, Former Computational Designer and Architect",
+  description:
+    "Lev Zhitnik | Full Stack & AI Engineer, Coffee Enthusiast, Former Computational Designer and Architect",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({
@@ -51,10 +45,8 @@ export default function RootLayout({
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable}${inter.variable} ${merriweather.variable} antialiased bg-["#1c1c1c"] font-inter-regular`}
-        >
-        <ThemeWrapper>
-          {children}
-        </ThemeWrapper>
+      >
+        <ThemeWrapper>{children}</ThemeWrapper>
       </body>
     </html>
   );
