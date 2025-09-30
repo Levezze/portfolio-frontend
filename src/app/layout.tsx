@@ -45,10 +45,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        {/* Direct viewport injection to bypass Next.js 15 streaming metadata timing issue */}
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
-      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable}${inter.variable} ${merriweather.variable} antialiased bg-["#1c1c1c"] font-inter-regular`}
       >
