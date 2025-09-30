@@ -217,7 +217,7 @@ const ThreadWelcome: FC<{ config: ChatConfig }> = ({ config }) => {
   const welcome_messages = config.welcome_messages;
   return (
     <ThreadPrimitive.Empty>
-      <div className="aui-thread-welcome-root mx-auto my-auto flex w-full max-w-[var(--thread-max-width)] flex-col h-full justify-around px-8">
+      <div className="aui-thread-welcome-root mx-auto my-auto flex w-full max-w-[var(--thread-max-width)] flex-col h-full justify-around px-0 md:px-8">
         <div className="aui-thread-welcome-center flex w-full flex-col justify-center">
           <div className="aui-thread-welcome-message flex size-full flex-col justify-center">
             <m.div
@@ -273,7 +273,7 @@ const ThreadWelcomeSuggestions: FC<{ suggestions: any[] }> = ({ suggestions }) =
   ];
 
   return (
-    <div className="aui-thread-welcome-suggestions py-2 grid w-full gap-4 @md:grid-cols-2">
+    <div className="aui-thread-welcome-suggestions py-2 flex flex-col w-full gap-4 overflow-y-auto @md:grid @md:grid-cols-2 @md:overflow-y-visible">
       {displaySuggestions.map((suggestedAction, index) => (
         <m.div
           initial={{ opacity: 0, y: 20 }}
