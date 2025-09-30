@@ -17,7 +17,7 @@ export const FooterFrame = ({
 
   return (
     <div
-      className={`gap-2 flex flex-row justify-around z-100 p-1 border ${borderColorClass} rounded-full`}
+      className={`gap-2 flex flex-row justify-around z-100 p-1 [@media(max-height:600px)]:p-0 border ${borderColorClass} rounded-full`}
     >
       {children}
     </div>

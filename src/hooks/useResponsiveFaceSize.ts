@@ -62,12 +62,6 @@ export const useResponsiveFaceSize = () => {
           );
           faceSize = 400;
         }
-
-        // Debug logging in development
-        if (process.env.NODE_ENV === "development") {
-          console.log("Viewport:", window.innerWidth, "x", window.innerHeight);
-          console.log("CSS --face-size:", cssValue, "→", faceSize);
-        }
       }
 
       // Update atoms
@@ -82,7 +76,7 @@ export const useResponsiveFaceSize = () => {
       fn: T,
       delay: number
     ): ((...args: Parameters<T>) => void) => {
-      let timeoutId: NodeJS.Timeout;
+      let timeoutId: ReturnType<typeof setTimeout>;
       return (...args: Parameters<T>) => {
         clearTimeout(timeoutId);
         timeoutId = setTimeout(() => fn(...args), delay);

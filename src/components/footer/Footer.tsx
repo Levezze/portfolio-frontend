@@ -3,7 +3,11 @@ import { StateControls } from "./StateControls";
 import { Navigation } from "./Navigation";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { useAtom, useAtomValue } from "jotai";
-import { cubeColorAtom, activeFaceAtom } from "@/atoms/atomStore";
+import {
+  cubeColorAtom,
+  activeFaceAtom,
+  drawerOpenAtom,
+} from "@/atoms/atomStore";
 import {
   Drawer,
   DrawerContent,
@@ -21,6 +25,7 @@ export const Footer = () => {
   const isMobile = useIsMobile();
   const cubeColor = useAtomValue(cubeColorAtom);
   const [activeFace, setActiveFace] = useAtom(activeFaceAtom);
+  const [drawerOpen, setDrawerOpen] = useAtom(drawerOpenAtom);
   const [orientation, setOrientation] = useState<"portrait" | "landscape">(
     "portrait"
   );
@@ -40,9 +45,16 @@ export const Footer = () => {
 
   if (!isMobile) {
     return (
-      <div className="footer fixed bottom-5 z-100 gap-4 flex flex-row justify-between">
-        <Navigation variant="default" />
-        <StateControls variant="default" />
+      <div
+        className="fixed bottom-0 left-0 right-0 flex items-center justify-center z-100"
+        style={{
+          height: 'clamp(50px, calc((100vh - var(--face-size)) / 2), 100px)'
+        }}
+      >
+        <div className="footer gap-4 flex flex-row justify-between">
+          <Navigation variant="default" />
+          <StateControls variant="default" />
+        </div>
       </div>
     );
   }
@@ -53,7 +65,7 @@ export const Footer = () => {
   const drawerButtonColorClass = "text-white dark:text-muted";
 
   return (
-    <Drawer>
+    <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
       {orientation === "portrait" ? (
         <div
           className="fixed bottom-0 left-0 right-0 flex flex-row gap-4 items-center justify-center z-100"

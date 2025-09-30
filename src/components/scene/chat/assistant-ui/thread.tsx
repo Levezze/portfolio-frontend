@@ -224,7 +224,7 @@ const ThreadWelcome: FC<{ config: ChatConfig }> = ({ config }) => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
-              className="aui-thread-welcome-message-motion-1 font-merriweather font-bold text-base md:text-2xl mb-2"
+              className="aui-thread-welcome-message-motion-1 font-merriweather font-bold text-base [@media(min-width:700px)_and_(min-height:700px)]:text-xl [@media(min-width:800px)_and_(min-height:800px)]:text-2xl mb-2"
             >
               {welcome_messages.filter((message: WelcomeMessage) => message.message_type === 'primary')[0]?.message_text}
             </m.div>
@@ -233,7 +233,7 @@ const ThreadWelcome: FC<{ config: ChatConfig }> = ({ config }) => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
               transition={{ delay: 0.1 }}
-              className="aui-thread-welcome-message-motion-2 font-merriweather text-base md:text-xl text-muted-foreground/90"
+              className="aui-thread-welcome-message-motion-2 font-merriweather text-base [@media(min-width:700px)_and_(min-height:700px)]:text-lg [@media(min-width:800px)_and_(min-height:800px)]:text-xl text-muted-foreground/90"
             >
               {welcome_messages.filter((message: WelcomeMessage) => message.message_type === 'secondary')[0]?.message_text}
             </m.div>
