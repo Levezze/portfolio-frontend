@@ -1,7 +1,9 @@
-import { useEffect } from 'react';
-import { useSetAtom } from 'jotai';
-import { cubeSizeAtom, faceSizeAtom } from '@/atoms/atomStore';
-import { isMobileDevice, getMobileOrientation } from '@/utils/deviceDetection';
+import { useEffect } from "react";
+import { useSetAtom } from "jotai";
+import { cubeSizeAtom, faceSizeAtom } from "@/atoms/atomStore";
+import { isMobileDevice, getMobileOrientation } from "@/utils/deviceDetection";
+import { RESPONSIVE_CONFIG } from "@/config/responsive";
+import { calculateMobileCubeSize } from "@/utils/deviceDetection";
 
 /**
  * Responsive face size hook - manages cube and HTML face sizing across breakpoints
@@ -30,19 +32,24 @@ export const useResponsiveFaceSize = () => {
 
       if (isMobileDevice()) {
         // Mobile: Calculate 90% of viewport dimension (orientation-aware)
-        const orientation = getMobileOrientation();
+        /* const orientation = getMobileOrientation();
         const dimension = orientation === 'portrait'
           ? window.innerHeight
-          : window.innerWidth;
+          : window.innerWidth; */
 
-        faceSize = Math.round(dimension * 0.9);
+        faceSize = calculateMobileCubeSize(
+          RESPONSIVE_CONFIG.mobile.marginPercentage
+        );
 
         // Set CSS variable dynamically for mobile
-        document.documentElement.style.setProperty('--face-size', `${faceSize}px`);
+        document.documentElement.style.setProperty(
+          "--face-size",
+          `${faceSize}px`
+        );
       } else {
         // Desktop/Tablet: Read from CSS (media queries control this)
         const cssValue = getComputedStyle(document.documentElement)
-          .getPropertyValue('--face-size')
+          .getPropertyValue("--face-size")
           .trim();
 
         faceSize = parseInt(cssValue, 10);
@@ -50,14 +57,16 @@ export const useResponsiveFaceSize = () => {
         // Fallback to DEFAULT CSS value if parsing fails
         // The CSS default is 400px, NOT 800px!
         if (isNaN(faceSize)) {
-          console.warn('Failed to read --face-size from CSS, using default 400px');
+          console.warn(
+            "Failed to read --face-size from CSS, using default 400px"
+          );
           faceSize = 400;
         }
 
         // Debug logging in development
-        if (process.env.NODE_ENV === 'development') {
-          console.log('Viewport:', window.innerWidth, 'x', window.innerHeight);
-          console.log('CSS --face-size:', cssValue, '→', faceSize);
+        if (process.env.NODE_ENV === "development") {
+          console.log("Viewport:", window.innerWidth, "x", window.innerHeight);
+          console.log("CSS --face-size:", cssValue, "→", faceSize);
         }
       }
 
@@ -85,10 +94,10 @@ export const useResponsiveFaceSize = () => {
 
     // Debounced resize handler (150ms)
     const debouncedUpdate = debounce(updateSize, 150);
-    window.addEventListener('resize', debouncedUpdate);
+    window.addEventListener("resize", debouncedUpdate);
 
     return () => {
-      window.removeEventListener('resize', debouncedUpdate);
+      window.removeEventListener("resize", debouncedUpdate);
     };
   }, [setFaceSize, setCubeSize]);
 };

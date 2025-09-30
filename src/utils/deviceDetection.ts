@@ -30,37 +30,14 @@
  * }
  */
 export function isMobileDevice(): boolean {
-  // Check if we're in a browser environment
-  if (typeof window === 'undefined' || typeof navigator === 'undefined') {
+  if (typeof window === "undefined") {
     return false;
   }
 
-  // Check user agent for mobile patterns
-  const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
-  const mobilePatterns = /Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i;
-  const isMobileUA = mobilePatterns.test(userAgent);
+  const width = window.innerWidth;
+  const height = window.innerHeight;
 
-  // Explicitly exclude tablets from mobile detection
-  // iPad has "iPad" in UA, Android tablets often have "Mobile" absent
-  const isTablet = /iPad|Android(?!.*Mobile)/i.test(userAgent);
-
-  // Check screen size (phones are typically smaller than 768px in smallest dimension)
-  const smallestDimension = Math.min(window.innerWidth, window.innerHeight);
-  const isSmallScreen = smallestDimension < 768;
-
-  // REMOVED TOUCH DETECTION - it breaks on desktop with touchscreens!
-  // Mobile detection should ONLY rely on user agent and screen size
-
-  // Mobile if:
-  // - Has mobile user agent (not tablet)
-  // - AND has small screen
-  // This prevents desktops with touch from being detected as mobile
-  if (isTablet) {
-    return false; // Tablets use desktop breakpoints
-  }
-
-  // Only return true for actual mobile phones
-  return isMobileUA && !isTablet && isSmallScreen;
+  return width < 600 || height < 600;
 }
 
 /**
@@ -80,12 +57,12 @@ export function isMobileDevice(): boolean {
  *   cubeSize = windowWidth * 0.9;
  * }
  */
-export function getMobileOrientation(): 'portrait' | 'landscape' {
-  if (typeof window === 'undefined') {
-    return 'portrait'; // Default for SSR
+export function getMobileOrientation(): "portrait" | "landscape" {
+  if (typeof window === "undefined") {
+    return "portrait"; // Default for SSR
   }
 
-  return window.innerWidth > window.innerHeight ? 'landscape' : 'portrait';
+  return window.innerWidth > window.innerHeight ? "landscape" : "portrait";
 }
 
 /**
@@ -110,17 +87,16 @@ export function getMobileOrientation(): 'portrait' | 'landscape' {
  * const size = calculateMobileCubeSize();
  * // Returns: 844 × 0.9 = 759.6px (uses width now)
  */
-export function calculateMobileCubeSize(marginPercent: number = 0.1): number {
-  if (typeof window === 'undefined') {
+export function calculateMobileCubeSize(marginPercent: number = 0.15): number {
+  if (typeof window === "undefined") {
     return 400; // Default for SSR
   }
 
   const orientation = getMobileOrientation();
 
   // Calculate available dimension (after margins)
-  const dimension = orientation === 'portrait'
-    ? window.innerHeight
-    : window.innerWidth;
+  const dimension =
+    orientation === "portrait" ? window.innerHeight : window.innerWidth;
 
   // Apply margin percentage (e.g., 0.1 = 10% total, 5% each side)
   const availableSize = dimension * (1 - marginPercent);
@@ -137,7 +113,7 @@ export function calculateMobileCubeSize(marginPercent: number = 0.1): number {
  * @returns true if orientation changed, false otherwise
  */
 export function hasOrientationChanged(
-  previousOrientation: 'portrait' | 'landscape'
+  previousOrientation: "portrait" | "landscape"
 ): boolean {
   const currentOrientation = getMobileOrientation();
   return currentOrientation !== previousOrientation;
@@ -148,22 +124,14 @@ export function hasOrientationChanged(
  *
  * @returns Device type string
  */
-export function getDeviceType(): 'mobile' | 'tablet' | 'desktop' {
-  if (typeof window === 'undefined') {
-    return 'desktop';
+export function getDeviceType(): "mobile" | "tablet" | "desktop" {
+  if (typeof window === "undefined") {
+    return "desktop";
   }
 
   if (isMobileDevice()) {
-    return 'mobile';
+    return "mobile";
   }
 
-  // Check for tablet
-  const userAgent = navigator.userAgent;
-  const isTablet = /iPad|Android(?!.*Mobile)/i.test(userAgent);
-
-  if (isTablet) {
-    return 'tablet';
-  }
-
-  return 'desktop';
+  return "desktop";
 }

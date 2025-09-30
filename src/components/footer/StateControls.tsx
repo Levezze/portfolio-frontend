@@ -17,11 +17,56 @@ export const StateControls = ({ variant = 'default' }: StateControlsProps) => {
     const [bgMotion, setBgMotion] = useAtom(bgMotionAtom);
 
     // Color scheme based on variant
-    const iconColorClass = variant === 'mobile'
+    const isMobile = variant === 'mobile';
+    const iconColorClass = isMobile
         ? 'text-foreground'
         : 'text-white dark:text-muted';
+    
 
     return (
+        isMobile 
+        ? 
+        (
+        <div className="flex gap-4 justify-center">
+            <FooterFrame variant={variant}>
+                <TooltipButton
+                    tooltip={true}
+                    inputIcon={
+                        <div className={iconColorClass}>
+                            {theme ? <SunIcon
+                                style={{ width: '18px', height: '18px' }}
+                            />
+                            : <MoonIcon
+                                style={{ width: '18px', height: '18px' }}
+                            />}
+                        </div>
+                    }
+                    tooltipText={theme ? "Dark Theme" : "Light Theme"}
+                    handleClick={() => setTheme(!theme)}
+                    state={theme}
+                    round={true}
+                    size={10}
+                />
+            </FooterFrame>
+            <FooterFrame variant={variant}>
+                <TooltipButton
+                    tooltip={true}
+                    inputIcon={
+                        <div className={iconColorClass}>
+                            <WallpaperIcon
+                                style={{ width: '18px', height: '18px' }}
+                            />
+                        </div>
+                    }
+                    tooltipText={bgMotion ? "Stop Background Animation" : "Resume Background Animation"}
+                    handleClick={() => setBgMotion(!bgMotion)}
+                    state={bgMotion}
+                    round={true}
+                    size={10}
+                />
+            </FooterFrame>
+            </div>
+        ) : (
         <FooterFrame variant={variant}>
             <TooltipButton
                 tooltip={true}
@@ -57,6 +102,7 @@ export const StateControls = ({ variant = 'default' }: StateControlsProps) => {
                 size={10}
             />
         </FooterFrame>
-  )
+        )
+    )
 }
 

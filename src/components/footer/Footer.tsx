@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { StateControls } from './StateControls';
 import { Navigation } from './Navigation';
 import { useIsMobile } from '@/hooks/useIsMobile';
@@ -11,14 +11,30 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from '@/components/ui/drawer';
-import { Button } from '@/components/ui/button';
 import { MenuIcon } from 'lucide-react';
+import { RESPONSIVE_CONFIG } from '@/config/responsive';
+import { getMobileOrientation } from '@/utils/deviceDetection';
+import { FooterFrame } from '../shared/FooterFrame';
+import { TooltipButton } from '../shared/TooltipButton';
 
 export const Footer = () => {
     const isMobile = useIsMobile();
     const cubeColor = useAtomValue(cubeColorAtom);
+    const [orientation, setOrientation] = useState<'portrait' | 'landscape'>('portrait');
 
-    // Desktop/Tablet: Fixed footer
+    useEffect(() => {
+        if (!isMobile) return;
+
+        const updateOrientation = () => {
+            setOrientation(getMobileOrientation());
+        };
+
+        updateOrientation();
+
+        window.addEventListener('resize', updateOrientation);
+        return () => window.removeEventListener('resize', updateOrientation);
+    }, [isMobile]);
+
     if (!isMobile) {
         return (
             <div className='footer fixed bottom-5 z-100 gap-4 flex flex-row justify-between'>
@@ -28,23 +44,69 @@ export const Footer = () => {
         );
     }
 
-    // Mobile: Drawer
+    // mobile:
+    const marginPercent = RESPONSIVE_CONFIG.mobile.marginPercentage || 0.15;
+    const containerSize = (marginPercent / 2) * 100;
+    const drawerButtonColorClass = 'text-white dark:text-muted';
+
     return (
         <Drawer>
             <DrawerTrigger asChild>
-                <Button
-                    className="fixed bottom-5 left-1/2 -translate-x-1/2 z-100 rounded-full"
-                    variant="outline"
-                    size="icon"
-                >
-                    <MenuIcon className="h-5 w-5" />
-                </Button>
+                {orientation === 'portrait' ? (
+                    <div
+                        className="fixed bottom-0 left-0 right-0 flex items-center justify-center z-100"
+                        style={{ height: `${containerSize}vh` }}
+                    >
+                        <FooterFrame variant="default">
+                            <TooltipButton
+                                tooltip={false}
+                                inputIcon={
+                                    <div className={drawerButtonColorClass}>
+                                        <MenuIcon style={{ width: '18px', height: '18px' }} />
+                                    </div>
+                                }
+                                tooltipText=""
+                                handleClick={() => {}}
+                                state={true}
+                                round={true}
+                                size={8}
+                            />
+                        </FooterFrame>
+                    </div>
+                ) : (
+                    <div
+                        className="fixed left-0 top-0 bottom-0 flex items-center justify-center z-100"
+                        style={{ width: `${containerSize}vw` }}
+                    >
+                        <FooterFrame variant="default">
+                            <TooltipButton
+                                tooltip={false}
+                                inputIcon={
+                                    <div className={drawerButtonColorClass}>
+                                        <MenuIcon style={{ width: '18px', height: '18px' }} />
+                                    </div>
+                                }
+                                tooltipText=""
+                                handleClick={() => {}}
+                                state={true}
+                                round={true}
+                                size={8}
+                            />
+                        </FooterFrame>
+                    </div>
+                )}
             </DrawerTrigger>
-            <DrawerContent style={{ backgroundColor: cubeColor || '#A8DADC' }}>
+            <DrawerContent
+                style={{
+                    backgroundColor: cubeColor || '#A8DADC',
+                    transition: 'background-color 300ms ease-in-out'
+                }}
+                className="z-200"
+            >
                 <DrawerHeader>
-                    <DrawerTitle className="text-foreground">Menu</DrawerTitle>
+                    <DrawerTitle className="text-foreground">Controls</DrawerTitle>
                 </DrawerHeader>
-                <div className="flex flex-col gap-4 p-6">
+                <div className="flex flex-col gap-4 p-6 pt-0">
                     <Navigation variant="mobile" />
                     <StateControls variant="mobile" />
                 </div>
