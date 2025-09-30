@@ -217,14 +217,14 @@ const ThreadWelcome: FC<{ config: ChatConfig }> = ({ config }) => {
   const welcome_messages = config.welcome_messages;
   return (
     <ThreadPrimitive.Empty>
-      <div className="aui-thread-welcome-root mx-auto my-auto flex w-full max-w-[var(--thread-max-width)] flex-col h-full justify-around px-8">
+      <div className="aui-thread-welcome-root mx-auto my-auto flex w-full max-w-[var(--thread-max-width)] flex-col h-full justify-around px-0 md:px-8">
         <div className="aui-thread-welcome-center flex w-full flex-col justify-center">
           <div className="aui-thread-welcome-message flex size-full flex-col justify-center">
             <m.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
-              className="aui-thread-welcome-message-motion-1 font-merriweather font-bold text-base md:text-2xl mb-2"
+              className="aui-thread-welcome-message-motion-1 font-merriweather font-bold text-base [@media(min-width:700px)_and_(min-height:700px)]:text-xl [@media(min-width:800px)_and_(min-height:800px)]:text-2xl mb-2"
             >
               {welcome_messages.filter((message: WelcomeMessage) => message.message_type === 'primary')[0]?.message_text}
             </m.div>
@@ -233,7 +233,7 @@ const ThreadWelcome: FC<{ config: ChatConfig }> = ({ config }) => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
               transition={{ delay: 0.1 }}
-              className="aui-thread-welcome-message-motion-2 font-merriweather text-base md:text-xl text-muted-foreground/90"
+              className="aui-thread-welcome-message-motion-2 font-merriweather text-base [@media(min-width:700px)_and_(min-height:700px)]:text-lg [@media(min-width:800px)_and_(min-height:800px)]:text-xl text-muted-foreground/90"
             >
               {welcome_messages.filter((message: WelcomeMessage) => message.message_type === 'secondary')[0]?.message_text}
             </m.div>
@@ -273,7 +273,7 @@ const ThreadWelcomeSuggestions: FC<{ suggestions: any[] }> = ({ suggestions }) =
   ];
 
   return (
-    <div className="aui-thread-welcome-suggestions py-2 grid w-full gap-4 @md:grid-cols-2">
+    <div className="aui-thread-welcome-suggestions py-2 flex flex-col w-full gap-4 overflow-y-auto @md:grid @md:grid-cols-2 @md:overflow-y-visible">
       {displaySuggestions.map((suggestedAction, index) => (
         <m.div
           initial={{ opacity: 0, y: 20 }}
@@ -281,7 +281,7 @@ const ThreadWelcomeSuggestions: FC<{ suggestions: any[] }> = ({ suggestions }) =
           exit={{ opacity: 0, y: 20 }}
           transition={{ delay: 0.05 * index }}
           key={`suggested-action-${suggestedAction.title}-${index}`}
-          className="aui-thread-welcome-suggestion-display [&:nth-child(n+3)]:hidden @md:[&:nth-child(n+3)]:block"
+          className="aui-thread-welcome-suggestion-display [&:nth-child(n+3)]:hidden [@media(min-height:800px)]:[&:nth-child(n+3)]:block @md:[&:nth-child(n+3)]:block"
         >
           <ThreadPrimitive.Suggestion
             prompt={suggestedAction.action}

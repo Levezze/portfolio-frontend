@@ -56,3 +56,6 @@ export const faceSizeAtom = atom<number>(800);
 
 // Animation
 export const cubeFloatingAtom = atom<boolean>(true);
+
+// Mobile
+export const drawerOpenAtom = atom<boolean>(false);

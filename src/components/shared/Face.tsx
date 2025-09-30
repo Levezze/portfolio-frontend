@@ -2,7 +2,7 @@ import React from 'react';
 
 export const Face = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className={`cube-face p-4 bg-background flex justify-center items-center`}>
+    <div className={`cube-face bg-background flex justify-center items-center`}>
         {children}
     </div>
   )

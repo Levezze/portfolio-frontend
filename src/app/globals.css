@@ -96,6 +96,14 @@
   --page-contact: #C7B8D4;
   --page-resume: #E6C9B5;
   --page-secret: #E4DFDA;
+
+  /* Responsive face padding for mobile/tablet letterboxing */
+  /* Vertical padding: when face is taller than viewport + 10px margin */
+  --face-padding-y: max(0px, calc((var(--face-size) - 100vh) / 2 + 20px));
+  /* Horizontal padding: when face is wider than viewport + 10px margin */
+  --face-padding-x: max(0px, calc((var(--face-size) - 100vw) / 2 + 20px));
+  /* Minimal padding for desktop (always applies) */
+  --face-padding-base: 1rem;
 }
 
 .dark {
@@ -138,6 +146,12 @@
   }
 }
 
+@media (min-width: 700px) and (min-height: 700px) {
+  :root {
+    --face-size: 600px;
+  }
+}
+
 @media (min-width: 800px) and (min-height: 800px) {
   :root {
     --face-size: 650px;
@@ -158,6 +172,22 @@
   -moz-osx-font-smoothing: grayscale;
   transform: translateZ(0); /* Force GPU acceleration */
   backface-visibility: hidden;
+
+  /* Default: Portrait orientation - horizontal padding */
+  padding-left: max(var(--face-padding-base), var(--face-padding-x));
+  padding-right: max(var(--face-padding-base), var(--face-padding-x));
+  padding-top: var(--face-padding-base);
+  padding-bottom: var(--face-padding-base);
+}
+
+/* Landscape orientation - vertical padding */
+@media (orientation: landscape) {
+  .cube-face {
+    padding-top: max(var(--face-padding-base), var(--face-padding-y));
+    padding-bottom: max(var(--face-padding-base), var(--face-padding-y));
+    padding-left: var(--face-padding-base);
+    padding-right: var(--face-padding-base);
+  }
 }
 
 .header-button {
