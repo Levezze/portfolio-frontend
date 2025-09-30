@@ -30,14 +30,24 @@
  * }
  */
 export function isMobileDevice(): boolean {
-  if (typeof window === "undefined") {
+  if (typeof window === "undefined" || typeof navigator === "undefined") {
     return false;
   }
 
-  const width = window.innerWidth;
-  const height = window.innerHeight;
+  const width = window.innerWidth || 0;
+  const height = window.innerHeight || 0;
 
-  return width < 600 || height < 600;
+  const userAgent =
+    navigator.userAgent || navigator.vendor || (window as any).opera;
+  const mobilePatterns =
+    /Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i;
+  const isMobileUA = mobilePatterns.test(userAgent);
+
+  // Explicitly exclude tablets from mobile detection
+  // iPad has "iPad" in UA, Android tablets often have "Mobile" absent
+  const isTablet = /iPad|Android(?!.*Mobile)/i.test(userAgent);
+
+  return (isMobileUA && !isTablet) || (width < 600 && height < 600);
 }
 
 /**
