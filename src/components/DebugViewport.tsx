@@ -10,7 +10,7 @@ export function DebugViewport() {
     const dpr = window.devicePixelRatio;
     const physicalWidth = Math.round(width * dpr);
     const physicalHeight = Math.round(height * dpr);
-    
+
     setInfo({
       width,
       height,
@@ -38,8 +38,12 @@ export function DebugViewport() {
         borderRadius: "0 0 8px 0",
       }}
     >
-      <div>CSS: {info.width} × {info.height}px</div>
-      <div>Physical: {info.physicalWidth} × {info.physicalHeight}px</div>
+      <div>
+        CSS: {info.width} × {info.height}px
+      </div>
+      <div>
+        Physical: {info.physicalWidth} × {info.physicalHeight}px
+      </div>
       <div>DPR: {info.dpr}</div>
       <div>Mobile: {info.isMobile ? "YES" : "NO"}</div>
       <div style={{ marginTop: "8px", fontSize: "14px", color: "#ffff00" }}>
