@@ -26,7 +26,8 @@ export const StateControls = ({ variant = 'default' }: StateControlsProps) => {
     return (
         isMobile 
         ? 
-        (<div className="flex gap-4 justify-center">
+        (
+        <div className="flex gap-4 justify-center">
             <FooterFrame variant={variant}>
                 <TooltipButton
                     tooltip={true}
@@ -65,9 +66,8 @@ export const StateControls = ({ variant = 'default' }: StateControlsProps) => {
                 />
             </FooterFrame>
             </div>
-        )
-        : 
-        (<FooterFrame variant={variant}>
+        ) : (
+        <FooterFrame variant={variant}>
             <TooltipButton
                 tooltip={true}
                 inputIcon={
@@ -101,7 +101,8 @@ export const StateControls = ({ variant = 'default' }: StateControlsProps) => {
                 round={true}
                 size={10}
             />
-        </FooterFrame>)
+        </FooterFrame>
+        )
     )
 }
 
