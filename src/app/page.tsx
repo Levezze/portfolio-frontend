@@ -10,10 +10,11 @@ import { DebugViewport } from "@/components/DebugViewport";
 
 export default function Home() {
   const isLoaded = useAtomValue(isLoadedAtom);
+  const showDebug = process.env.NEXT_PUBLIC_DEBUG_VIEWPORT === 'true';
 
   return (
     <div className="h-[100dvh] w-full flex flex-col items-center justify-center">
-      <DebugViewport />
+      {showDebug && <DebugViewport />}
       <ExtensionWarning />
       {!isLoaded && <LoadingScene />}
       <Scene3DErrorBoundary>
