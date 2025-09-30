@@ -111,9 +111,11 @@
 
   /* Responsive face padding for mobile/tablet letterboxing */
   /* Vertical padding: when face is taller than viewport + 10px margin */
-  --face-padding-y: max(0px, calc((var(--face-size) - 100vh) / 2 + 20px));
+  /* Production-safe: explicit parentheses and spaces around operators */
+  --face-padding-y: max(0px, calc(((var(--face-size) - 100vh) / 2) + 20px));
   /* Horizontal padding: when face is wider than viewport + 10px margin */
-  --face-padding-x: max(0px, calc((var(--face-size) - 100vw) / 2 + 20px));
+  /* CRITICAL FIX: Extra parentheses prevent production build mangling */
+  --face-padding-x: max(0px, calc(((var(--face-size) - 100vw) / 2) + 20px));
   /* Minimal padding for desktop (always applies) */
   --face-padding-base: 1rem;
 }

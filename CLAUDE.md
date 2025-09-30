@@ -6,18 +6,23 @@ A 3D interactive portfolio application featuring a rotating cube with HTML faces
 
 ## Tech Stack
 
+### pnpm!
+
 ### Core Framework
+
 - **Next.js 15** - React framework with App Router
 - **TypeScript** - Type-safe development
 - **React 18** - UI library
 
 ### 3D Graphics
+
 - **React Three Fiber (R3F)** - React renderer for Three.js
 - **Drei** - Helper library for R3F (Html, OrthographicCamera, etc.)
 - **Three.js** - WebGL 3D library
 - **GSAP** - Animation library for cube rotations
 
 ### State Management
+
 - **Jotai** - Primitive and flexible state management
   - Atomic state updates
   - Minimal re-renders
@@ -25,6 +30,7 @@ A 3D interactive portfolio application featuring a rotating cube with HTML faces
   - All atoms defined in `src/atoms/atomStore.ts`
 
 ### Styling
+
 - **Tailwind CSS v4** - Utility-first CSS framework
   - **Key Change from v3:** CSS-first configuration via `globals.css` instead of `tailwind.config.js`
   - Use `@theme` directive to define custom properties
@@ -32,6 +38,7 @@ A 3D interactive portfolio application featuring a rotating cube with HTML faces
   - Example in `src/app/globals.css`
 
 ### AI Integration
+
 - **@assistant-ui** - Chat interface components
 - **AI SDK** - AI/LLM integration tools
 
@@ -92,18 +99,21 @@ src/
 ### 3D Scene Architecture
 
 **The Cube:**
+
 - 6 faces representing different pages (chat, about, projects, contact, resume, secret)
 - Rotates using GSAP animations when active face changes
 - Variable world size (5-8 units) controlled by `cubeSizeAtom`
 - Screen-space size = `cubeSize × zoom` (simple formula with OrthographicCamera)
 
 **Html Faces:**
+
 - Drei's `<Html>` component overlays React components on cube faces
 - `distanceFactor={4}` creates scaling relationship with OrthographicCamera
 - `transform` prop enables 3D positioning
 - `occlude` prop handles visibility when behind geometry
 
 **Responsive Sizing:**
+
 - **OrthographicCamera with fixed zoom=100** (not PerspectiveCamera)
 - CSS breakpoints define target sizes via `--face-size` variable
 - React hook reads CSS variable and updates `cubeSizeAtom`
@@ -115,19 +125,21 @@ src/
 ### State Management with Jotai
 
 **Key Atoms:**
+
 ```typescript
 // 3D Scene
-cubeSizeAtom           // Cube size in world units (5-8)
-faceSizeAtom           // Face size in CSS pixels (500-800)
-isLoadedAtom           // Scene loaded state
+cubeSizeAtom; // Cube size in world units (5-8)
+faceSizeAtom; // Face size in CSS pixels (500-800)
+isLoadedAtom; // Scene loaded state
 
 // UI State
-activeFaceAtom         // Current active page
-cubeColorAtom          // Current cube color
-pageColorAtom          // Page theme color
+activeFaceAtom; // Current active page
+cubeColorAtom; // Current cube color
+pageColorAtom; // Page theme color
 ```
 
 **Usage Pattern:**
+
 ```typescript
 // Read value
 const faceSize = useAtomValue(faceSizeAtom);
@@ -143,13 +155,14 @@ const [faceSize, setFaceSize] = useAtom(faceSizeAtom);
 ### Tailwind v4 Configuration
 
 **In `src/app/globals.css`:**
+
 ```css
 @import "tailwindcss";
 
 /* Define custom theme values */
 @theme {
   --color-primary: #3b82f6;
-  --font-sans: 'Inter', sans-serif;
+  --font-sans: "Inter", sans-serif;
 }
 
 /* Define custom utilities */
@@ -172,21 +185,25 @@ const [faceSize, setFaceSize] = useAtom(faceSizeAtom);
 ### OrthographicCamera Sizing Formula
 
 **Simple Formula:**
+
 ```typescript
 screenPixels = cubeWorldUnits × zoom
 ```
 
 **To achieve target size:**
+
 ```typescript
-cubeWorldUnits = targetPixels / zoom
+cubeWorldUnits = targetPixels / zoom;
 ```
 
 **Examples:**
+
 - 800px target, zoom=100 → cubeSize = 8.0 world units
 - 650px target, zoom=100 → cubeSize = 6.5 world units
 - 500px target, zoom=100 → cubeSize = 5.0 world units
 
 **Why OrthographicCamera:**
+
 - Fixed zoom means fixed pixel-to-world-unit ratio
 - No perspective distortion
 - Window resize doesn't affect size (unless CSS breakpoint changes)
@@ -197,16 +214,19 @@ cubeWorldUnits = targetPixels / zoom
 ## Important Files
 
 ### Configuration & State
+
 - `src/atoms/atomStore.ts` - All global state atoms
 - `src/config/responsive.ts` - Breakpoint definitions
 - `src/app/globals.css` - Tailwind v4 config + global styles
 
 ### Core Components
+
 - `src/components/Scene.tsx` - R3F Canvas setup, camera configuration
 - `src/components/scene/CubeWithFaces.tsx` - Main cube with face management
 - `src/components/shared/Face.tsx` - Face wrapper with responsive padding
 
 ### Documentation
+
 - `docs/decisions/adr_0002.md` - Responsive sizing architecture decision
 - `.dev/responsive-implementation-todo.md` - Implementation checklist
 
@@ -215,6 +235,7 @@ cubeWorldUnits = targetPixels / zoom
 ## Development Workflow
 
 ### Running the Project
+
 ```bash
 npm run dev    # Start development server
 npm run build  # Production build
@@ -222,18 +243,21 @@ npm run lint   # ESLint
 ```
 
 ### Adding a New Cube Face
+
 1. Create component in `src/components/scene/{pageName}/`
 2. Add to `cubeFaces` object in `CubeWithFaces.tsx`
 3. Define position, rotation, and htmlRotation
 4. Add to `PagesType` in types
 
 ### Modifying Responsive Behavior
+
 1. Update CSS breakpoints in `src/app/globals.css` (`:root` and `@media` queries)
 2. Update `cubeSizeAtom` calculation logic in hook to match new breakpoints
 3. Test at various viewport sizes
 4. Document changes in ADR if significant
 
 ### Debugging 3D Issues
+
 - Use `<SceneDebugger />` (already in Scene.tsx)
 - Logs: scene, camera, size, viewport to console
 - Enable OrbitControls temporarily to inspect geometry
@@ -244,22 +268,25 @@ npm run lint   # ESLint
 ## Common Patterns
 
 ### Accessing 3D State
+
 ```typescript
 // In a component inside <Canvas>
 const { scene, camera, size, viewport } = useThree();
 ```
 
 ### Animating the Cube
+
 ```typescript
 gsap.to(cubeRef.current.rotation, {
   x: targetRotation.x,
   y: targetRotation.y,
   duration: 0.8,
-  ease: "power2.inOut"
+  ease: "power2.inOut",
 });
 ```
 
 ### Responsive Sizing
+
 ```typescript
 // CSS breakpoints in globals.css
 :root {
@@ -292,6 +319,7 @@ Major architectural decisions are documented in `docs/decisions/` as ADRs (Archi
 ## Notes for AI Assistants
 
 When working on this codebase:
+
 - **Camera:** OrthographicCamera with fixed zoom=100 (NOT PerspectiveCamera)
 - **Sizing formula:** `screenPixels = cubeWorldUnits × zoom` (simple!)
 - **Breakpoints:** Defined in CSS via `--face-size` variable
