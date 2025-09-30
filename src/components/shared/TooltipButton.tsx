@@ -31,12 +31,14 @@ export const TooltipButton = ({
         height: `${height || size/4}rem`,
         borderRadius: `${round ? "50%" : "0 35% 0 35%"}`,
         cursor: "pointer",
+        padding: "0",
+        margin: "0",
     };
     return (
         <Tooltip>
             <TooltipTrigger asChild>
                 <Button 
-                    variant={state ? "outline" : "outline_pressed"}
+                    variant={state ? "footer" : "outline_pressed"}
                     className="tooltip-button" 
                     style={style} 
                     onClick={handleClick}

@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/dialog";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { TooltipIconButton } from "@/components/scene/chat/assistant-ui/tooltip-icon-button";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/general";
 
 const useFileSrc = (file: File | undefined) => {
   const [src, setSrc] = useState<string | undefined>(undefined);

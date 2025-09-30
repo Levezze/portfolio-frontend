@@ -1,8 +1,10 @@
-import React from 'react'
+import React from 'react';
+import { Maintenance } from '@/components/shared/Maintenance';
+
 
 const SecretPage = () => {
   return (
-    <div>Down for maintenance, come back later!</div>
+    <Maintenance />
   )
 }
 

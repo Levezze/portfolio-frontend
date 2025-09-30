@@ -1,19 +1,20 @@
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls, OrthographicCamera, Sky, SoftShadows } from "@react-three/drei";
+import { OrbitControls, OrthographicCamera, PerspectiveCamera, SoftShadows } from "@react-three/drei";
 import { CubeWithFaces } from "./scene/CubeWithFaces";
 import { CameraController } from "./scene/CameraController";
 import { BowlGroundPlane } from "./scene/BowlGroundPlane";
-import { useResponsiveFaceSize } from "@/hooks/useResponsiveFaceSize";
 import { Float } from "@react-three/drei";
 import { useAtomValue } from "jotai";
-import { isLoadedAtom, bgMotionAtom, cubeMotionAtom } from "@/atoms/atomStore";
+import { isLoadedAtom, bgMotionAtom } from "@/atoms/atomStore";
 import { useEffect, useState, useRef } from "react";
+import { useResponsiveFaceSize } from "@/hooks/useResponsiveFaceSize";
 
 export const Scene = () => {
+    // Activate responsive sizing system
     useResponsiveFaceSize();
+
     const isLoaded = useAtomValue(isLoadedAtom)
     const bgMotion = useAtomValue(bgMotionAtom);
-    const cubeMotion = useAtomValue(cubeMotionAtom);
 
     // WebGL context recovery state
     const [contextLost, setContextLost] = useState(false);
@@ -86,6 +87,8 @@ export const Scene = () => {
         );
     }
 
+    const bowlPosition = [50, 155, 100] as [number, number, number];
+
     return (
         <div className={`canvas w-full h-full ${isLoaded ? "opacity-100" : "opacity-0"} z-0 relative`}>
             {/* Context recovery notification */}
@@ -114,7 +117,7 @@ export const Scene = () => {
                 <ambientLight intensity={6} />
                 <directionalLight
                     castShadow
-                    position={[8, 7, 15]}
+                    position={[5, 5, 15]}
                     intensity={2}
                     shadow-mapSize={[2048, 2048]}
                     shadow-camera-far={50}
@@ -127,24 +130,29 @@ export const Scene = () => {
                     size={4}
                     samples={16}
                 />
-                <OrthographicCamera makeDefault position={[0, 0, 100]}/>
+                
+                {/* <OrthographicCamera makeDefault position={[0, 0, 100]}/> */}
+                {/* <PerspectiveCamera 
+                    makeDefault position={[0, 0, 50]}
+                    manual={false}
+                    fov={75}
+                    zoom={5}
+                    resolution={500}
+                /> */}
+                <OrthographicCamera makeDefault position={[0, 0, 100]} zoom={100}/>
                 <CameraController />
+
                 {bgMotion ? <Float
                     speed={1}
                     rotationIntensity={1.2}
                     floatIntensity={0.1}
                     floatingRange={[0.1, 1.5]}
                 >
-                    <BowlGroundPlane position={[20, 65, 50]} color={"#1c1c1c"}/>
-                </Float> : <BowlGroundPlane position={[20, 65, 50]} color={"#1c1c1c"}/>}
-                {cubeMotion ? <Float
-                    speed={0.5}
-                    rotationIntensity={0.15}
-                    floatIntensity={0.1}
-                    floatingRange={[0.1, 2.5]}
-                >
-                    <CubeWithFaces />
-                </Float> : <CubeWithFaces />}
+                    <BowlGroundPlane position={bowlPosition} color={"#1c1c1c"}/>
+                </Float> : <BowlGroundPlane position={bowlPosition} color={"#1c1c1c"}/>}
+
+                <CubeWithFaces />
+                
                 <OrbitControls enabled={false}/>
             </Canvas>
         </div>

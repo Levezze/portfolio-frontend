@@ -30,7 +30,7 @@ import { ToolFallback } from "@/components/scene/chat/assistant-ui/tool-fallback
 import { TooltipIconButton } from "@/components/scene/chat/assistant-ui/tooltip-icon-button";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/general";
 import { LazyMotion, MotionConfig, domAnimation } from "motion/react";
 import * as m from "motion/react-m";
 import { getChatConfig } from "@/lib/api/services/chatService";
@@ -93,11 +93,6 @@ export const Thread: FC = () => {
 
   return (
     <div className="relative h-full">
-      {/* {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center z-10 bg-background">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
-      )} */}
       <div className={`h-full ${isLoading ? "opacity-0" : "opacity-100 transition-opacity"}`}>
         <LazyMotion features={domAnimation}>
           <MotionConfig reducedMotion="user">
@@ -120,7 +115,7 @@ export const Thread: FC = () => {
             <ThreadPrimitive.If empty={false}>
               <div className="aui-thread-viewport-spacer min-h-8 grow" />
             </ThreadPrimitive.If>
-            <Composer chatConfig={chatConfig} />
+            <Composer chatConfig={chatConfig} isLoading={isLoading} />
           </ThreadPrimitive.Viewport>
         </ThreadPrimitive.Root>
       </MotionConfig>
@@ -146,17 +141,35 @@ const ThreadScrollToBottom: FC = () => {
 
 const FakeAssistantMessage: FC<{ text: string }> = ({ text }) => {
   const [displayText, setDisplayText] = useState('');
+  const [finalText, setFinalText] = useState(text);
   const gimliChoice = useAtomValue(gimliChoiceAtom);
 
+  useEffect(() => {
+    if (!text || text.length === 0) return;
+
+    const timeout = setTimeout(() => {
+      setFinalText(text);
+    }, 1500);
+
+    return () => clearTimeout(timeout);
+  }, [text]);
+
   useEffect(()=> {
+    if (!finalText || finalText.length === 0) return;
+    
     setDisplayText('');
     let count = 0;
     let interval: NodeJS.Timeout;
 
     const timeout = setTimeout(() => {
       interval = setInterval(() => {
-        if (count < text.length) {
-          setDisplayText(prev => prev + text[count]);
+        if (count < finalText.length) {
+          setDisplayText(prev => {
+            if (prev.length < finalText.length) {
+              return finalText.slice(0, prev.length + 1);
+            }
+            return prev;
+          });
           count++;
         } else {
           clearInterval(interval);
@@ -169,7 +182,7 @@ const FakeAssistantMessage: FC<{ text: string }> = ({ text }) => {
       clearTimeout(timeout);
       if (interval) clearInterval(interval);
     }
-  }, [text]);
+  }, [finalText]);
 
   return (
     <div
@@ -204,14 +217,14 @@ const ThreadWelcome: FC<{ config: ChatConfig }> = ({ config }) => {
   const welcome_messages = config.welcome_messages;
   return (
     <ThreadPrimitive.Empty>
-      <div className="aui-thread-welcome-root mx-auto my-auto flex w-full max-w-[var(--thread-max-width)] flex-col h-full justify-between">
-        <div className="aui-thread-welcome-center flex w-full flex-col justify-center my-auto px-12">
+      <div className="aui-thread-welcome-root mx-auto my-auto flex w-full max-w-[var(--thread-max-width)] flex-col h-full justify-around px-8">
+        <div className="aui-thread-welcome-center flex w-full flex-col justify-center">
           <div className="aui-thread-welcome-message flex size-full flex-col justify-center">
             <m.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
-              className="aui-thread-welcome-message-motion-1 font-merriweather font-bold text-2xl mb-2"
+              className="aui-thread-welcome-message-motion-1 font-merriweather font-bold text-base md:text-2xl mb-2"
             >
               {welcome_messages.filter((message: WelcomeMessage) => message.message_type === 'primary')[0]?.message_text}
             </m.div>
@@ -220,19 +233,15 @@ const ThreadWelcome: FC<{ config: ChatConfig }> = ({ config }) => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
               transition={{ delay: 0.1 }}
-              className="aui-thread-welcome-message-motion-2 font-merriweather text-xl text-muted-foreground/90"
+              className="aui-thread-welcome-message-motion-2 font-merriweather text-base md:text-xl text-muted-foreground/90"
             >
               {welcome_messages.filter((message: WelcomeMessage) => message.message_type === 'secondary')[0]?.message_text}
             </m.div>
           </div>
         </div>
-        <div className="flex flex-col items-center justify-center mb-4">
-          <Separator className="mb-4" />
-          <FakeAssistantMessage 
-            text={welcome_messages.filter((message: WelcomeMessage) => message.message_type === 'assistant')[0]?.message_text}
-
-          />
-        </div>
+        <ThreadPrimitive.Empty>
+          <ThreadWelcomeSuggestions suggestions={config?.suggestions || []} />
+        </ThreadPrimitive.Empty>
       </div>
     </ThreadPrimitive.Empty>
   );
@@ -264,7 +273,7 @@ const ThreadWelcomeSuggestions: FC<{ suggestions: any[] }> = ({ suggestions }) =
   ];
 
   return (
-    <div className="aui-thread-welcome-suggestions grid w-full gap-4 @md:grid-cols-2">
+    <div className="aui-thread-welcome-suggestions py-2 grid w-full gap-4 @md:grid-cols-2">
       {displaySuggestions.map((suggestedAction, index) => (
         <m.div
           initial={{ opacity: 0, y: 20 }}
@@ -282,14 +291,15 @@ const ThreadWelcomeSuggestions: FC<{ suggestions: any[] }> = ({ suggestions }) =
           >
             <Button
               variant="ghost"
-              className="aui-thread-welcome-suggestion rounded-none h-auto w-full flex-1 flex-wrap items-start justify-start gap-0 border-none px-5 py-3 text-left text-sm @md:flex-col dark:hover:bg-accent/60 dark:text-background shadow-sm shadow-muted-foreground/10 cursor-pointer"
+              className="aui-thread-welcome-suggestion w-full h-auto hover:bg-accent/90 flex flex-col items-start justify-around gap-0.5 px-6 rounded-full cursor-pointer"
+              // className="aui-thread-welcome-suggestion rounded-none h-auto w-full flex-1 flex-wrap items-start justify-start gap-0 border-none px-5 py-3 text-left text-sm @md:flex-col dark:hover:bg-accent/60 dark:text-background cursor-pointer"
               aria-label={suggestedAction.action}
               matchBgColor={true}
             >
-              <span className="aui-thread-welcome-suggestion-text-1 text-lg font-inter font-medium text-background">
+              <span className="aui-thread-welcome-suggestion-text-1 text-base font-inter font-normal text-background m-0 p-0">
                 {suggestedAction.title}
               </span>
-              <span className="aui-thread-welcome-suggestion-text-2 text-muted-foreground">
+              <span className="aui-thread-welcome-suggestion-text-2 text-md font-light text-muted-foreground dark:text-muted">
                 {suggestedAction.label}
               </span>
             </Button>
@@ -300,18 +310,26 @@ const ThreadWelcomeSuggestions: FC<{ suggestions: any[] }> = ({ suggestions }) =
   );
 };
 
-const Composer: FC<{ chatConfig: ChatConfig | null }> = ({ chatConfig }) => {
+const Composer: FC<{ chatConfig: ChatConfig | null, isLoading: boolean }> = ({ chatConfig, isLoading }) => {
   return (
-    <div className="aui-composer-wrapper sticky bottom-0 mx-auto flex w-full max-w-[var(--thread-max-width)] flex-col gap-4 overflow-visible rounded-t-md bg-background pb-4 md:pb-6">
+    <div className="aui-composer-wrapper sticky bottom-0 mx-auto flex w-full max-w-[var(--thread-max-width)] flex-col overflow-visible rounded-t-md bg-background pb-4 md:pb-6">
       <ThreadScrollToBottom />
       <ThreadPrimitive.Empty>
-        <ThreadWelcomeSuggestions suggestions={chatConfig?.suggestions || []} />
+        <div className="flex flex-col items-center justify-center mb-4">
+          <Separator className="my-4 w-full" />
+          {chatConfig && !isLoading && (
+          <FakeAssistantMessage 
+            text={chatConfig.welcome_messages.filter(
+              (message: WelcomeMessage) => message.message_type === 'assistant'
+            )[0]?.message_text as string}
+          />
+          )}
+        </div>
       </ThreadPrimitive.Empty>
-      <ComposerPrimitive.Root className="aui-composer-root relative rounded-none flex w-full flex-col border-none bg-muted px-1 pt-2 dark:border-muted-foreground/15 shadow-inner shadow-muted-foreground/10">
-        <ComposerAttachments />
+      <ComposerPrimitive.Root className="aui-composer-root relative rounded-full flex w-full flex-col bg-muted px-1 pt-2 dark:border-muted-foreground/15 shadow-inner shadow-muted-foreground/5">
         <ComposerPrimitive.Input
           placeholder="Send a message..."
-          className="aui-composer-input mb-1 max-h-32 min-h-16 w-full resize-none bg-transparent px-3.5 pt-1.5 pb-3 text-base outline-none placeholder:text-muted-foreground focus:outline-primary text-sm"
+          className="aui-composer-input flex items-center justify-center mb-1 h-16 w-full resize-none bg-transparent px-3.5 pt-1.5 pb-3 text-base outline-none placeholder:text-muted-foreground focus:outline-primary"
           rows={1}
           autoFocus
           aria-label="Message input"
@@ -324,9 +342,7 @@ const Composer: FC<{ chatConfig: ChatConfig | null }> = ({ chatConfig }) => {
 
 const ComposerAction: FC = () => {
   return (
-    <div className="aui-composer-action-wrapper relative mx-1 mt-2 mb-2 flex items-center ml-auto">
-      {/* <ComposerAddAttachment /> */}
-
+    <div className="aui-composer-action-wrapper absolute bottom-1 right-2 mb-1 flex items-center ml-auto">
       <ThreadPrimitive.If running={false}>
         <ComposerPrimitive.Send asChild>
           <TooltipIconButton
@@ -452,7 +468,7 @@ const UserMessage: FC = () => {
         <UserMessageAttachments />
 
         <div className="aui-user-message-content-wrapper relative col-start-2 min-w-0">
-          <div className="aui-user-message-content rounded-md bg-muted px-5 py-2.5 break-words text-foreground">
+          <div className="aui-user-message-content rounded-full bg-muted px-5 py-2.5 break-words text-foreground">
             <MessagePrimitive.Parts />
           </div>
           <div className="aui-user-action-bar-wrapper absolute top-1/2 left-0 -translate-x-full -translate-y-1/2 pr-2">

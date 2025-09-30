@@ -49,7 +49,7 @@ export const BowlGroundPlane = ({position, color}:
     <group>
         <mesh receiveShadow position={position} rotation={[Math.PI / 4, 0, 0]}>
             <sphereGeometry args={[
-                100,  // radius
+                200,  // radius
                 32,   // widthSegments
                 16,   // heightSegments
                 0,    // phiStart
@@ -60,7 +60,7 @@ export const BowlGroundPlane = ({position, color}:
             <meshStandardMaterial side={THREE.DoubleSide}>
                 <GradientTexture
                     attach="map"
-                    stops={[0, 0.99]}
+                    stops={[0, 0.999]}
                     colors={[currentColor, '#1c1c1c']}
                     size={1024}
                 />

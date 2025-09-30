@@ -1,8 +1,9 @@
-import React from 'react'
+import { Maintenance } from '@/components/shared/Maintenance';
+import React from 'react';
 
 const Projects = () => {
   return (
-    <div>Down for maintenance, come back later!</div>
+    <Maintenance />
   )
 }
 

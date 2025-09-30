@@ -1,8 +1,7 @@
 'use client'
 import { Scene } from "@/components/Scene";
 import { LoadingScene } from "@/components/LoadingScene";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
+import { Footer } from "@/components/footer/Footer";
 import { ExtensionWarning } from "@/components/ExtensionWarning";
 import { Scene3DErrorBoundary } from "@/components/scene/Scene3DErrorBoundary";
 import { useAtomValue } from "jotai";
@@ -14,7 +13,6 @@ export default function Home() {
   return (
     <div className="h-[100dvh] w-full flex flex-col items-center justify-center">
       <ExtensionWarning />
-      <Header />
       {!isLoaded && <LoadingScene />}
       <Scene3DErrorBoundary>
         <Scene />

@@ -38,7 +38,7 @@ const Resume = () => {
   );
 
   return (
-    <Face>
+    <>
       <div className="flex flex-col h-full w-full">
         {isLoading && (
           <div className="flex items-center justify-center h-full">
@@ -85,7 +85,7 @@ const Resume = () => {
           <PDFViewer url={resumeUrl} />
         )}
       </div>
-    </Face>
+    </>
   );
 };
 

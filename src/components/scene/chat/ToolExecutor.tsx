@@ -2,7 +2,7 @@ import { activeFaceAtom } from "@/atoms/atomStore";
 import { makeAssistantToolUI, useThreadRuntime } from "@assistant-ui/react";
 import { useSetAtom } from "jotai";
 import { useEffect } from "react";
-import { capitalFirstLetter } from "@/lib/utils";
+import { capitalFirstLetter } from "@/utils/general";
 import { type PagesType } from "@/lib/api/schemas/tools";
 
 export const NavigationToolUI = makeAssistantToolUI<{ page: PagesType }, unknown>({

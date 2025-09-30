@@ -1,8 +1,9 @@
+import { Maintenance } from '@/components/shared/Maintenance';
 import React from 'react'
 
 const ContactForm = () => {
   return (
-    <div>Down for maintenance, come back later!</div>
+    <Maintenance />
   )
 }
 

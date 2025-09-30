@@ -3,7 +3,7 @@ import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { transitionDurationAtom } from "@/atoms/atomStore"
-import { cn } from "@/lib/utils"
+import { cn } from "@/utils/general"
 import { pageColorAtom } from "@/atoms/atomStore"
 import { useAtomValue } from "jotai"
 
@@ -21,6 +21,9 @@ const buttonVariants = cva(
           // dark:bg-input/30 dark:border-input dark:hover:bg-input/100
         outline_pressed:
           "border-input bg-hover-header-color/40 shadow-xs hover:bg-input/30 hover:text-accent-foreground",
+          // dark:bg-input/30 dark:border-input dark:hover:bg-input/50
+        footer:
+          "border-input bg-none hover:bg-input/30 hover:text-accent-foreground",
           // dark:bg-input/30 dark:border-input dark:hover:bg-input/50
         secondary:
           "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
