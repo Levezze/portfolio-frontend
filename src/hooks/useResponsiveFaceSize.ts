@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useSetAtom } from "jotai";
 import { cubeSizeAtom, faceSizeAtom } from "@/atoms/atomStore";
-import { isMobileDevice, getMobileOrientation } from "@/utils/deviceDetection";
+import { isMobileDevice } from "@/utils/deviceDetection";
 import { RESPONSIVE_CONFIG } from "@/config/responsive";
 import { calculateMobileCubeSize } from "@/utils/deviceDetection";
 
@@ -10,12 +10,13 @@ import { calculateMobileCubeSize } from "@/utils/deviceDetection";
  *
  * Strategy:
  * - Desktop/Tablet: Read --face-size from CSS (set by media queries)
- * - Mobile: Calculate 90% of viewport dimension, set --face-size dynamically
+ * - Mobile: Calculate 85% of viewport dimension, set --face-size dynamically
  * - Always: Update cubeSizeAtom = faceSize / 100
  *
  * CSS breakpoints (desktop/tablet):
  * - < 600×600: 400px
  * - ≥ 600×600: 500px
+ * - ≥ 700×700: 600px
  * - ≥ 800×800: 650px
  * - ≥ 1000×1000: 800px
  */
@@ -31,12 +32,7 @@ export const useResponsiveFaceSize = () => {
       let faceSize: number;
 
       if (isMobileDevice()) {
-        // Mobile: Calculate 90% of viewport dimension (orientation-aware)
-        /* const orientation = getMobileOrientation();
-        const dimension = orientation === 'portrait'
-          ? window.innerHeight
-          : window.innerWidth; */
-
+        // Mobile: Calculate 85% of viewport dimension (orientation-aware)
         faceSize = calculateMobileCubeSize(
           RESPONSIVE_CONFIG.mobile.marginPercentage
         );
@@ -55,7 +51,6 @@ export const useResponsiveFaceSize = () => {
         faceSize = parseInt(cssValue, 10);
 
         // Fallback to DEFAULT CSS value if parsing fails
-        // The CSS default is 400px, NOT 800px!
         if (isNaN(faceSize)) {
           console.warn(
             "Failed to read --face-size from CSS, using default 400px"
