@@ -10,7 +10,11 @@ export function DebugViewport() {
     const dpr = window.devicePixelRatio;
     const physicalWidth = Math.round(width * dpr);
     const physicalHeight = Math.round(height * dpr);
-
+    
+    // Check if viewport meta tag exists
+    const viewportMeta = document.querySelector('meta[name="viewport"]');
+    const viewportContent = viewportMeta?.getAttribute('content') || 'NOT FOUND';
+    
     setInfo({
       width,
       height,
@@ -18,6 +22,8 @@ export function DebugViewport() {
       physicalWidth,
       physicalHeight,
       isMobile: /Android|iPhone/i.test(navigator.userAgent),
+      viewportContent,
+      hasViewportTag: !!viewportMeta,
     });
   }, []);
 
@@ -46,8 +52,16 @@ export function DebugViewport() {
       </div>
       <div>DPR: {info.dpr}</div>
       <div>Mobile: {info.isMobile ? "YES" : "NO"}</div>
+      <div style={{ marginTop: "8px", fontSize: "12px", borderTop: "1px solid #333", paddingTop: "8px" }}>
+        <div style={{ color: info.hasViewportTag ? "#0f0" : "#f00", fontWeight: "bold" }}>
+          Meta tag: {info.hasViewportTag ? "✓ FOUND" : "✗ MISSING"}
+        </div>
+        <div style={{ fontSize: "10px", color: "#888", marginTop: "4px", wordBreak: "break-all" }}>
+          {info.viewportContent}
+        </div>
+      </div>
       <div style={{ marginTop: "8px", fontSize: "14px", color: "#ffff00" }}>
-        {info.width <= 600 ? "✓ Viewport working" : "⚠ Check if UI looks right"}
+        {info.width <= 600 ? "✓ Viewport working" : "⚠ UI looks wrong"}
       </div>
     </div>
   );
