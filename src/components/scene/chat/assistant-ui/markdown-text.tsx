@@ -13,7 +13,7 @@ import { type FC, memo, useState } from "react";
 import { CheckIcon, CopyIcon } from "lucide-react";
 
 import { TooltipIconButton } from "@/components/scene/chat/assistant-ui/tooltip-icon-button";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/general";
 
 const MarkdownTextImpl = () => {
   return (

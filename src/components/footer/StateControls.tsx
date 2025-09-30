@@ -6,7 +6,6 @@ import {
     lightThemeAtom, 
     bgMotionAtom, 
     activeFaceAtom, 
-    cubeMotionAtom, 
     cubeColorAtom 
 } from "@/atoms/atomStore";
 import { FooterFrame } from "../shared/FooterFrame";
@@ -16,7 +15,6 @@ export const StateControls = () => {
     const [theme, setTheme] = useAtom(lightThemeAtom);
     const [bgMotion, setBgMotion] = useAtom(bgMotionAtom);
     const [activePage, setActiveFace] = useAtom(activeFaceAtom);
-    const [cubeMotion, setCubeMotion] = useAtom(cubeMotionAtom);
 
     return (
         <FooterFrame>
@@ -49,18 +47,6 @@ export const StateControls = () => {
                 tooltipText={bgMotion ? "Stop Background Animation" : "Resume Background Animation"}
                 handleClick={() => setBgMotion(!bgMotion)}
                 state={bgMotion}
-                round={true}
-                size={10}
-            />
-            <TooltipButton
-                tooltip={true}
-                inputIcon={<Box 
-                    color={backgroundColor} 
-                    style={{ width: '18px', height: '18px' }} 
-                />}
-                tooltipText={cubeMotion ? "Stop Cube Sway" : "Resume Cube Sway"}
-                handleClick={() => setCubeMotion(!cubeMotion)}
-                state={cubeMotion}
                 round={true}
                 size={10}
             />

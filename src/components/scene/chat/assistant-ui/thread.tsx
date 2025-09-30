@@ -30,7 +30,7 @@ import { ToolFallback } from "@/components/scene/chat/assistant-ui/tool-fallback
 import { TooltipIconButton } from "@/components/scene/chat/assistant-ui/tooltip-icon-button";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/general";
 import { LazyMotion, MotionConfig, domAnimation } from "motion/react";
 import * as m from "motion/react-m";
 import { getChatConfig } from "@/lib/api/services/chatService";

@@ -6,14 +6,13 @@ import { BowlGroundPlane } from "./scene/BowlGroundPlane";
 import { useResponsiveFaceSize } from "@/hooks/useResponsiveFaceSize";
 import { Float } from "@react-three/drei";
 import { useAtomValue } from "jotai";
-import { isLoadedAtom, bgMotionAtom, cubeMotionAtom } from "@/atoms/atomStore";
+import { isLoadedAtom, bgMotionAtom } from "@/atoms/atomStore";
 import { useEffect, useState, useRef } from "react";
 
 export const Scene = () => {
     useResponsiveFaceSize();
     const isLoaded = useAtomValue(isLoadedAtom)
     const bgMotion = useAtomValue(bgMotionAtom);
-    const cubeMotion = useAtomValue(cubeMotionAtom);
 
     // WebGL context recovery state
     const [contextLost, setContextLost] = useState(false);
@@ -129,9 +128,11 @@ export const Scene = () => {
                     size={4}
                     samples={16}
                 />
+                
                 {/* <OrthographicCamera makeDefault position={[0, 0, 100]}/> */}
                 <PerspectiveCamera makeDefault position={[0, 0, 100]}/>
                 <CameraController />
+
                 {bgMotion ? <Float
                     speed={1}
                     rotationIntensity={1.2}
@@ -140,14 +141,9 @@ export const Scene = () => {
                 >
                     <BowlGroundPlane position={bowlPosition} color={"#1c1c1c"}/>
                 </Float> : <BowlGroundPlane position={bowlPosition} color={"#1c1c1c"}/>}
-                {cubeMotion ? <Float
-                    speed={0.5}
-                    rotationIntensity={0.15}
-                    floatIntensity={0.1}
-                    floatingRange={[0.1, 2.5]}
-                >
-                    <CubeWithFaces />
-                </Float> : <CubeWithFaces />}
+
+                <CubeWithFaces />
+                
                 <OrbitControls enabled={true}/>
             </Canvas>
         </div>

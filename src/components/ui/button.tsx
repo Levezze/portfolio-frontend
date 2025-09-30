@@ -3,7 +3,7 @@ import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
 
 import { transitionDurationAtom } from "@/atoms/atomStore"
-import { cn } from "@/lib/utils"
+import { cn } from "@/utils/general"
 import { pageColorAtom } from "@/atoms/atomStore"
 import { useAtomValue } from "jotai"
 

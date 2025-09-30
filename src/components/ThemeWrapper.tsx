@@ -2,7 +2,7 @@
 import { useSetAtom, useAtomValue } from 'jotai';
 import React, { useEffect, useState } from 'react';
 import { lightThemeAtom, cubeColorAtom, pageColorAtom, activeFaceAtom } from '@/atoms/atomStore';
-import { getCssColor } from '@/lib/utils';
+import { getCssColor } from '@/utils/general';
 
 export const ThemeWrapper = ({ children }:{ children: React.ReactNode }) => {
     const theme = useAtomValue(lightThemeAtom);
