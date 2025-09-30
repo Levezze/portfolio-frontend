@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Inter, Merriweather } from "next/font/google";
 import { ThemeWrapper } from "@/components/ThemeWrapper";
+import { ViewportEnforcer } from "@/components/ViewportEnforcer";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -34,10 +35,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  minimumScale: 1,
   maximumScale: 5,
-  userScalable: true,
-  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -50,6 +48,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable}${inter.variable} ${merriweather.variable} antialiased bg-["#1c1c1c"] font-inter-regular`}
       >
+        <ViewportEnforcer />
         <ThemeWrapper>{children}</ThemeWrapper>
       </body>
     </html>
