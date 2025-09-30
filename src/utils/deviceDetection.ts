@@ -44,21 +44,23 @@ export function isMobileDevice(): boolean {
   // iPad has "iPad" in UA, Android tablets often have "Mobile" absent
   const isTablet = /iPad|Android(?!.*Mobile)/i.test(userAgent);
 
-  // Check touch capability
-  const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-
   // Check screen size (phones are typically smaller than 768px in smallest dimension)
   const smallestDimension = Math.min(window.innerWidth, window.innerHeight);
   const isSmallScreen = smallestDimension < 768;
 
+  // REMOVED TOUCH DETECTION - it breaks on desktop with touchscreens!
+  // Mobile detection should ONLY rely on user agent and screen size
+
   // Mobile if:
-  // - Mobile UA detected AND not a tablet
-  // - OR has touch AND very small screen (< 480px to catch edge cases)
+  // - Has mobile user agent (not tablet)
+  // - AND has small screen
+  // This prevents desktops with touch from being detected as mobile
   if (isTablet) {
     return false; // Tablets use desktop breakpoints
   }
 
-  return (isMobileUA && hasTouch) || (hasTouch && smallestDimension < 480);
+  // Only return true for actual mobile phones
+  return isMobileUA && !isTablet && isSmallScreen;
 }
 
 /**

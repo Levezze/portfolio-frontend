@@ -47,9 +47,17 @@ export const useResponsiveFaceSize = () => {
 
         faceSize = parseInt(cssValue, 10);
 
-        // Fallback if CSS variable not set
+        // Fallback to DEFAULT CSS value if parsing fails
+        // The CSS default is 400px, NOT 800px!
         if (isNaN(faceSize)) {
-          faceSize = 800;
+          console.warn('Failed to read --face-size from CSS, using default 400px');
+          faceSize = 400;
+        }
+
+        // Debug logging in development
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Viewport:', window.innerWidth, 'x', window.innerHeight);
+          console.log('CSS --face-size:', cssValue, '→', faceSize);
         }
       }
 
