@@ -5,10 +5,18 @@ export function DebugViewport() {
   const [info, setInfo] = useState<any>(null);
 
   useEffect(() => {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const dpr = window.devicePixelRatio;
+    const physicalWidth = Math.round(width * dpr);
+    const physicalHeight = Math.round(height * dpr);
+    
     setInfo({
-      width: window.innerWidth,
-      height: window.innerHeight,
-      dpr: window.devicePixelRatio,
+      width,
+      height,
+      dpr,
+      physicalWidth,
+      physicalHeight,
       isMobile: /Android|iPhone/i.test(navigator.userAgent),
     });
   }, []);
@@ -30,12 +38,12 @@ export function DebugViewport() {
         borderRadius: "0 0 8px 0",
       }}
     >
-      <div>Width: {info.width}px</div>
-      <div>Height: {info.height}px</div>
+      <div>CSS: {info.width} × {info.height}px</div>
+      <div>Physical: {info.physicalWidth} × {info.physicalHeight}px</div>
       <div>DPR: {info.dpr}</div>
       <div>Mobile: {info.isMobile ? "YES" : "NO"}</div>
-      <div style={{ marginTop: "8px", fontSize: "12px", color: "#888" }}>
-        {info.width < 500 ? "✓ Viewport working" : "✗ Viewport NOT working"}
+      <div style={{ marginTop: "8px", fontSize: "14px", color: "#ffff00" }}>
+        {info.width <= 600 ? "✓ Viewport working" : "⚠ Check if UI looks right"}
       </div>
     </div>
   );
