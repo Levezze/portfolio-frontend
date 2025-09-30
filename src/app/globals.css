@@ -132,13 +132,19 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
-@media (min-width: 640px) or (min-height: 640px) {
+@media (min-width: 600px) and (min-height: 600px) {
   :root {
     --face-size: 500px;
   }
 }
 
-@media (min-width: 1024px) or (min-height: 1024px) {
+@media (min-width: 800px) and (min-height: 800px) {
+  :root {
+    --face-size: 650px;
+  }
+}
+
+@media (min-width: 1000px) and (min-height: 1000px) {
   :root {
     --face-size: 800px;
   }
@@ -152,7 +158,6 @@
   -moz-osx-font-smoothing: grayscale;
   transform: translateZ(0); /* Force GPU acceleration */
   backface-visibility: hidden;
-  /* transform: scale(2); */
 }
 
 .header-button {

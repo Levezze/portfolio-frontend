@@ -188,13 +188,13 @@ export const CubeWithFaces = () => {
           transform
           occlude
           sprite={false}
-          scale={0.5}
+          // scale={0.4}
           style={{
             fontSize: "1rem",
             imageRendering: "crisp-edges",
             WebkitFontSmoothing: "antialiased",
           }}
-          distanceFactor={distanceFactor}
+          distanceFactor={4}
         >
           {data.page}
         </Html>

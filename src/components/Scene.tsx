@@ -10,7 +10,7 @@ import { isLoadedAtom, bgMotionAtom } from "@/atoms/atomStore";
 import { useEffect, useState, useRef } from "react";
 
 export const Scene = () => {
-    useResponsiveFaceSize();
+    // useResponsiveFaceSize();
     const isLoaded = useAtomValue(isLoadedAtom)
     const bgMotion = useAtomValue(bgMotionAtom);
 
@@ -130,7 +130,14 @@ export const Scene = () => {
                 />
                 
                 {/* <OrthographicCamera makeDefault position={[0, 0, 100]}/> */}
-                <PerspectiveCamera makeDefault position={[0, 0, 100]}/>
+                {/* <PerspectiveCamera 
+                    makeDefault position={[0, 0, 50]}
+                    manual={false}
+                    fov={75}
+                    zoom={5}
+                    resolution={500}
+                /> */}
+                <OrthographicCamera makeDefault position={[0, 0, 100]} zoom={100}/>
                 <CameraController />
 
                 {bgMotion ? <Float
