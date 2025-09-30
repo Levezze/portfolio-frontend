@@ -13,7 +13,7 @@ A 3D interactive portfolio application featuring a rotating cube with HTML faces
 
 ### 3D Graphics
 - **React Three Fiber (R3F)** - React renderer for Three.js
-- **Drei** - Helper library for R3F (Html, PerspectiveCamera, etc.)
+- **Drei** - Helper library for R3F (Html, OrthographicCamera, etc.)
 - **Three.js** - WebGL 3D library
 - **GSAP** - Animation library for cube rotations
 
@@ -69,13 +69,14 @@ src/
 │   └── SceneDebugger.tsx  # Development debugging
 │
 ├── config/                 # Configuration files
-│   └── responsive.ts      # Breakpoint definitions (to be created)
+│   └── responsive.ts      # Breakpoint definitions
 │
 ├── hooks/                  # Custom React hooks
-│   └── useResponsiveBreakpoint.ts  # Responsive sizing logic (to be created)
+│   └── useResponsiveFaceSize.ts  # CSS variable reading hook
 │
 ├── utils/                  # Utility functions
-│   └── cameraCalculations.ts  # Camera/distanceFactor formulas (to be created)
+│   ├── deviceDetection.ts # Mobile device detection
+│   └── general.ts         # Generic utilities (cn, etc.)
 │
 ├── lib/                    # External integrations
 │   └── api/               # API client code
@@ -93,18 +94,22 @@ src/
 **The Cube:**
 - 6 faces representing different pages (chat, about, projects, contact, resume, secret)
 - Rotates using GSAP animations when active face changes
-- Fixed world size (e.g., 10 units), screen-space size controlled by camera distance
+- Variable world size (5-8 units) controlled by `cubeSizeAtom`
+- Screen-space size = `cubeSize × zoom` (simple formula with OrthographicCamera)
 
 **Html Faces:**
 - Drei's `<Html>` component overlays React components on cube faces
-- `distanceFactor` prop creates world-space coupling (Html scales with camera distance)
+- `distanceFactor={4}` creates scaling relationship with OrthographicCamera
 - `transform` prop enables 3D positioning
 - `occlude` prop handles visibility when behind geometry
 
 **Responsive Sizing:**
-- Height-based breakpoints for desktop/tablet (discrete: 800px, 700px, 650px)
-- Percentage-based for mobile (dynamic: vh × 0.9)
-- Camera distance adjusts continuously within breakpoints to maintain exact pixel size
+- **OrthographicCamera with fixed zoom=100** (not PerspectiveCamera)
+- CSS breakpoints define target sizes via `--face-size` variable
+- React hook reads CSS variable and updates `cubeSizeAtom`
+- Formula: `screenPixels = cubeWorldUnits × zoom`
+- Example: 6.5 world units × 100 zoom = 650px on screen
+- **Zero continuous scaling** - size only changes at CSS breakpoint boundaries
 - See `docs/decisions/adr_0002.md` for detailed explanation
 
 ### State Management with Jotai
@@ -112,16 +117,14 @@ src/
 **Key Atoms:**
 ```typescript
 // 3D Scene
-cubeSizeAtom           // Cube size in world units
-faceSizeAtom           // Face size in CSS pixels
-cameraDistanceAtom     // Camera Z position
-distanceFactorAtom     // Html distanceFactor value
+cubeSizeAtom           // Cube size in world units (5-8)
+faceSizeAtom           // Face size in CSS pixels (500-800)
+isLoadedAtom           // Scene loaded state
 
 // UI State
 activeFaceAtom         // Current active page
-isLoadedAtom           // Scene loaded state
-currentBreakpointAtom  // Current responsive breakpoint
-controlsLayoutAtom     // 'visible' or 'drawer'
+cubeColorAtom          // Current cube color
+pageColorAtom          // Page theme color
 ```
 
 **Usage Pattern:**
@@ -166,21 +169,28 @@ const [faceSize, setFaceSize] = useAtom(faceSizeAtom);
 
 **No `tailwind.config.js` needed** - everything is in CSS using directives.
 
-### Camera Distance Calculation
+### OrthographicCamera Sizing Formula
 
-**Formula:**
+**Simple Formula:**
 ```typescript
-distance = (cubeWorldSize × windowHeight) / (targetPixelSize × 2 × tan(fov/2))
+screenPixels = cubeWorldUnits × zoom
 ```
 
-**Example:**
-- Want 800px cube on screen
-- Window is 1305px tall
-- Cube is 10 world units
-- FOV is 50°
-- Calculate: distance ≈ 25 units
+**To achieve target size:**
+```typescript
+cubeWorldUnits = targetPixels / zoom
+```
 
-This makes the 10-unit cube appear as exactly 800px on screen.
+**Examples:**
+- 800px target, zoom=100 → cubeSize = 8.0 world units
+- 650px target, zoom=100 → cubeSize = 6.5 world units
+- 500px target, zoom=100 → cubeSize = 5.0 world units
+
+**Why OrthographicCamera:**
+- Fixed zoom means fixed pixel-to-world-unit ratio
+- No perspective distortion
+- Window resize doesn't affect size (unless CSS breakpoint changes)
+- Much simpler than PerspectiveCamera calculations
 
 ---
 
@@ -218,8 +228,8 @@ npm run lint   # ESLint
 4. Add to `PagesType` in types
 
 ### Modifying Responsive Behavior
-1. Update breakpoint thresholds in `src/config/responsive.ts`
-2. Adjust calculations in `src/hooks/useResponsiveBreakpoint.ts`
+1. Update CSS breakpoints in `src/app/globals.css` (`:root` and `@media` queries)
+2. Update `cubeSizeAtom` calculation logic in hook to match new breakpoints
 3. Test at various viewport sizes
 4. Document changes in ADR if significant
 
@@ -251,13 +261,21 @@ gsap.to(cubeRef.current.rotation, {
 
 ### Responsive Sizing
 ```typescript
-// In Face.tsx
-const faceSize = useAtomValue(faceSizeAtom);
-<div style={{
-  width: `${faceSize}px`,
-  height: `${faceSize}px`,
-  padding: `0 max(0px, calc((${faceSize}px - 100vw + 80px) / 2))`
-}}>
+// CSS breakpoints in globals.css
+:root {
+  --face-size: 800px;
+}
+@media (max-height: 999px) {
+  :root { --face-size: 650px; }
+}
+
+// Hook reads CSS variable and updates atom
+const setFaceSize = useSetAtom(faceSizeAtom);
+const size = getComputedStyle(root).getPropertyValue('--face-size');
+setFaceSize(parseInt(size));
+
+// Cube size formula
+cubeSizeAtom = faceSizeAtom / 100;  // e.g., 650 / 100 = 6.5
 ```
 
 ---
@@ -274,10 +292,12 @@ Major architectural decisions are documented in `docs/decisions/` as ADRs (Archi
 ## Notes for AI Assistants
 
 When working on this codebase:
-- All 3D positioning is in Three.js world units (not pixels)
-- Screen-space sizing requires camera distance calculations
+- **Camera:** OrthographicCamera with fixed zoom=100 (NOT PerspectiveCamera)
+- **Sizing formula:** `screenPixels = cubeWorldUnits × zoom` (simple!)
+- **Breakpoints:** Defined in CSS via `--face-size` variable
+- **No JavaScript resize logic** - CSS handles everything
 - Atoms are the single source of truth for all state
 - Tailwind v4 uses CSS-first config (no JS config file)
 - Responsive system uses discrete breakpoints, NOT continuous scaling
-- `distanceFactor` creates world-space coupling for Html components
-- See ADR 0002 for detailed responsive sizing explanation
+- `distanceFactor={4}` is empirically determined for zoom=100
+- See ADR 0002 for detailed responsive sizing explanation and lessons learned
