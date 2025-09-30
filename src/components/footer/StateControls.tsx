@@ -1,34 +1,39 @@
 import React from 'react';
 import { TooltipButton } from "../shared/TooltipButton";
-import { Box, WallpaperIcon, SunIcon, MoonIcon, MessageSquareTextIcon } from "lucide-react";
-import { useAtom, useAtomValue } from "jotai";
-import { 
-    lightThemeAtom, 
-    bgMotionAtom, 
-    activeFaceAtom, 
-    cubeColorAtom 
+import { WallpaperIcon, SunIcon, MoonIcon } from "lucide-react";
+import { useAtom } from "jotai";
+import {
+    lightThemeAtom,
+    bgMotionAtom
 } from "@/atoms/atomStore";
 import { FooterFrame } from "../shared/FooterFrame";
 
-export const StateControls = () => {
-    const backgroundColor = useAtomValue(cubeColorAtom);
+interface StateControlsProps {
+    variant?: 'default' | 'mobile';
+}
+
+export const StateControls = ({ variant = 'default' }: StateControlsProps) => {
     const [theme, setTheme] = useAtom(lightThemeAtom);
     const [bgMotion, setBgMotion] = useAtom(bgMotionAtom);
-    const [activePage, setActiveFace] = useAtom(activeFaceAtom);
+
+    // Color scheme based on variant
+    const iconColorClass = variant === 'mobile'
+        ? 'text-foreground'
+        : 'text-white dark:text-muted';
 
     return (
-        <FooterFrame>
+        <FooterFrame variant={variant}>
             <TooltipButton
                 tooltip={true}
                 inputIcon={
-                    theme ? <SunIcon 
-                        color={backgroundColor} 
-                        style={{ width: '18px', height: '18px' }} 
-                    /> 
-                    : <MoonIcon 
-                        color={backgroundColor} 
-                        style={{ width: '18px', height: '18px' }} 
-                    />
+                    <div className={iconColorClass}>
+                        {theme ? <SunIcon
+                            style={{ width: '18px', height: '18px' }}
+                        />
+                        : <MoonIcon
+                            style={{ width: '18px', height: '18px' }}
+                        />}
+                    </div>
                 }
                 tooltipText={theme ? "Dark Theme" : "Light Theme"}
                 handleClick={() => setTheme(!theme)}
@@ -39,10 +44,11 @@ export const StateControls = () => {
             <TooltipButton
                 tooltip={true}
                 inputIcon={
-                    <WallpaperIcon 
-                        color={backgroundColor} 
-                        style={{ width: '18px', height: '18px' }} 
-                    />
+                    <div className={iconColorClass}>
+                        <WallpaperIcon
+                            style={{ width: '18px', height: '18px' }}
+                        />
+                    </div>
                 }
                 tooltipText={bgMotion ? "Stop Background Animation" : "Resume Background Animation"}
                 handleClick={() => setBgMotion(!bgMotion)}

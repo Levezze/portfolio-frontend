@@ -1,12 +1,18 @@
 import React from 'react';
-import { useAtomValue } from 'jotai';
-import { lightThemeAtom } from '@/atoms/atomStore';
 
-export const FooterFrame = ({ children }: { children: React.ReactNode }) => {
-  const theme = useAtomValue(lightThemeAtom);
-  const borderColor = theme ? 'border-white' : 'border-background';
+interface FooterFrameProps {
+  children: React.ReactNode;
+  variant?: 'default' | 'mobile';
+}
+
+export const FooterFrame = ({ children, variant = 'default' }: FooterFrameProps) => {
+  // Border color based on variant
+  const borderColorClass = variant === 'mobile'
+    ? 'border-foreground/20'
+    : 'border-white dark:border-muted';
+
   return (
-    <div className={`gap-2 flex flex-row justify-between z-100 p-1 border ${borderColor} rounded-full`}>
+    <div className={`gap-2 flex flex-row justify-between z-100 p-1 border ${borderColorClass} rounded-full`}>
       {children}
     </div>
   )

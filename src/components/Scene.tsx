@@ -3,14 +3,16 @@ import { OrbitControls, OrthographicCamera, PerspectiveCamera, SoftShadows } fro
 import { CubeWithFaces } from "./scene/CubeWithFaces";
 import { CameraController } from "./scene/CameraController";
 import { BowlGroundPlane } from "./scene/BowlGroundPlane";
-import { useResponsiveFaceSize } from "@/hooks/useResponsiveFaceSize";
 import { Float } from "@react-three/drei";
 import { useAtomValue } from "jotai";
 import { isLoadedAtom, bgMotionAtom } from "@/atoms/atomStore";
 import { useEffect, useState, useRef } from "react";
+import { useResponsiveFaceSize } from "@/hooks/useResponsiveFaceSize";
 
 export const Scene = () => {
-    // useResponsiveFaceSize();
+    // Activate responsive sizing system
+    useResponsiveFaceSize();
+
     const isLoaded = useAtomValue(isLoadedAtom)
     const bgMotion = useAtomValue(bgMotionAtom);
 
@@ -115,7 +117,7 @@ export const Scene = () => {
                 <ambientLight intensity={6} />
                 <directionalLight
                     castShadow
-                    position={[20, 15, 15]}
+                    position={[5, 5, 15]}
                     intensity={2}
                     shadow-mapSize={[2048, 2048]}
                     shadow-camera-far={50}
@@ -151,7 +153,7 @@ export const Scene = () => {
 
                 <CubeWithFaces />
                 
-                <OrbitControls enabled={true}/>
+                <OrbitControls enabled={false}/>
             </Canvas>
         </div>
     );

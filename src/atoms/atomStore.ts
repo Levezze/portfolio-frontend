@@ -51,7 +51,7 @@ export const pageTransitionManagerAtom = atom(
 );
 
 // Sizing
-export const cubeSizeAtom = atom<number>(6.5);
+export const cubeSizeAtom = atom<number>(8);
 export const faceSizeAtom = atom<number>(800);
 
 // Animation

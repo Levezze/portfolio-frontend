@@ -20,6 +20,8 @@ import {
  * Configuration for a single breakpoint
  */
 export interface BreakpointConfig {
+  /** Minimum window width for this breakpoint (desktop/tablet only) */
+  minWidth?: number;
   /** Minimum window height for this breakpoint (desktop/tablet only) */
   minHeight?: number;
   /** Maximum window height for this breakpoint (desktop/tablet only) */
@@ -42,60 +44,51 @@ export interface BreakpointConfig {
  * All breakpoint configurations
  *
  * Breakpoints are checked in order:
- * 1. Mobile device detection (overrides height checks)
- * 2. Height-based for desktop/tablet (largest to smallest)
+ * 1. Mobile device detection (overrides dimension checks)
+ * 2. Both width AND height based for desktop/tablet (largest to smallest)
+ *
+ * Note: Requiring both dimensions prevents cube oversizing on extreme aspect ratios
  */
 export const RESPONSIVE_CONFIG = {
   /**
-   * Desktop Large - 27"+ monitors, large displays
-   * Height ≥ 1200px → 800×800px cube
+   * Desktop Large - Large displays
+   * Width ≥ 1000px AND Height ≥ 1000px → 800×800px cube
    */
-  desktopLarge: {
-    minHeight: 1200,
+  large: {
+    minWidth: 1000,
+    minHeight: 1000,
     targetPixelSize: 800,
     controlsLayout: "visible",
-    description: 'Large desktop displays (27"+)',
+    description: "Large displays (≥1000×1000)",
   },
 
   /**
-   * Desktop Medium - Standard desktops, large laptops
-   * 1000px ≤ Height < 1200px → 700×700px cube
+   * Desktop Medium - Standard desktops, laptops
+   * Width ≥ 800px AND Height ≥ 800px → 650×650px cube
    */
-  desktopMedium: {
-    minHeight: 1000,
-    maxHeight: 1199,
-    targetPixelSize: 700,
-    controlsLayout: "visible",
-    description: "Medium desktops and large laptops",
-  },
-
-  /**
-   * Tablet Landscape - iPads, tablets in landscape, small laptops
-   * 800px ≤ Height < 1000px → 650×650px cube
-   */
-  tabletLandscape: {
+  medium: {
+    minWidth: 800,
     minHeight: 800,
-    maxHeight: 999,
     targetPixelSize: 650,
     controlsLayout: "visible",
-    description: "Tablets in landscape, small laptops",
+    description: "Medium displays (≥800×800)",
   },
 
   /**
-   * Tablet Portrait - Tablets in portrait mode
-   * 700px ≤ Height < 800px → 600×600px cube
+   * Small Desktop/Tablet - Small laptops, tablets
+   * Width ≥ 600px AND Height ≥ 600px → 500×500px cube
    */
-  tabletPortrait: {
-    minHeight: 700,
-    maxHeight: 799,
-    targetPixelSize: 600,
+  small: {
+    minWidth: 600,
+    minHeight: 600,
+    targetPixelSize: 500,
     controlsLayout: "visible",
-    description: "Tablets in portrait mode",
+    description: "Small displays (≥600×600)",
   },
 
   /**
    * Mobile - All mobile devices (phones)
-   * Detected by device characteristics, not height
+   * Detected by device characteristics, not dimensions
    * Size = 90% of viewport dimension (height in portrait, width in landscape)
    * Controls moved to drawer component
    */
@@ -118,8 +111,8 @@ export type BreakpointKey = keyof typeof RESPONSIVE_CONFIG;
  *
  * Priority:
  * 1. Mobile device → 'mobile' breakpoint
- * 2. Window height → largest matching desktop/tablet breakpoint
- * 3. Fallback → 'desktopLarge'
+ * 2. Window dimensions (both width AND height) → largest matching breakpoint
+ * 3. Fallback → 'small'
  *
  * @returns Current breakpoint key
  *
@@ -129,11 +122,11 @@ export type BreakpointKey = keyof typeof RESPONSIVE_CONFIG;
  *
  * @example
  * // On 1920×1080 desktop
- * getCurrentBreakpoint() // → 'desktopLarge' (height >= 1200)
+ * getCurrentBreakpoint() // → 'large' (both >= 1000)
  *
  * @example
  * // On 912×1368 iPad portrait
- * getCurrentBreakpoint() // → 'desktopLarge' (not mobile, height >= 1200)
+ * getCurrentBreakpoint() // → 'large' (not mobile, both >= 1000)
  */
 export function getCurrentBreakpoint(): BreakpointKey {
   // Check for mobile device first
@@ -141,17 +134,17 @@ export function getCurrentBreakpoint(): BreakpointKey {
     return "mobile";
   }
 
-  // For desktop/tablet, check height-based breakpoints
+  // For desktop/tablet, check both width AND height
   // Check in order from largest to smallest
-  const height = typeof window !== "undefined" ? window.innerHeight : 1200;
+  const width = typeof window !== "undefined" ? window.innerWidth : 1000;
+  const height = typeof window !== "undefined" ? window.innerHeight : 1000;
 
-  if (height >= 1200) return "desktopLarge";
-  if (height >= 1000) return "desktopMedium";
-  if (height >= 800) return "tabletLandscape";
-  if (height >= 700) return "tabletPortrait";
+  if (width >= 1000 && height >= 1000) return "large";
+  if (width >= 800 && height >= 800) return "medium";
+  if (width >= 600 && height >= 600) return "small";
 
-  // Fallback for very small screens (< 700px but not mobile)
-  return "tabletPortrait";
+  // Fallback for screens < 600×600 (but not mobile devices)
+  return "small";
 }
 
 /**
@@ -216,10 +209,9 @@ export function hasBreakpointChanged(
  */
 export function getAllBreakpoints(): BreakpointKey[] {
   return [
-    "desktopLarge",
-    "desktopMedium",
-    "tabletLandscape",
-    "tabletPortrait",
+    "large",
+    "medium",
+    "small",
     "mobile",
   ];
 }
