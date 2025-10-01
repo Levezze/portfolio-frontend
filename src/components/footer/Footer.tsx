@@ -52,8 +52,8 @@ export const Footer = () => {
         }}
       >
         <div className="footer gap-4 flex flex-row justify-between">
-          <Navigation variant="default" />
-          <StateControls variant="default" />
+          <Navigation variant="default" orientation="horizontal" />
+          <StateControls variant="default" orientation="horizontal" />
         </div>
       </div>
     );

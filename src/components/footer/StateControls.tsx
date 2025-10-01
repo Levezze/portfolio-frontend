@@ -26,7 +26,7 @@ export const StateControls = ({
     <div className="flex gap-4 justify-center">
       <ButtonFrame variant={variant} orientation={orientation}>
         <TooltipButton
-          tooltip={true}
+          tooltip={!isMobile}
           inputIcon={
             <div className={iconColorClass}>
               {theme ? (
@@ -36,21 +36,23 @@ export const StateControls = ({
               )}
             </div>
           }
+          inputText={isMobile ? (theme ? "Light" : "Dark") : undefined}
           tooltipText={theme ? "Dark Theme" : "Light Theme"}
           handleClick={() => setTheme(!theme)}
           state={theme}
-          round={true}
+          round={!isMobile}
           size={10}
         />
       </ButtonFrame>
       <ButtonFrame variant={variant} orientation={orientation}>
         <TooltipButton
-          tooltip={true}
+          tooltip={!isMobile}
           inputIcon={
             <div className={iconColorClass}>
               <WallpaperIcon style={{ width: "18px", height: "18px" }} />
             </div>
           }
+          inputText={isMobile ? "Animation" : undefined}
           tooltipText={
             bgMotion
               ? "Stop Background Animation"
@@ -58,7 +60,7 @@ export const StateControls = ({
           }
           handleClick={() => setBgMotion(!bgMotion)}
           state={bgMotion}
-          round={true}
+          round={!isMobile}
           size={10}
         />
       </ButtonFrame>
@@ -66,7 +68,7 @@ export const StateControls = ({
   ) : (
     <ButtonFrame variant={variant} orientation={orientation}>
       <TooltipButton
-        tooltip={true}
+        tooltip={!isMobile}
         inputIcon={
           <div className={iconColorClass}>
             {theme ? (
@@ -76,25 +78,27 @@ export const StateControls = ({
             )}
           </div>
         }
+        inputText={isMobile ? (theme ? "Light" : "Dark") : undefined}
         tooltipText={theme ? "Dark Theme" : "Light Theme"}
         handleClick={() => setTheme(!theme)}
         state={theme}
-        round={true}
+        round={!isMobile}
         size={10}
       />
       <TooltipButton
-        tooltip={true}
+        tooltip={!isMobile}
         inputIcon={
           <div className={iconColorClass}>
             <WallpaperIcon style={{ width: "18px", height: "18px" }} />
           </div>
         }
+        inputText={isMobile ? "Animation" : undefined}
         tooltipText={
           bgMotion ? "Stop Background Animation" : "Resume Background Animation"
         }
         handleClick={() => setBgMotion(!bgMotion)}
         state={bgMotion}
-        round={true}
+        round={!isMobile}
         size={10}
       />
     </ButtonFrame>

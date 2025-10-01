@@ -33,9 +33,9 @@ export const TooltipButton = ({
   state,
 }: TooltipButtonProps) => {
   const style = {
-    width: `${width || size / 4}rem`,
+    width: inputText ? "auto" : `${width || size / 4}rem`,
     height: `${height || size / 4}rem`,
-    borderRadius: `${round ? "50%" : "0 35% 0 35%"}`,
+    borderRadius: `${round ? "50%" : "25px"}`,
     cursor: "pointer",
     padding: "0",
     margin: "0",
@@ -50,7 +50,16 @@ export const TooltipButton = ({
           onClick={handleClick}
           disabled={disabled}
         >
-          {inputIcon ? inputIcon : inputText}
+          <div className="flex flex-row gap-2">
+            {inputIcon ? inputIcon : <></>}
+            {inputText ? (
+              <span className="text-sm my-auto !text-foreground dark:text-muted pl-2">
+                {inputText}
+              </span>
+            ) : (
+              <></>
+            )}
+          </div>
         </Button>
       </TooltipTrigger>
       {tooltip ? (
