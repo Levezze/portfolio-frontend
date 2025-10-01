@@ -78,15 +78,36 @@ export const useResponsiveFaceSize = () => {
       };
     };
 
-    // Initial update
-    updateSize();
+    // Delay initial update to ensure viewport is ready
+    // This prevents calculating with broken viewport dimensions
+    const initializeSize = () => {
+      // Small delay to let ViewportEnforcer run first
+      setTimeout(() => {
+        updateSize();
+      }, 50);
+    };
+
+    // Listen for viewport correction events
+    const handleViewportCorrected = () => {
+      // console.log("Viewport corrected, recalculating size...");
+      updateSize();
+      // Signal that size calculation is complete after viewport fix
+      window.dispatchEvent(new CustomEvent('size-calculated'));
+    };
+
+    // Initial update with delay
+    initializeSize();
 
     // Debounced resize handler (150ms)
     const debouncedUpdate = debounce(updateSize, 150);
     window.addEventListener("resize", debouncedUpdate);
+    window.addEventListener("viewport-corrected", handleViewportCorrected);
+    window.addEventListener("viewport-ready", updateSize);
 
     return () => {
       window.removeEventListener("resize", debouncedUpdate);
+      window.removeEventListener("viewport-corrected", handleViewportCorrected);
+      window.removeEventListener("viewport-ready", updateSize);
     };
   }, [setFaceSize, setCubeSize]);
 };
