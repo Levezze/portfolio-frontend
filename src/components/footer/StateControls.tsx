@@ -7,9 +7,13 @@ import { ButtonFrame } from "../shared/ButtonFrame";
 
 interface StateControlsProps {
   variant?: "default" | "inverse";
+  orientation?: "horizontal" | "vertical";
 }
 
-export const StateControls = ({ variant = "default" }: StateControlsProps) => {
+export const StateControls = ({
+  variant = "default",
+  orientation = "horizontal",
+}: StateControlsProps) => {
   const [theme, setTheme] = useAtom(lightThemeAtom);
   const [bgMotion, setBgMotion] = useAtom(bgMotionAtom);
 
@@ -20,7 +24,7 @@ export const StateControls = ({ variant = "default" }: StateControlsProps) => {
 
   return isMobile ? (
     <div className="flex gap-4 justify-center">
-      <ButtonFrame variant={variant}>
+      <ButtonFrame variant={variant} orientation={orientation}>
         <TooltipButton
           tooltip={true}
           inputIcon={
@@ -39,7 +43,7 @@ export const StateControls = ({ variant = "default" }: StateControlsProps) => {
           size={10}
         />
       </ButtonFrame>
-      <ButtonFrame variant={variant}>
+      <ButtonFrame variant={variant} orientation={orientation}>
         <TooltipButton
           tooltip={true}
           inputIcon={
@@ -60,7 +64,7 @@ export const StateControls = ({ variant = "default" }: StateControlsProps) => {
       </ButtonFrame>
     </div>
   ) : (
-    <ButtonFrame variant={variant}>
+    <ButtonFrame variant={variant} orientation={orientation}>
       <TooltipButton
         tooltip={true}
         inputIcon={

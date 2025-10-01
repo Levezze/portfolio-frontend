@@ -1,14 +1,8 @@
 import { TooltipButton } from "@/components/shared/TooltipButton";
-import { Icon, IconName } from "@/components/shared/Icon";
+import { Icon } from "@/components/shared/Icon";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import React from "react";
-
-interface LinkButtonProps {
-  className: string;
-  icon: IconName;
-  linkUrl: string;
-  tooltipText: string;
-  buttonSize?: number;
-}
+import { LinkButtonProps } from "@/types/buttonTypes";
 
 export const LinkButton = ({
   className,
@@ -17,9 +11,10 @@ export const LinkButton = ({
   tooltipText,
   buttonSize = 6,
 }: LinkButtonProps) => {
+  const isMobile = useIsMobile();
   return (
     <TooltipButton
-      tooltip={true}
+      tooltip={!isMobile}
       inputIcon={<Icon name={icon} className={className} />}
       tooltipText={tooltipText}
       handleClick={() => {

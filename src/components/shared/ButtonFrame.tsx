@@ -1,15 +1,11 @@
 import React from "react";
-
-interface ButtonFrameProps {
-  children: React.ReactNode;
-  variant?: "default" | "inverse";
-  classNameAdditional?: string;
-}
+import { ButtonFrameProps } from "@/types/buttonTypes";
 
 export const ButtonFrame = ({
   children,
   variant = "default",
   classNameAdditional = "",
+  orientation = "horizontal",
 }: ButtonFrameProps) => {
   const borderColorClass =
     variant === "inverse"
@@ -18,7 +14,11 @@ export const ButtonFrame = ({
 
   return (
     <div
-      className={`gap-2 flex flex-row justify-around z-100 p-1 w-fit [@media(max-height:600px)]:p-0 border ${borderColorClass} rounded-full ${classNameAdditional}`}
+      className={`gap-2 flex justify-around z-100 p-1 w-fit [@media(max-height:600px)]:p-0 border ${borderColorClass} ${classNameAdditional} ${
+        orientation === "horizontal"
+          ? "flex-row rounded-full"
+          : "flex-col w-full rounded-[25px]"
+      }`}
     >
       {children}
     </div>

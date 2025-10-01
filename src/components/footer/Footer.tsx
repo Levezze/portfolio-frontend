@@ -72,7 +72,7 @@ export const Footer = () => {
           style={{ height: `${containerSize}vh` }}
         >
           <DrawerTrigger asChild>
-            <div>
+            <div className="flex justify-center">
               <ButtonFrame variant="default">
                 <TooltipButton
                   tooltip={false}
@@ -90,7 +90,7 @@ export const Footer = () => {
               </ButtonFrame>
             </div>
           </DrawerTrigger>
-          <div>
+          <div className="flex justify-center">
             <ButtonFrame variant="default">
               <TooltipButton
                 tooltip={false}
@@ -117,7 +117,7 @@ export const Footer = () => {
           style={{ width: `${containerSize}vw` }}
         >
           <DrawerTrigger asChild>
-            <div>
+            <div className="flex justify-center w-full">
               <ButtonFrame variant="default">
                 <TooltipButton
                   tooltip={false}
@@ -135,7 +135,7 @@ export const Footer = () => {
               </ButtonFrame>
             </div>
           </DrawerTrigger>
-          <div>
+          <div className="flex justify-center w-full">
             <ButtonFrame variant="default">
               <TooltipButton
                 tooltip={false}
@@ -165,11 +165,17 @@ export const Footer = () => {
         className="z-200"
       >
         <DrawerHeader>
-          <DrawerTitle className="text-foreground">Controls</DrawerTitle>
+          <DrawerTitle className="text-foreground">Navigation</DrawerTitle>
         </DrawerHeader>
         <div className="flex flex-col gap-4 p-6 pt-0">
-          <Navigation variant="inverse" />
-          <StateControls variant="inverse" />
+          <Navigation
+            variant="inverse"
+            orientation={!isMobile ? "horizontal" : "vertical"}
+          />
+          <StateControls
+            variant="inverse"
+            orientation={!isMobile ? "horizontal" : "vertical"}
+          />
         </div>
       </DrawerContent>
     </Drawer>

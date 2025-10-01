@@ -1,7 +1,7 @@
 import { Html } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { gsap } from "gsap";
-import { useAtomValue } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 
@@ -10,6 +10,8 @@ import {
   cubeColorAtom,
   cubeSizeAtom,
   faceSizeAtom,
+  pageTransitionManagerAtom,
+  transitionDurationAtom,
 } from "@/atoms/atomStore";
 import type { CubeFace } from "@/types/cubeTypes";
 import { Face } from "../shared/Face";
@@ -29,8 +31,12 @@ export const CubeWithFaces = () => {
 
   const faceSize = useAtomValue(faceSizeAtom);
   const cubeSize = useAtomValue(cubeSizeAtom);
+  const transitionDuration = useAtomValue(transitionDurationAtom);
+  const triggerTransition = useSetAtom(pageTransitionManagerAtom);
   const cubeRef = useRef<THREE.Group>(null);
   const cubeMaterialRef = useRef<THREE.MeshStandardMaterial>(null);
+  const isColorChanging = useRef(false);
+  const targetColorRef = useRef<THREE.Color>(new THREE.Color());
 
   const distanceFactor = useMemo(() => {
     if (!faceSize) {
@@ -41,6 +47,11 @@ export const CubeWithFaces = () => {
   }, [cubeSize, faceSize]);
 
   const cubeHtmlSize = cubeSize / 2 + 0.02;
+
+  const boxArgs = useMemo<[number, number, number]>(
+    () => [cubeSize, cubeSize, cubeSize],
+    [cubeSize]
+  );
 
   const cubeFaces: Record<string, CubeFace> = useMemo(
     () => ({
@@ -107,7 +118,7 @@ export const CubeWithFaces = () => {
         ),
       },
     }),
-    [cubeHtmlSize],
+    [cubeHtmlSize]
   );
 
   const activeFaceData = cubeFaces[activeFace];
@@ -150,16 +161,42 @@ export const CubeWithFaces = () => {
     }
   }, [activeFaceData]);
 
+  // Trigger face opacity transition when active face changes
+  useEffect(() => {
+    if (!isMounted.current) return;
+    triggerTransition(null);
+  }, [activeFace, triggerTransition]);
+
   const targetColor = useAtomValue(cubeColorAtom);
 
+  // Set up target color and start animation when color changes
+  useEffect(() => {
+    if (targetColor && targetColor !== "") {
+      targetColorRef.current.set(targetColor);
+      isColorChanging.current = true;
+    }
+  }, [targetColor]);
+
   useFrame((_state, delta) => {
-    if (cubeMaterialRef.current && targetColor && targetColor !== "") {
-      cubeMaterialRef.current.color.r = THREE.MathUtils.damp(
-        cubeMaterialRef.current.color.r,
-        new THREE.Color(targetColor).r,
-        1.6,
-        delta,
-      );
+    if (!isColorChanging.current || !cubeMaterialRef.current) return;
+
+    const material = cubeMaterialRef.current;
+    const target = targetColorRef.current;
+
+    // Damp all RGB channels
+    material.color.r = THREE.MathUtils.damp(material.color.r, target.r, 1.6, delta);
+    material.color.g = THREE.MathUtils.damp(material.color.g, target.g, 1.6, delta);
+    material.color.b = THREE.MathUtils.damp(material.color.b, target.b, 1.6, delta);
+
+    // Stop when close enough (threshold check)
+    const threshold = 0.001;
+    const rDiff = Math.abs(material.color.r - target.r);
+    const gDiff = Math.abs(material.color.g - target.g);
+    const bDiff = Math.abs(material.color.b - target.b);
+
+    if (rDiff < threshold && gDiff < threshold && bDiff < threshold) {
+      material.color.copy(target);
+      isColorChanging.current = false;
     }
   });
 
@@ -170,7 +207,7 @@ export const CubeWithFaces = () => {
   return (
     <group ref={cubeRef}>
       <mesh castShadow>
-        <boxGeometry args={[cubeSize, cubeSize, cubeSize]} />
+        <boxGeometry args={boxArgs} />
         <meshStandardMaterial
           ref={cubeMaterialRef}
           color={targetColor || undefined}
@@ -179,26 +216,32 @@ export const CubeWithFaces = () => {
         />
       </mesh>
 
-      {Object.entries(cubeFaces).map(([face, data]) => (
-        <Html
-          key={face}
-          position={data.position}
-          rotation={data.htmlRotation}
-          center
-          transform
-          occlude
-          sprite={false}
-          // scale={0.4}
-          style={{
-            fontSize: "1rem",
-            imageRendering: "crisp-edges",
-            WebkitFontSmoothing: "antialiased",
-          }}
-          distanceFactor={4}
-        >
-          {data.page}
-        </Html>
-      ))}
+      {Object.entries(cubeFaces).map(([face, data]) => {
+        const isActive = face === activeFace;
+
+        return (
+          <Html
+            key={face}
+            position={data.position}
+            rotation={data.htmlRotation}
+            center
+            transform
+            occlude
+            sprite={false}
+            style={{
+              fontSize: "1rem",
+              imageRendering: "crisp-edges",
+              WebkitFontSmoothing: "antialiased",
+              opacity: isActive ? 1 : 0,
+              transition: `opacity ${transitionDuration}ms ease-in-out`,
+              pointerEvents: isActive ? 'auto' : 'none',
+            }}
+            distanceFactor={4}
+          >
+            {data.page}
+          </Html>
+        );
+      })}
     </group>
   );
-}
+};
