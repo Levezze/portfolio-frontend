@@ -89,7 +89,7 @@ export const useResponsiveFaceSize = () => {
 
     // Listen for viewport correction events
     const handleViewportCorrected = () => {
-      console.log("Viewport corrected, recalculating size...");
+      // console.log("Viewport corrected, recalculating size...");
       updateSize();
       // Signal that size calculation is complete after viewport fix
       window.dispatchEvent(new CustomEvent('size-calculated'));

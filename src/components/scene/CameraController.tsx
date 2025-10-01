@@ -15,11 +15,12 @@ export const CameraController = () => {
             return;
         }
 
-        console.log('camera', camera);
-        console.log('size', size);
-        console.log('viewport', viewport);
-        console.log('scene', scene);
-        console.log('setSize', setSize);
+        // Debug logs - commented out for production
+        // console.log('camera', camera);
+        // console.log('size', size);
+        // console.log('viewport', viewport);
+        // console.log('scene', scene);
+        // console.log('setSize', setSize);
 
         // const perspCamera = camera as THREE.PerspectiveCamera;
         // const viewportHeight = size.height || window.innerHeight || 1;

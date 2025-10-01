@@ -107,8 +107,8 @@ export const Scene = () => {
                 }}
                 dpr={1}
                 onCreated={({ gl }) => {
-                    // Log successful context creation
-                    console.log('WebGL context created successfully');
+                    // Context created successfully (logging disabled for production)
+                    // console.log('WebGL context created successfully');
                 }}
                 onPointerMissed={() => {
                     // Handle any pointer events that might interfere

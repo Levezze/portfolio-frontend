@@ -11,9 +11,7 @@ export function ViewportEnforcer() {
       let wasCorrected = false;
 
       if (!meta) {
-        console.warn(
-          "Viewport meta tag missing, forcing creation."
-        );
+        // console.warn("Viewport meta tag missing, forcing creation.");
         meta = document.createElement("meta");
         meta.setAttribute("name", "viewport");
         document.head.prepend(meta);
@@ -21,9 +19,7 @@ export function ViewportEnforcer() {
       }
 
       if (meta.getAttribute("content") !== correctContent) {
-        console.warn(
-          "Viewport meta tag incorrect, forcing correction."
-        );
+        // console.warn("Viewport meta tag incorrect, forcing correction.");
         meta.setAttribute("content", correctContent);
         wasCorrected = true;
       }

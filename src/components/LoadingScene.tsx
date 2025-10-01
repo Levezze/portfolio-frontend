@@ -6,7 +6,7 @@ import * as THREE from 'three';
 
 export const LoadingScene = () => {
     // const asciiColor = getCssColor('--primary');
-    console.log('LoadingScene rendering');
+    // console.log('LoadingScene rendering');
 
     return (
         <div className="w-full h-full absolute inset-0">
