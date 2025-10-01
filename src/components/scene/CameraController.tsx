@@ -33,12 +33,21 @@ export const CameraController = () => {
             return;
         }
 
+        // Wait longer to ensure viewport is corrected and size is calculated
+        // This keeps the loading scene visible during viewport fix
         const timeout = setTimeout(() => {
             setIsLoaded(true);
-        }, 0);
+        }, 200); // Increased delay to allow viewport correction
+
+        // Also listen for size calculation completion
+        const handleSizeCalculated = () => {
+            setIsLoaded(true);
+        };
+        window.addEventListener('size-calculated', handleSizeCalculated);
 
         return () => {
             clearTimeout(timeout);
+            window.removeEventListener('size-calculated', handleSizeCalculated);
         }
     }, [camera, cubeSize, faceSize, size.height, isLoaded, setIsLoaded]);
 
