@@ -18,7 +18,7 @@ import {
 import { MenuIcon, MessageSquareTextIcon } from "lucide-react";
 import { RESPONSIVE_CONFIG } from "@/config/responsive";
 import { getMobileOrientation } from "@/utils/deviceDetection";
-import { FooterFrame } from "../shared/FooterFrame";
+import { ButtonFrame } from "../shared/ButtonFrame";
 import { TooltipButton } from "../shared/TooltipButton";
 
 export const Footer = () => {
@@ -48,7 +48,7 @@ export const Footer = () => {
       <div
         className="fixed bottom-0 left-0 right-0 flex items-center justify-center z-100"
         style={{
-          height: 'clamp(50px, calc((100vh - var(--face-size)) / 2), 100px)'
+          height: "clamp(50px, calc((100vh - var(--face-size)) / 2), 100px)",
         }}
       >
         <div className="footer gap-4 flex flex-row justify-between">
@@ -73,7 +73,7 @@ export const Footer = () => {
         >
           <DrawerTrigger asChild>
             <div>
-              <FooterFrame variant="default">
+              <ButtonFrame variant="default">
                 <TooltipButton
                   tooltip={false}
                   inputIcon={
@@ -87,11 +87,11 @@ export const Footer = () => {
                   round={true}
                   size={8}
                 />
-              </FooterFrame>
+              </ButtonFrame>
             </div>
           </DrawerTrigger>
           <div>
-            <FooterFrame variant="default">
+            <ButtonFrame variant="default">
               <TooltipButton
                 tooltip={false}
                 disabled={activeFace === "chat"}
@@ -108,7 +108,7 @@ export const Footer = () => {
                 round={true}
                 size={8}
               />
-            </FooterFrame>
+            </ButtonFrame>
           </div>
         </div>
       ) : (
@@ -118,7 +118,7 @@ export const Footer = () => {
         >
           <DrawerTrigger asChild>
             <div>
-              <FooterFrame variant="default">
+              <ButtonFrame variant="default">
                 <TooltipButton
                   tooltip={false}
                   inputIcon={
@@ -132,11 +132,11 @@ export const Footer = () => {
                   round={true}
                   size={8}
                 />
-              </FooterFrame>
+              </ButtonFrame>
             </div>
           </DrawerTrigger>
           <div>
-            <FooterFrame variant="default">
+            <ButtonFrame variant="default">
               <TooltipButton
                 tooltip={false}
                 disabled={activeFace === "chat"}
@@ -153,7 +153,7 @@ export const Footer = () => {
                 round={true}
                 size={8}
               />
-            </FooterFrame>
+            </ButtonFrame>
           </div>
         </div>
       )}
@@ -168,8 +168,8 @@ export const Footer = () => {
           <DrawerTitle className="text-foreground">Controls</DrawerTitle>
         </DrawerHeader>
         <div className="flex flex-col gap-4 p-6 pt-0">
-          <Navigation variant="mobile" />
-          <StateControls variant="mobile" />
+          <Navigation variant="inverse" />
+          <StateControls variant="inverse" />
         </div>
       </DrawerContent>
     </Drawer>
