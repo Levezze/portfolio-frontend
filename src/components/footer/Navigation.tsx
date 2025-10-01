@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FooterFrame } from "../shared/FooterFrame";
+import { ButtonFrame } from "../shared/ButtonFrame";
 import {
   MessageSquareTextIcon,
   CircleUserIcon,
@@ -13,7 +13,7 @@ import { activeFaceAtom, drawerOpenAtom } from "@/atoms/atomStore";
 import { useIsMobile } from "@/hooks/useIsMobile";
 
 interface NavigationProps {
-  variant?: "default" | "mobile";
+  variant?: "default" | "inverse";
 }
 
 export const Navigation = ({ variant = "default" }: NavigationProps) => {
@@ -23,10 +23,10 @@ export const Navigation = ({ variant = "default" }: NavigationProps) => {
 
   // Color scheme based on variant
   const iconColorClass =
-    variant === "mobile" ? "text-foreground" : "text-white dark:text-muted";
+    variant === "inverse" ? "text-foreground" : "text-white dark:text-muted";
 
   return (
-    <FooterFrame variant={variant}>
+    <ButtonFrame variant={variant}>
       <TooltipButton
         tooltip={activeFace === "chat" ? false : true}
         disabled={activeFace === "chat"}
@@ -122,6 +122,6 @@ export const Navigation = ({ variant = "default" }: NavigationProps) => {
         round={true}
         size={10}
       />
-    </FooterFrame>
+    </ButtonFrame>
   );
 };

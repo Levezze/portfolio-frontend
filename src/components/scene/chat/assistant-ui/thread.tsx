@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import {
   ActionBarPrimitive,
   BranchPickerPrimitive,
@@ -18,13 +18,14 @@ import {
   RefreshCwIcon,
   Square,
 } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useEffect, useState, useRef, type FC } from "react";
-
 import {
-  ComposerAttachments,
-  UserMessageAttachments,
-} from "@/components/scene/chat/assistant-ui/attachment";
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useEffect, useState, type FC } from "react";
+
+import { UserMessageAttachments } from "@/components/scene/chat/assistant-ui/attachment";
 import { MarkdownText } from "@/components/scene/chat/assistant-ui/markdown-text";
 import { ToolFallback } from "@/components/scene/chat/assistant-ui/tool-fallback";
 import { TooltipIconButton } from "@/components/scene/chat/assistant-ui/tooltip-icon-button";
@@ -35,91 +36,96 @@ import { LazyMotion, MotionConfig, domAnimation } from "motion/react";
 import * as m from "motion/react-m";
 import { getChatConfig } from "@/lib/api/services/chatService";
 import { type WelcomeMessage, type ChatConfig } from "@/lib/api/schemas/chat";
-import useSWR from 'swr';
+import useSWR from "swr";
 import { Separator } from "@/components/ui/separator";
 import { useAtomValue } from "jotai";
 import { gimliChoiceAtom } from "@/atoms/atomStore";
+import { ButtonFrame } from "@/components/shared/ButtonFrame";
+import { LinkButton } from "@/components/shared/LinkButton";
+// import githubIcon from "public/links/github-icon.svg";
 
 export const Thread: FC = () => {
-  const { data: chatConfig, isLoading } = useSWR(
-    'chat-config',
-    getChatConfig,
-    {
-      revalidateOnFocus: false,
-      dedupingInterval: 50000,
-      fallbackData: {
-        welcome_messages: [
-          {
-            id: '1',
-            message_text: 'Lev Zhitnik',
-            message_type: 'primary',
-            display_order: 1,
-            is_active: true,
-          },
-          {
-            id: '2',
-            message_text: "Perpetually curious, endlessly building, constantly shipping. I approach engineering with an architect's eye for structure and scale, transforming complex problems into elegant solutions, combining systems thinking with modern AI to build what matters.",
-            message_type: 'secondary',
-            display_order: 2,
-            is_active: true,
-          },
-          {
-            id: '3',
-            message_text: "I'm Gimli-AI, Lev's portfolio assistant and dwarf. Feel free to ask me questions or tell me to navigate to another page!",
-            message_type: 'assistant',
-            display_order: 3,
-            is_active: true,
-          }
-        ],
-        suggestions: [
-          {
-            id: '1',
-            title: 'More about me',
-            label: 'Introduction',
-            action: 'Write here about who I am, what I do, and why I\'m doing it.',
-            action_type: "prompt",
-            method: "replace",
-            auto_send: true,
-            display_order: 1,
-            is_active: true,
-          },
-        ]
-      } satisfies ChatConfig,
-      onError: (err) => {
-        console.error('Failed to load chat config:', err);
-      }
-    }
-  );
+  const { data: chatConfig, isLoading } = useSWR("chat-config", getChatConfig, {
+    revalidateOnFocus: false,
+    dedupingInterval: 50000,
+    fallbackData: {
+      welcome_messages: [
+        {
+          id: "1",
+          message_text: "Lev Zhitnik",
+          message_type: "primary",
+          display_order: 1,
+          is_active: true,
+        },
+        {
+          id: "2",
+          message_text:
+            "Perpetually curious, endlessly building, constantly shipping. I approach engineering with an architect's eye for structure and scale, transforming complex problems into elegant solutions, combining systems thinking with modern AI to build what matters.",
+          message_type: "secondary",
+          display_order: 2,
+          is_active: true,
+        },
+        {
+          id: "3",
+          message_text:
+            "I'm Gimli-AI, Lev's portfolio assistant and dwarf. Feel free to ask me questions or tell me to navigate to another page!",
+          message_type: "assistant",
+          display_order: 3,
+          is_active: true,
+        },
+      ],
+      suggestions: [
+        {
+          id: "1",
+          title: "More about me",
+          label: "Introduction",
+          action: "Write here about who I am, what I do, and why I'm doing it.",
+          action_type: "prompt",
+          method: "replace",
+          auto_send: true,
+          display_order: 1,
+          is_active: true,
+        },
+      ],
+    } satisfies ChatConfig,
+    onError: (err) => {
+      console.error("Failed to load chat config:", err);
+    },
+  });
 
   return (
     <div className="relative h-full">
-      <div className={`h-full ${isLoading ? "opacity-0" : "opacity-100 transition-opacity"}`}>
+      <div
+        className={`h-full ${
+          isLoading ? "opacity-0" : "opacity-100 transition-opacity"
+        }`}
+      >
         <LazyMotion features={domAnimation}>
           <MotionConfig reducedMotion="user">
-        <ThreadPrimitive.Root
-          className="aui-root aui-thread-root @container flex h-full flex-col bg-background"
-          style={{
-            ["--thread-max-width" as string]: "44rem",
-          }}
-        >
-          <ThreadPrimitive.Viewport className="aui-thread-viewport relative flex flex-1 flex-col overflow-x-auto overflow-y-scroll">
-            {chatConfig && <ThreadWelcome config={chatConfig} />}
-
-            <ThreadPrimitive.Messages
-              components={{
-                UserMessage,
-                EditComposer,
-                AssistantMessage,
+            <ThreadPrimitive.Root
+              className="aui-root aui-thread-root @container flex h-full flex-col bg-background"
+              style={{
+                ["--thread-max-width" as string]: "44rem",
               }}
-            />
-            <ThreadPrimitive.If empty={false}>
-              <div className="aui-thread-viewport-spacer min-h-8 grow" />
-            </ThreadPrimitive.If>
-            <Composer chatConfig={chatConfig} isLoading={isLoading} />
-          </ThreadPrimitive.Viewport>
-        </ThreadPrimitive.Root>
-      </MotionConfig>
-    </LazyMotion>
+            >
+              <ThreadPrimitive.Viewport className="aui-thread-viewport relative flex flex-1 flex-col overflow-x-auto overflow-y-auto">
+                {chatConfig && <ThreadWelcome config={chatConfig} />}
+
+                <ThreadPrimitive.Messages
+                  components={{
+                    UserMessage,
+                    EditComposer,
+                    AssistantMessage,
+                  }}
+                />
+                <ThreadPrimitive.If empty={false}>
+                  <div className="aui-thread-viewport-spacer min-h-8 grow" />
+                </ThreadPrimitive.If>
+                <Composer chatConfig={chatConfig} isLoading={isLoading} />
+              </ThreadPrimitive.Viewport>
+            </ThreadPrimitive.Root>
+          </MotionConfig>
+        </LazyMotion>
       </div>
     </div>
   );
@@ -140,7 +146,7 @@ const ThreadScrollToBottom: FC = () => {
 };
 
 const FakeAssistantMessage: FC<{ text: string }> = ({ text }) => {
-  const [displayText, setDisplayText] = useState('');
+  const [displayText, setDisplayText] = useState("");
   const [finalText, setFinalText] = useState(text);
   const gimliChoice = useAtomValue(gimliChoiceAtom);
 
@@ -154,17 +160,17 @@ const FakeAssistantMessage: FC<{ text: string }> = ({ text }) => {
     return () => clearTimeout(timeout);
   }, [text]);
 
-  useEffect(()=> {
+  useEffect(() => {
     if (!finalText || finalText.length === 0) return;
-    
-    setDisplayText('');
+
+    setDisplayText("");
     let count = 0;
     let interval: NodeJS.Timeout;
 
     const timeout = setTimeout(() => {
       interval = setInterval(() => {
         if (count < finalText.length) {
-          setDisplayText(prev => {
+          setDisplayText((prev) => {
             if (prev.length < finalText.length) {
               return finalText.slice(0, prev.length + 1);
             }
@@ -175,13 +181,12 @@ const FakeAssistantMessage: FC<{ text: string }> = ({ text }) => {
           clearInterval(interval);
         }
       }, 7);
-
     }, 200);
-    
+
     return () => {
       clearTimeout(timeout);
       if (interval) clearInterval(interval);
-    }
+    };
   }, [finalText]);
 
   return (
@@ -191,7 +196,7 @@ const FakeAssistantMessage: FC<{ text: string }> = ({ text }) => {
     >
       <div className="flex">
         <Tooltip>
-            <Avatar className="mr-3 mt-1 h-12 w-12 shadow-sm shadow-muted-foreground/10">
+          <Avatar className="mr-3 mt-1 h-12 w-12 shadow-sm shadow-muted-foreground/10">
             <TooltipTrigger>
               <AvatarImage
                 src={`/gimli-ai/gimli-ai-avatar-${gimliChoice}.webp`}
@@ -200,7 +205,7 @@ const FakeAssistantMessage: FC<{ text: string }> = ({ text }) => {
               />
               <AvatarFallback>G</AvatarFallback>
             </TooltipTrigger>
-            </Avatar>
+          </Avatar>
           <TooltipContent>
             <p>Gimli-AI, Lev's sidekick</p>
           </TooltipContent>
@@ -217,7 +222,7 @@ const ThreadWelcome: FC<{ config: ChatConfig }> = ({ config }) => {
   const welcome_messages = config.welcome_messages;
   return (
     <ThreadPrimitive.Empty>
-      <div className="aui-thread-welcome-root mx-auto my-auto flex w-full max-w-[var(--thread-max-width)] flex-col h-full justify-around px-0 md:px-8">
+      <div className="aui-thread-welcome-root mx-auto my-auto flex w-full max-w-[var(--thread-max-width)] flex-col h-full justify-around overflow-y-auto px-0 md:px-8">
         <div className="aui-thread-welcome-center flex w-full flex-col justify-center">
           <div className="aui-thread-welcome-message flex size-full flex-col justify-center">
             <m.div
@@ -226,16 +231,53 @@ const ThreadWelcome: FC<{ config: ChatConfig }> = ({ config }) => {
               exit={{ opacity: 0, y: 10 }}
               className="aui-thread-welcome-message-motion-1 font-merriweather font-bold text-base [@media(min-width:700px)_and_(min-height:700px)]:text-xl [@media(min-width:800px)_and_(min-height:800px)]:text-2xl mb-2"
             >
-              {welcome_messages.filter((message: WelcomeMessage) => message.message_type === 'primary')[0]?.message_text}
+              {
+                welcome_messages.filter(
+                  (message: WelcomeMessage) =>
+                    message.message_type === "primary"
+                )[0]?.message_text
+              }
             </m.div>
             <m.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
               transition={{ delay: 0.1 }}
-              className="aui-thread-welcome-message-motion-2 font-merriweather text-base [@media(min-width:700px)_and_(min-height:700px)]:text-lg [@media(min-width:800px)_and_(min-height:800px)]:text-xl text-muted-foreground/90"
+              className="aui-thread-welcome-message-motion-2 font-merriweather text-base [@media(min-width:700px)_and_(min-height:700px)]:text-lg [@media(min-width:800px)_and_(min-height:800px)]:text-xl text-muted-foreground/90 mb-2"
             >
-              {welcome_messages.filter((message: WelcomeMessage) => message.message_type === 'secondary')[0]?.message_text}
+              {
+                welcome_messages.filter(
+                  (message: WelcomeMessage) =>
+                    message.message_type === "secondary"
+                )[0]?.message_text
+              }
+            </m.div>
+            <m.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              transition={{ delay: 0.2 }}
+            >
+              <ButtonFrame variant="inverse" classNameAdditional="px-2">
+                <LinkButton
+                  className="text-foreground color-foreground size-4"
+                  icon="linkedin"
+                  linkUrl="https://www.linkedin.com/in/lev-zhitnik/"
+                  tooltipText="LinkedIn profile"
+                />
+                <LinkButton
+                  className="text-foreground color-foreground size-4"
+                  icon="github"
+                  linkUrl="https://github.com/Levezze"
+                  tooltipText="GitHub profile"
+                />
+                <LinkButton
+                  className="text-foreground color-foreground size-5"
+                  icon="email"
+                  linkUrl="mailto:contact@levezze.com"
+                  tooltipText="Email me"
+                />
+              </ButtonFrame>
             </m.div>
           </div>
         </div>
@@ -247,30 +289,36 @@ const ThreadWelcome: FC<{ config: ChatConfig }> = ({ config }) => {
   );
 };
 
-const ThreadWelcomeSuggestions: FC<{ suggestions: any[] }> = ({ suggestions }) => {
+const ThreadWelcomeSuggestions: FC<{ suggestions: any[] }> = ({
+  suggestions,
+}) => {
   // Use suggestions from config, or fallback to hardcoded if empty
-  const displaySuggestions = suggestions && suggestions.length > 0 ? suggestions : [
-    {
-      title: "More about me?",
-      label: "My AI sales pitch",
-      action: "Write here about who I am, what I do, and why I'm doing it.",
-    },
-    {
-      title: "My resume",
-      label: "View my resume PDF",
-      action: "Go to the resume page",
-    },
-    {
-      title: "Projects",
-      label: "Some of my recent projects",
-      action: "Go to the contact page",
-    },
-    {
-      title: "Contact me!",
-      label: "Contact form submission",
-      action: "Go to the contact page",
-    },
-  ];
+  const displaySuggestions =
+    suggestions && suggestions.length > 0
+      ? suggestions
+      : [
+          {
+            title: "More about me?",
+            label: "My AI sales pitch",
+            action:
+              "Write here about who I am, what I do, and why I'm doing it.",
+          },
+          {
+            title: "My resume",
+            label: "View my resume PDF",
+            action: "Go to the resume page",
+          },
+          {
+            title: "Projects",
+            label: "Some of my recent projects",
+            action: "Go to the contact page",
+          },
+          {
+            title: "Contact me!",
+            label: "Contact form submission",
+            action: "Go to the contact page",
+          },
+        ];
 
   return (
     <div className="aui-thread-welcome-suggestions py-2 flex flex-col w-full gap-4 overflow-y-auto @md:grid @md:grid-cols-2 @md:overflow-y-visible">
@@ -286,17 +334,21 @@ const ThreadWelcomeSuggestions: FC<{ suggestions: any[] }> = ({ suggestions }) =
           <ThreadPrimitive.Suggestion
             prompt={suggestedAction.action}
             method={suggestedAction.method || "replace"}
-            autoSend={suggestedAction.auto_send !== undefined ? suggestedAction.auto_send : true}
+            autoSend={
+              suggestedAction.auto_send !== undefined
+                ? suggestedAction.auto_send
+                : true
+            }
             asChild
           >
             <Button
               variant="ghost"
-              className="aui-thread-welcome-suggestion w-full h-auto hover:bg-accent/90 flex flex-col items-start justify-around gap-0.5 px-6 rounded-full cursor-pointer"
+              className="aui-thread-welcome-suggestion w-full h-auto hover:bg-accent/90 flex flex-col items-start justify-around gap-0.5 px-6 rounded-full cursor-pointer [@media(max-width:600px)_or_(max-height:600px)]:gap-0"
               // className="aui-thread-welcome-suggestion rounded-none h-auto w-full flex-1 flex-wrap items-start justify-start gap-0 border-none px-5 py-3 text-left text-sm @md:flex-col dark:hover:bg-accent/60 dark:text-background cursor-pointer"
               aria-label={suggestedAction.action}
               matchBgColor={true}
             >
-              <span className="aui-thread-welcome-suggestion-text-1 text-base font-inter font-normal text-background m-0 p-0">
+              <span className="aui-thread-welcome-suggestion-text-1 text-base font-inter font-normal text-background [@media(max-width:600px)_or_(max-height:600px)]:text-sm m-0 p-0">
                 {suggestedAction.title}
               </span>
               <span className="aui-thread-welcome-suggestion-text-2 text-md font-light text-muted-foreground dark:text-muted">
@@ -310,7 +362,10 @@ const ThreadWelcomeSuggestions: FC<{ suggestions: any[] }> = ({ suggestions }) =
   );
 };
 
-const Composer: FC<{ chatConfig: ChatConfig | null, isLoading: boolean }> = ({ chatConfig, isLoading }) => {
+const Composer: FC<{ chatConfig: ChatConfig | null; isLoading: boolean }> = ({
+  chatConfig,
+  isLoading,
+}) => {
   return (
     <div className="aui-composer-wrapper sticky bottom-0 mx-auto flex w-full max-w-[var(--thread-max-width)] flex-col overflow-visible rounded-t-md bg-background pb-4 md:pb-6">
       <ThreadScrollToBottom />
@@ -318,11 +373,14 @@ const Composer: FC<{ chatConfig: ChatConfig | null, isLoading: boolean }> = ({ c
         <div className="flex flex-col items-center justify-center mb-4">
           <Separator className="my-4 w-full" />
           {chatConfig && !isLoading && (
-          <FakeAssistantMessage 
-            text={chatConfig.welcome_messages.filter(
-              (message: WelcomeMessage) => message.message_type === 'assistant'
-            )[0]?.message_text as string}
-          />
+            <FakeAssistantMessage
+              text={
+                chatConfig.welcome_messages.filter(
+                  (message: WelcomeMessage) =>
+                    message.message_type === "assistant"
+                )[0]?.message_text as string
+              }
+            />
           )}
         </div>
       </ThreadPrimitive.Empty>
@@ -397,16 +455,16 @@ const AssistantMessage: FC = () => {
       >
         <div className="flex">
           <Tooltip>
-              <Avatar className="mr-3 mt-1 h-10 w-10 shadow-sm shadow-muted-foreground/10">
+            <Avatar className="mr-3 mt-1 h-10 w-10 shadow-sm shadow-muted-foreground/10">
               <TooltipTrigger className="flex align-top justify-start">
-                <AvatarImage 
-                  src={`/gimli-ai/gimli-ai-avatar-${gimliChoice}.webp`} 
-                  alt="GimlAI, Lev's dwarf sidekick" 
+                <AvatarImage
+                  src={`/gimli-ai/gimli-ai-avatar-${gimliChoice}.webp`}
+                  alt="GimlAI, Lev's dwarf sidekick"
                   className="object-cover"
                 />
                 <AvatarFallback>G</AvatarFallback>
               </TooltipTrigger>
-              </Avatar>
+            </Avatar>
             <TooltipContent>
               <p>Gimli-AI, Lev's sidekick</p>
             </TooltipContent>
@@ -417,7 +475,7 @@ const AssistantMessage: FC = () => {
                 Text: MarkdownText,
                 tools: { Fallback: ToolFallback },
               }}
-              />
+            />
             <MessageError />
           </div>
         </div>
@@ -533,7 +591,7 @@ const BranchPicker: FC<BranchPickerPrimitive.Root.Props> = ({
       hideWhenSingleBranch
       className={cn(
         "aui-branch-picker-root mr-2 -ml-2 inline-flex items-center text-xs text-muted-foreground",
-        className,
+        className
       )}
       {...rest}
     >
