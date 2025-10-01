@@ -1,0 +1,42 @@
+# .gitattributes
+
+# Mark vendored/minified files
+*.min.js linguist-vendored
+*.min.mjs linguist-vendored
+*.worker.js linguist-vendored
+*.worker.mjs linguist-vendored
+
+# Mark generated directories
+.next/** linguist-generated
+build/** linguist-generated
+dist/** linguist-generated
+
+# Mark development files
+.dev/** linguist-documentation
+
+# Explicitly mark TypeScript
+*.ts linguist-language=TypeScript
+*.tsx linguist-language=TypeScript
+
+# Documentation
+*.md linguist-documentation
+
+# Vendored/third-party files - exclude from language stats
+*.min.js linguist-vendored
+*.min.mjs linguist-vendored
+*.worker.js linguist-vendored
+*.worker.mjs linguist-vendored
+public/pdf.worker.min.mjs linguist-vendored
+
+# Generated build output
+.next/** linguist-generated
+build/** linguist-generated
+dist/** linguist-generated
+
+# TypeScript is the primary language
+*.ts linguist-language=TypeScript
+*.tsx linguist-language=TypeScript
+
+# Development/documentation files
+.dev/** linguist-documentation
+*.md linguist-documentation
