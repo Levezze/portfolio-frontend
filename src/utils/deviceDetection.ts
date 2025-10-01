@@ -107,6 +107,19 @@ export function calculateMobileCubeSize(marginPercent: number = 0.15): number {
   const vw = window.visualViewport?.width ?? window.innerWidth;
   const vh = window.visualViewport?.height ?? window.innerHeight;
 
+  // DEBUG: Log what we're actually reading
+  console.log('🔍 calculateMobileCubeSize:', {
+    'visualViewport exists': !!window.visualViewport,
+    'visualViewport.width': window.visualViewport?.width,
+    'visualViewport.height': window.visualViewport?.height,
+    'window.innerWidth': window.innerWidth,
+    'window.innerHeight': window.innerHeight,
+    'vw (used)': vw,
+    'vh (used)': vh,
+    'max(vw, vh)': Math.max(vw, vh),
+    'final size': Math.max(vw, vh) * (1 - marginPercent)
+  });
+
   // Use the larger visible dimension so the cube stays large on mobile.
   // Letterboxing CSS will handle the smaller axis padding.
   const dimension = Math.max(vw, vh);
