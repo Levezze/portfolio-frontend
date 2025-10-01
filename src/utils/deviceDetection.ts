@@ -72,7 +72,9 @@ export function getMobileOrientation(): "portrait" | "landscape" {
     return "portrait"; // Default for SSR
   }
 
-  return window.innerWidth > window.innerHeight ? "landscape" : "portrait";
+  const vw = window.visualViewport?.width ?? window.innerWidth;
+  const vh = window.visualViewport?.height ?? window.innerHeight;
+  return vw > vh ? "landscape" : "portrait";
 }
 
 /**
@@ -102,13 +104,14 @@ export function calculateMobileCubeSize(marginPercent: number = 0.15): number {
     return 400; // Default for SSR
   }
 
-  const orientation = getMobileOrientation();
+  const vw = window.visualViewport?.width ?? window.innerWidth;
+  const vh = window.visualViewport?.height ?? window.innerHeight;
 
-  // Calculate available dimension (after margins)
-  const dimension =
-    orientation === "portrait" ? window.innerHeight : window.innerWidth;
+  // Use the larger visible dimension so the cube stays large on mobile.
+  // Letterboxing CSS will handle the smaller axis padding.
+  const dimension = Math.max(vw, vh);
 
-  // Apply margin percentage (e.g., 0.1 = 10% total, 5% each side)
+  // Apply margin percentage (e.g., 0.15 = 15% total)
   const availableSize = dimension * (1 - marginPercent);
 
   return availableSize;
