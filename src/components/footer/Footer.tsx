@@ -20,6 +20,7 @@ import { RESPONSIVE_CONFIG } from "@/config/responsive";
 import { getMobileOrientation } from "@/utils/deviceDetection";
 import { ButtonFrame } from "../shared/ButtonFrame";
 import { TooltipButton } from "../shared/TooltipButton";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 export const Footer = () => {
   const isMobile = useIsMobile();
@@ -158,6 +159,7 @@ export const Footer = () => {
         </div>
       )}
       <DrawerContent
+        aria-describedby={undefined}
         style={{
           backgroundColor: cubeColor || "#A8DADC",
           transition: "background-color 300ms ease-in-out",
@@ -165,9 +167,11 @@ export const Footer = () => {
         className="z-200"
       >
         <DrawerHeader>
-          <DrawerTitle className="text-foreground">Navigation</DrawerTitle>
+          <DrawerTitle className="text-foreground">
+            <VisuallyHidden>Navigation</VisuallyHidden>
+          </DrawerTitle>
         </DrawerHeader>
-        <div className="flex flex-col gap-4 p-6 pt-0">
+        <div className="flex flex-col gap-4 p-6 pt-0 overflow-y-auto">
           <Navigation
             variant="inverse"
             orientation={!isMobile ? "horizontal" : "vertical"}
