@@ -8,22 +8,9 @@ import {
 } from "../schemas/projects";
 
 export const getProjectsGallery = async () => {
-  try {
-    const response = await apiClient.get("/projects");
-    const projectGallery = ProjectGalleryArraySchema.parse(response);
-    return {
-      projects: projectGallery,
-    };
-  } catch (e) {
-    if (e instanceof ZodError) {
-      console.error("Invalid API response", e.issues);
-    } else {
-      console.error("Failed to load projects", e);
-    }
-    return {
-      projects: [],
-    };
-  }
+  const response = await apiClient.get("/projects");
+  const projectGallery = ProjectGalleryArraySchema.parse(response);
+  return { projects: projectGallery };
 };
 
 export const transformProjectGallery = async (project: ProjectGalleryType) => {
@@ -38,22 +25,9 @@ export const transformProjectGallery = async (project: ProjectGalleryType) => {
 };
 
 export const getProjectPage = async (id: string) => {
-  try {
-    const response = await apiClient.get(`/projects/${id}`);
-    const project = ProjectPageSchema.parse(response);
-    return {
-      project: project,
-    };
-  } catch (e) {
-    if (e instanceof ZodError) {
-      console.error("Invalid API response", e.issues);
-    } else {
-      console.error("Failed to load project", e);
-    }
-    return {
-      project: null,
-    };
-  }
+  const response = await apiClient.get(`/projects/${id}`);
+  const project = ProjectPageSchema.parse(response);
+  return { project: project };
 };
 
 export const transformProjectPage = async (project: ProjectPageType) => {

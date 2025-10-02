@@ -28,32 +28,45 @@ const Projects = () => {
     }
   }
 
+  const MOCK: ProjectGalleryArrayType[] = [
+    [
+      {
+        thumbnail_key: "1",
+        title: "title_1",
+        short_description: "short_description_1",
+        display_order: 1,
+      },
+      {
+        thumbnail_key: "2",
+        title: "title_2",
+        short_description: "short_description_2",
+        display_order: 2,
+      },
+    ],
+    [
+      {
+        thumbnail_key: "3",
+        title: "title_3",
+        short_description: "short_description_3",
+        display_order: 3,
+      },
+    ],
+  ];
   return (
     // <Maintenance />
-    <div className="w-full h-full grid grid-rows-2 grid-flow-col auto-cols-[50%] gap-4 overflow-x-auto overflow-y-hidden">
-      {projectPairs.map((pair, index) => (
-        <div key={index} className="w-auto h-auto border-2 border-red-500">
-          <h1 className="text-2xl font-bold">Projects</h1>
+    <div className="w-full h-full flex flex-row gap-4 overflow-x-auto overflow-y-hidden">
+      {MOCK.map((pair, index) => (
+        <div
+          key={index}
+          className="w-auto h-auto grid grid-rows-2 gap-4 border-2 border-blue-500"
+        >
+          {pair.map((project, index) => (
+            <div key={index} className="aspect-square border-2 border-red-500">
+              <h1 className="text-2xl font-bold">{project.title}</h1>
+            </div>
+          ))}
         </div>
       ))}
-      <div className="w-auto h-auto border-2 border-red-500">
-        <h1 className="text-2xl font-bold">Projects</h1>
-      </div>
-      <div className="w-auto h-auto border-2 border-red-500">
-        <h1 className="text-2xl font-bold">Projects</h1>
-      </div>
-      <div className="w-auto h-auto border-2 border-red-500">
-        <h1 className="text-2xl font-bold">Projects</h1>
-      </div>
-      {/* <div className="w-auto h-auto border-2 border-red-500">
-        <h1 className="text-2xl font-bold">Projects</h1>
-      </div>
-      <div className="w-auto h-auto border-2 border-red-500">
-        <h1 className="text-2xl font-bold">Projects</h1>
-      </div>
-      <div className="w-auto h-auto border-2 border-red-500">
-        <h1 className="text-2xl font-bold">Projects</h1>
-      </div> */}
     </div>
   );
 };
