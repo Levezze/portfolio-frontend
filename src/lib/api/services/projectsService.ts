@@ -1,7 +1,7 @@
 import { ZodError } from "zod";
 import { apiClient } from "../core/client";
 import {
-  ProjectGallerySchema,
+  ProjectGalleryArraySchema,
   ProjectGalleryType,
   ProjectPageSchema,
   ProjectPageType,
@@ -10,9 +10,9 @@ import {
 export const getProjectsGallery = async () => {
   try {
     const response = await apiClient.get("/projects");
-    const projects = ProjectGallerySchema.parse(response);
+    const projectGallery = ProjectGalleryArraySchema.parse(response);
     return {
-      projects: projects,
+      projects: projectGallery,
     };
   } catch (e) {
     if (e instanceof ZodError) {

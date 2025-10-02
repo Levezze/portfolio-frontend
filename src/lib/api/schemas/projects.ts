@@ -61,9 +61,12 @@ export const ProjectPageSchema = z.object({
   media: z.array(ProjectMediaSchema),
 });
 
+export const ProjectGalleryArraySchema = z.array(ProjectGallerySchema);
+
 export type ProjectCategoryType = z.infer<typeof ProjectCategoryEnum>;
 
 export type ProjectMediaType = z.infer<typeof ProjectMediaSchema>;
 export type ProjectType = z.infer<typeof ProjectPublicSchema>;
 export type ProjectGalleryType = z.infer<typeof ProjectGallerySchema>;
+export type ProjectGalleryArrayType = z.infer<typeof ProjectGalleryArraySchema>;
 export type ProjectPageType = z.infer<typeof ProjectPageSchema>;
