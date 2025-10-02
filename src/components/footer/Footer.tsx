@@ -20,6 +20,7 @@ import { RESPONSIVE_CONFIG } from "@/config/responsive";
 import { getMobileOrientation } from "@/utils/deviceDetection";
 import { ButtonFrame } from "../shared/ButtonFrame";
 import { TooltipButton } from "../shared/TooltipButton";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 export const Footer = () => {
   const isMobile = useIsMobile();
@@ -52,8 +53,8 @@ export const Footer = () => {
         }}
       >
         <div className="footer gap-4 flex flex-row justify-between">
-          <Navigation variant="default" />
-          <StateControls variant="default" />
+          <Navigation variant="default" orientation="horizontal" />
+          <StateControls variant="default" orientation="horizontal" />
         </div>
       </div>
     );
@@ -72,7 +73,7 @@ export const Footer = () => {
           style={{ height: `${containerSize}vh` }}
         >
           <DrawerTrigger asChild>
-            <div>
+            <div className="flex justify-center">
               <ButtonFrame variant="default">
                 <TooltipButton
                   tooltip={false}
@@ -90,7 +91,7 @@ export const Footer = () => {
               </ButtonFrame>
             </div>
           </DrawerTrigger>
-          <div>
+          <div className="flex justify-center">
             <ButtonFrame variant="default">
               <TooltipButton
                 tooltip={false}
@@ -117,7 +118,7 @@ export const Footer = () => {
           style={{ width: `${containerSize}vw` }}
         >
           <DrawerTrigger asChild>
-            <div>
+            <div className="flex justify-center w-full">
               <ButtonFrame variant="default">
                 <TooltipButton
                   tooltip={false}
@@ -135,7 +136,7 @@ export const Footer = () => {
               </ButtonFrame>
             </div>
           </DrawerTrigger>
-          <div>
+          <div className="flex justify-center w-full">
             <ButtonFrame variant="default">
               <TooltipButton
                 tooltip={false}
@@ -158,6 +159,7 @@ export const Footer = () => {
         </div>
       )}
       <DrawerContent
+        aria-describedby={undefined}
         style={{
           backgroundColor: cubeColor || "#A8DADC",
           transition: "background-color 300ms ease-in-out",
@@ -165,11 +167,19 @@ export const Footer = () => {
         className="z-200"
       >
         <DrawerHeader>
-          <DrawerTitle className="text-foreground">Controls</DrawerTitle>
+          <DrawerTitle className="text-foreground">
+            <VisuallyHidden>Navigation</VisuallyHidden>
+          </DrawerTitle>
         </DrawerHeader>
-        <div className="flex flex-col gap-4 p-6 pt-0">
-          <Navigation variant="inverse" />
-          <StateControls variant="inverse" />
+        <div className="flex flex-col gap-4 p-6 pt-0 overflow-y-auto">
+          <Navigation
+            variant="inverse"
+            orientation={!isMobile ? "horizontal" : "vertical"}
+          />
+          <StateControls
+            variant="inverse"
+            orientation={!isMobile ? "horizontal" : "vertical"}
+          />
         </div>
       </DrawerContent>
     </Drawer>

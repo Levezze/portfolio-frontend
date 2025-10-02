@@ -7,9 +7,13 @@ import { ButtonFrame } from "../shared/ButtonFrame";
 
 interface StateControlsProps {
   variant?: "default" | "inverse";
+  orientation?: "horizontal" | "vertical";
 }
 
-export const StateControls = ({ variant = "default" }: StateControlsProps) => {
+export const StateControls = ({
+  variant = "default",
+  orientation = "horizontal",
+}: StateControlsProps) => {
   const [theme, setTheme] = useAtom(lightThemeAtom);
   const [bgMotion, setBgMotion] = useAtom(bgMotionAtom);
 
@@ -20,9 +24,9 @@ export const StateControls = ({ variant = "default" }: StateControlsProps) => {
 
   return isMobile ? (
     <div className="flex gap-4 justify-center">
-      <ButtonFrame variant={variant}>
+      <ButtonFrame variant={variant} orientation={orientation}>
         <TooltipButton
-          tooltip={true}
+          tooltip={!isMobile}
           inputIcon={
             <div className={iconColorClass}>
               {theme ? (
@@ -32,21 +36,23 @@ export const StateControls = ({ variant = "default" }: StateControlsProps) => {
               )}
             </div>
           }
+          inputText={isMobile ? (theme ? "Light" : "Dark") : undefined}
           tooltipText={theme ? "Dark Theme" : "Light Theme"}
           handleClick={() => setTheme(!theme)}
           state={theme}
-          round={true}
+          round={!isMobile}
           size={10}
         />
       </ButtonFrame>
-      <ButtonFrame variant={variant}>
+      <ButtonFrame variant={variant} orientation={orientation}>
         <TooltipButton
-          tooltip={true}
+          tooltip={!isMobile}
           inputIcon={
             <div className={iconColorClass}>
               <WallpaperIcon style={{ width: "18px", height: "18px" }} />
             </div>
           }
+          inputText={isMobile ? "Animation" : undefined}
           tooltipText={
             bgMotion
               ? "Stop Background Animation"
@@ -54,15 +60,15 @@ export const StateControls = ({ variant = "default" }: StateControlsProps) => {
           }
           handleClick={() => setBgMotion(!bgMotion)}
           state={bgMotion}
-          round={true}
+          round={!isMobile}
           size={10}
         />
       </ButtonFrame>
     </div>
   ) : (
-    <ButtonFrame variant={variant}>
+    <ButtonFrame variant={variant} orientation={orientation}>
       <TooltipButton
-        tooltip={true}
+        tooltip={!isMobile}
         inputIcon={
           <div className={iconColorClass}>
             {theme ? (
@@ -72,25 +78,27 @@ export const StateControls = ({ variant = "default" }: StateControlsProps) => {
             )}
           </div>
         }
+        inputText={isMobile ? (theme ? "Light" : "Dark") : undefined}
         tooltipText={theme ? "Dark Theme" : "Light Theme"}
         handleClick={() => setTheme(!theme)}
         state={theme}
-        round={true}
+        round={!isMobile}
         size={10}
       />
       <TooltipButton
-        tooltip={true}
+        tooltip={!isMobile}
         inputIcon={
           <div className={iconColorClass}>
             <WallpaperIcon style={{ width: "18px", height: "18px" }} />
           </div>
         }
+        inputText={isMobile ? "Animation" : undefined}
         tooltipText={
           bgMotion ? "Stop Background Animation" : "Resume Background Animation"
         }
         handleClick={() => setBgMotion(!bgMotion)}
         state={bgMotion}
-        round={true}
+        round={!isMobile}
         size={10}
       />
     </ButtonFrame>

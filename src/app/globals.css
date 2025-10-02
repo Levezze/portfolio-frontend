@@ -48,6 +48,7 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --radius-25: calc(var(--radius) + 6px);
   --font-merriweather: var(--font-mw);
   /* --font-merriweather-semibold: var(--font-mw-600); */
   --font-inter: var(--font-inter);
