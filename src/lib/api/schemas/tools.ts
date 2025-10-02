@@ -2,37 +2,46 @@ import * as z from "zod";
 import { resumeDownloadSchema } from "./resume";
 
 export const toolCallBaseSchema = z.object({
-    type: z.literal('tool_call'),
-    tool_name: z.enum(['navigate_page','trigger_download', 'contact_form']),
-    tool_id: z.string(),
-    message_id: z.string(),
+  type: z.literal("tool_call"),
+  tool_name: z.enum(["navigate_page", "trigger_download", "contact_form"]),
+  tool_id: z.string(),
+  message_id: z.string(),
 });
 
-const pagesEnum = z.enum(["chat", "about", "projects", "contact", "resume", "secret"]);
+const pagesEnum = z.enum([
+  "chat",
+  "about",
+  "projects",
+  "contact",
+  "resume",
+  "secret",
+]);
 
 export const navigateParamsSchema = toolCallBaseSchema.extend({
-    parameters: z.object({
-        page: pagesEnum,
-        reason: z.string(),
-    })
+  parameters: z.object({
+    page: pagesEnum,
+    reason: z.string(),
+  }),
 });
 
 const fileTypeEnum = ["resume"] as const;
 
 export const downloadParamsSchema = toolCallBaseSchema.extend({
-    parameters: z.object({
-        file_type: z.enum(fileTypeEnum),
-        message: z.string(),
-    })
+  parameters: z.object({
+    file_type: z.enum(fileTypeEnum),
+    message: z.string(),
+  }),
 });
 
 export const contactParamsSchema = toolCallBaseSchema.extend({
-    parameters: z.object({
-        message: z.string(),
-        prefill: z.object({
-            subject: z.string().optional(),
-        }).optional(),
-    })
+  parameters: z.object({
+    message: z.string(),
+    prefill: z
+      .object({
+        subject: z.string().optional(),
+      })
+      .optional(),
+  }),
 });
 
 export type PagesType = z.infer<typeof pagesEnum>;
