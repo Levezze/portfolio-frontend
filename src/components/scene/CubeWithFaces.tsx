@@ -233,7 +233,9 @@ export const CubeWithFaces = () => {
               imageRendering: "crisp-edges",
               WebkitFontSmoothing: "antialiased",
               opacity: isActive ? 1 : 0,
-              transition: `opacity ${transitionDuration}ms ease-in-out`,
+              transition: isActive
+                ? 'opacity 50ms ease-out'  // Quick appear
+                : `opacity ${transitionDuration}ms ease-in-out`,  // Slow fade-out
               pointerEvents: isActive ? 'auto' : 'none',
             }}
             distanceFactor={4}
