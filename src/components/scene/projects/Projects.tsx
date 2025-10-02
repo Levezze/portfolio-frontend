@@ -1,4 +1,5 @@
 // import { Maintenance } from "@/components/shared/Maintenance";
+import { FailedLoad } from "@/components/shared/FailedLoad";
 import { ProjectGalleryArrayType } from "@/lib/api/schemas/projects";
 import { getProjectsGallery } from "@/lib/api/services/projectsService";
 import React from "react";
@@ -18,7 +19,7 @@ const Projects = () => {
   );
 
   if (isLoading) return <div>Loading projects...</div>;
-  if (error) return <div>Failed to load projects</div>;
+  if (error) return <FailedLoad />;
 
   const projectsArray = data?.projects || [];
   const projectPairs: ProjectGalleryArrayType[] = [];
@@ -54,7 +55,7 @@ const Projects = () => {
   ];
   return (
     // <Maintenance />
-    <div className="w-full h-full flex flex-row gap-4 overflow-x-auto overflow-y-hidden">
+    <div className="w-full h-full flex flex-row gap-4 overflow-x-hidden overflow-y-hidden">
       {MOCK.map((pair, index) => (
         <div
           key={index}
