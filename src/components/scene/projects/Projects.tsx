@@ -1,5 +1,6 @@
 // import { Maintenance } from "@/components/shared/Maintenance";
 import { FailedLoad } from "@/components/shared/FailedLoad";
+import Image from "next/image";
 import { ProjectGalleryArrayType } from "@/lib/api/schemas/projects";
 import { getProjectsGallery } from "@/lib/api/services/projectsService";
 import React from "react";
@@ -19,7 +20,7 @@ const Projects = () => {
   );
 
   if (isLoading) return <div>Loading projects...</div>;
-  if (error) return <FailedLoad />;
+  if (error) console.log(error); // return <FailedLoad />;
 
   const projectsArray = data?.projects || [];
   const projectPairs: ProjectGalleryArrayType[] = [];
@@ -32,13 +33,13 @@ const Projects = () => {
   const MOCK: ProjectGalleryArrayType[] = [
     [
       {
-        thumbnail_key: "1",
+        thumbnail_key: "/portfolio-logo.png",
         title: "title_1",
         short_description: "short_description_1",
         display_order: 1,
       },
       {
-        thumbnail_key: "2",
+        thumbnail_key: "/portfolio-logo.png",
         title: "title_2",
         short_description: "short_description_2",
         display_order: 2,
@@ -46,7 +47,7 @@ const Projects = () => {
     ],
     [
       {
-        thumbnail_key: "3",
+        thumbnail_key: "/portfolio-logo.png",
         title: "title_3",
         short_description: "short_description_3",
         display_order: 3,
@@ -57,14 +58,31 @@ const Projects = () => {
     // <Maintenance />
     <div className="w-full h-full flex flex-row gap-4 overflow-x-hidden overflow-y-hidden">
       {MOCK.map((pair, index) => (
-        <div
-          key={index}
-          className="w-auto h-auto grid grid-rows-2 gap-4 border-2 border-blue-500"
-        >
+        <div key={index} className="flex-1 min-w-0 grid grid-rows-2 gap-4">
           {pair.map((project, index) => (
-            <div key={index} className="aspect-square border-2 border-red-500">
-              <h1 className="text-2xl font-bold">{project.title}</h1>
-            </div>
+            <button
+              key={index}
+              className="aspect-square w-full relative cursor-pointer rounded-[25px] group overflow-hidden"
+            >
+              <Image
+                src={project.thumbnail_key}
+                alt={project.title}
+                fill
+                className="object-cover rounded-[25px] group-hover:scale-105 transition-transform duration-300"
+              />
+              <div className="absolute inset-0 rounded-[25px] bg-black/0 group-hover:bg-white/20 dark:group-hover:bg-black/20 transition-colors duration-300 pointer-events-none" />
+              <div className="absolute inset-0 rounded-[25px] shadow-[inset_0px_-10px_10px_-10px_rgba(0,0,0,0.05)] pointer-events-none" />
+              <div className="relative w-full h-full z-10 flex flex-col items-center justify-end p-4">
+                <div className="bg-background/30 px-4 py-2 rounded-[25px] w-full break-words">
+                  <h1 className="text-xl font-bold text-center">
+                    {project.title}
+                  </h1>
+                  <h2 className="text-sm font-bold">
+                    {project.short_description}
+                  </h2>
+                </div>
+              </div>
+            </button>
           ))}
         </div>
       ))}
