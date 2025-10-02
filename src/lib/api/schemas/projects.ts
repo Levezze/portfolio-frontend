@@ -26,7 +26,7 @@ const ProjectCategoryEnum = z.enum([
 
 export const ProjectPublicSchema = z.object({
   id: z.string(),
-  thumbnail_key: z.string(),
+  thumbnail_url: z.string(),
   media: z.array(ProjectMediaSchema),
   created_at: z.string(),
   title: z.string(),
@@ -42,7 +42,7 @@ export const ProjectPublicSchema = z.object({
 });
 
 export const ProjectGallerySchema = z.object({
-  thumbnail_key: z.string(),
+  thumbnail_url: z.string(),
   title: z.string(),
   short_description: z.string(),
   display_order: z.number().int(),

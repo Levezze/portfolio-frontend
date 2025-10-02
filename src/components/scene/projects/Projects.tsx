@@ -20,7 +20,10 @@ const Projects = () => {
   );
 
   if (isLoading) return <div>Loading projects...</div>;
-  if (error) console.log(error); // return <FailedLoad />;
+  if (error) {
+    console.error(error);
+    return <FailedLoad />;
+  }
 
   const projectsArray = data?.projects || [];
   const projectPairs: ProjectGalleryArrayType[] = [];
@@ -30,34 +33,10 @@ const Projects = () => {
     }
   }
 
-  const MOCK: ProjectGalleryArrayType[] = [
-    [
-      {
-        thumbnail_key: "/portfolio-logo.png",
-        title: "title_1",
-        short_description: "short_description_1",
-        display_order: 1,
-      },
-      {
-        thumbnail_key: "/portfolio-logo.png",
-        title: "title_2",
-        short_description: "short_description_2",
-        display_order: 2,
-      },
-    ],
-    [
-      {
-        thumbnail_key: "/portfolio-logo.png",
-        title: "title_3",
-        short_description: "short_description_3",
-        display_order: 3,
-      },
-    ],
-  ];
   return (
     // <Maintenance />
-    <div className="w-full h-full flex flex-row gap-4 overflow-x-hidden overflow-y-hidden">
-      {MOCK.map((pair, index) => (
+    <div className="w-full h-full p-4 flex flex-row gap-8 overflow-x-hidden overflow-y-hidden">
+      {projectPairs.map((pair, index) => (
         <div key={index} className="flex-1 min-w-0 grid grid-rows-2 gap-4">
           {pair.map((project, index) => (
             <button
@@ -65,19 +44,21 @@ const Projects = () => {
               className="aspect-square w-full relative cursor-pointer rounded-[25px] group overflow-hidden"
             >
               <Image
-                src={project.thumbnail_key}
+                src={project.thumbnail_url}
                 alt={project.title}
                 fill
                 className="object-cover rounded-[25px] group-hover:scale-105 transition-transform duration-300"
               />
               <div className="absolute inset-0 rounded-[25px] bg-black/0 group-hover:bg-white/20 dark:group-hover:bg-black/20 transition-colors duration-300 pointer-events-none" />
               <div className="absolute inset-0 rounded-[25px] shadow-[inset_0px_-10px_10px_-10px_rgba(0,0,0,0.05)] pointer-events-none" />
-              <div className="relative w-full h-full z-10 flex flex-col items-center justify-end p-4">
-                <div className="bg-background/30 px-4 py-2 rounded-[25px] w-full break-words">
-                  <h1 className="text-xl font-bold text-center">
+              <div className="relative w-full h-full z-10 flex flex-col items-center justify-between p-4">
+                <div className="bg-background/80 px-4 py-2 rounded-[25px] w-full break-words">
+                  <h1 className="text-center font-merriweather font-medium text-base">
                     {project.title}
                   </h1>
-                  <h2 className="text-sm font-bold">
+                </div>
+                <div className="bg-background/80 px-4 py-2 rounded-[25px] w-full break-words">
+                  <h2 className="text-sm font-regular font-inter text-center">
                     {project.short_description}
                   </h2>
                 </div>
