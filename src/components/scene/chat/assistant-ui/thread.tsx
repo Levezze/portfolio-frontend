@@ -42,10 +42,14 @@ import { useAtomValue } from "jotai";
 import { gimliChoiceAtom } from "@/atoms/atomStore";
 import { ButtonFrame } from "@/components/shared/ButtonFrame";
 import { LinkButton } from "@/components/shared/LinkButton";
-// import githubIcon from "public/links/github-icon.svg";
+import { FailedLoad } from "@/components/shared/FailedLoad";
 
 export const Thread: FC = () => {
-  const { data: chatConfig, isLoading } = useSWR("chat-config", getChatConfig, {
+  const {
+    data: chatConfig,
+    isLoading,
+    error,
+  } = useSWR("chat-config", getChatConfig, {
     revalidateOnFocus: false,
     dedupingInterval: 50000,
     fallbackData: {
@@ -92,6 +96,8 @@ export const Thread: FC = () => {
       console.error("Failed to load chat config:", err);
     },
   });
+
+  if (error) return <FailedLoad />;
 
   return (
     <div className="relative h-full">
