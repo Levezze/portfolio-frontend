@@ -49,10 +49,10 @@ export const ProjectGallery = () => {
         <button
           key={index}
           className={`md:aspect-square mobile-landscape:aspect-auto w-full relative cursor-pointer group overflow-hidden md:rounded-none ${borderRadius[index]}`}
-          onClick={() => setProjectView(project.title)}
+          onClick={() => setProjectView(project.slug)}
         >
           <Image
-            src={project.thumbnail_url}
+            src={project.thumbnailUrl}
             alt={project.title}
             fill
             className={`object-cover group-hover:scale-105 rounded-[25px] transition-transform duration-300 md:rounded-none ${borderRadius[index]}`}
@@ -69,7 +69,7 @@ export const ProjectGallery = () => {
             </div>
             <div className="bg-background/80 px-4 py-2 rounded-[25px] break-words group-hover:opacity-100 opacity-0 transition-all duration-300 shadow-sm shadow-muted-foreground/5">
               <h2 className="font-regular font-inter text-center text-xs lg:text-sm">
-                {project.short_description}
+                {project.shortDescription}
               </h2>
             </div>
           </div>

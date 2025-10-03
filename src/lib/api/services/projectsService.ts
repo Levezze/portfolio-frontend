@@ -10,13 +10,14 @@ import {
 export const getProjectsGallery = async () => {
   const response = await apiClient.get("/projects");
   const projectGallery = ProjectGalleryArraySchema.parse(response);
-  return { projects: projectGallery };
+  const transformedProjects = projectGallery.map(transformProjectGallery);
+  return { projects: transformedProjects };
 };
 
-export const transformProjectGallery = async (project: ProjectGalleryType) => {
+export const transformProjectGallery = (project: ProjectGalleryType) => {
   const baseProjectGallery = {
     slug: project.slug,
-    thumbnailKey: project.thumbnail_url,
+    thumbnailUrl: project.thumbnail_url,
     title: project.title,
     shortDescription: project.short_description,
     displayOrder: project.display_order,
@@ -28,10 +29,11 @@ export const transformProjectGallery = async (project: ProjectGalleryType) => {
 export const getProjectPage = async (id: string) => {
   const response = await apiClient.get(`/projects/${id}`);
   const project = ProjectPageSchema.parse(response);
-  return { project: project };
+  const transformedProject = transformProjectPage(project);
+  return { project: transformedProject };
 };
 
-export const transformProjectPage = async (project: ProjectPageType) => {
+export const transformProjectPage = (project: ProjectPageType) => {
   const baseProjectPage = {
     slug: project.slug,
     title: project.title,

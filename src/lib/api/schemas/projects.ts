@@ -2,7 +2,7 @@ import * as z from "zod";
 
 export const ProjectMediaSchema = z.object({
   id: z.string(),
-  media_type: z.enum(["image", "video"]),
+  media_type: z.enum(["image", "video", "document"]),
   filename: z.string(),
   file_size: z.number().int().optional(),
   mime_type: z.string().optional(),
