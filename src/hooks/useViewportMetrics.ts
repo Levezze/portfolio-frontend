@@ -5,7 +5,6 @@ import {
   viewportHeightAtom,
   viewportOrientationAtom,
   viewportWidthAtom,
-  virtualKeyboardVisibleAtom,
 } from "@/atoms/atomStore";
 import { isMobileDevice } from "@/utils/deviceDetection";
 
@@ -34,13 +33,8 @@ const detectOrientation = (
   width: number,
   height: number,
   previous: Orientation,
-  portraitMax: number,
-  keyboardVisible: boolean
+  portraitMax: number
 ): Orientation => {
-  if (keyboardVisible) {
-    return previous;
-  }
-
   if (typeof window !== "undefined") {
     const screenOrientation = window.screen?.orientation?.type;
     if (typeof screenOrientation === "string") {
@@ -68,7 +62,6 @@ export const useViewportMetrics = () => {
   const setViewportWidth = useSetAtom(viewportWidthAtom);
   const setOrientation = useSetAtom(viewportOrientationAtom);
   const setIsMobile = useSetAtom(isMobileAtom);
-  const setKeyboardVisible = useSetAtom(virtualKeyboardVisibleAtom);
 
   const maxHeightRef = useRef<{ portrait: number; landscape: number }>({
     portrait: 0,
@@ -123,12 +116,11 @@ export const useViewportMetrics = () => {
         width,
         height,
         orientationRef.current,
-        maxHeightRef.current.portrait,
-        keyboardVisible
+        maxHeightRef.current.portrait
       );
       orientationRef.current = orientation;
 
-      if (reset && !keyboardVisible) {
+      if (reset || !keyboardVisible) {
         maxHeightRef.current[orientation] = 0;
       }
 
@@ -151,8 +143,7 @@ export const useViewportMetrics = () => {
       setViewportWidth(width);
       setOrientation(orientation);
       setIsMobile(isMobileDevice({ width, height }));
-      setKeyboardVisible(keyboardVisible);
-    };
+          };
 
     const scheduleUpdate = (reset = false) => {
       if (rafId.current !== null) {
@@ -171,7 +162,7 @@ export const useViewportMetrics = () => {
         return;
       }
       keyboardVisibleRef.current = visible;
-      scheduleUpdate(false);
+      scheduleUpdate(true);
     };
 
     const handleFocusIn = (event: FocusEvent) => {
@@ -235,5 +226,5 @@ export const useViewportMetrics = () => {
       window.removeEventListener("orientationchange", handleOrientationChange);
       window.visualViewport?.removeEventListener("resize", handleResize);
     };
-  }, [setIsMobile, setKeyboardVisible, setOrientation, setViewportHeight, setViewportWidth]);
+  }, [setIsMobile, setOrientation, setViewportHeight, setViewportWidth]);
 };

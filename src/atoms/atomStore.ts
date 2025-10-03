@@ -65,4 +65,3 @@ export const viewportWidthAtom = atom<number>(0);
 export const viewportOrientationAtom = atom<"portrait" | "landscape">(
   "portrait"
 );
-export const virtualKeyboardVisibleAtom = atom<boolean>(false);
