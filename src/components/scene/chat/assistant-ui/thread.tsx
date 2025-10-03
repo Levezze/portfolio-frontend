@@ -42,56 +42,22 @@ import { useAtomValue } from "jotai";
 import { gimliChoiceAtom } from "@/atoms/atomStore";
 import { ButtonFrame } from "@/components/shared/ButtonFrame";
 import { LinkButton } from "@/components/shared/LinkButton";
-// import githubIcon from "public/links/github-icon.svg";
+import { FailedLoad } from "@/components/shared/FailedLoad";
 
 export const Thread: FC = () => {
-  const { data: chatConfig, isLoading } = useSWR("chat-config", getChatConfig, {
+  const {
+    data: chatConfig,
+    isLoading,
+    error,
+  } = useSWR("chat-config", getChatConfig, {
     revalidateOnFocus: false,
     dedupingInterval: 50000,
-    fallbackData: {
-      welcome_messages: [
-        {
-          id: "1",
-          message_text: "Lev Zhitnik",
-          message_type: "primary",
-          display_order: 1,
-          is_active: true,
-        },
-        {
-          id: "2",
-          message_text:
-            "Perpetually curious, endlessly building, constantly shipping. I approach engineering with an architect's eye for structure and scale, transforming complex problems into elegant solutions, combining systems thinking with modern AI to build what matters.",
-          message_type: "secondary",
-          display_order: 2,
-          is_active: true,
-        },
-        {
-          id: "3",
-          message_text:
-            "I'm Gimli-AI, Lev's portfolio assistant and dwarf. Feel free to ask me questions or tell me to navigate to another page!",
-          message_type: "assistant",
-          display_order: 3,
-          is_active: true,
-        },
-      ],
-      suggestions: [
-        {
-          id: "1",
-          title: "More about me",
-          label: "Introduction",
-          action: "Write here about who I am, what I do, and why I'm doing it.",
-          action_type: "prompt",
-          method: "replace",
-          auto_send: true,
-          display_order: 1,
-          is_active: true,
-        },
-      ],
-    } satisfies ChatConfig,
     onError: (err) => {
       console.error("Failed to load chat config:", err);
     },
   });
+
+  if (error) return <FailedLoad />;
 
   return (
     <div className="relative h-full">
@@ -121,7 +87,10 @@ export const Thread: FC = () => {
                 <ThreadPrimitive.If empty={false}>
                   <div className="aui-thread-viewport-spacer min-h-8 grow" />
                 </ThreadPrimitive.If>
-                <Composer chatConfig={chatConfig} isLoading={isLoading} />
+                <Composer
+                  chatConfig={chatConfig ?? null}
+                  isLoading={isLoading}
+                />
               </ThreadPrimitive.Viewport>
             </ThreadPrimitive.Root>
           </MotionConfig>
