@@ -1,163 +1,59 @@
 /**
- * Device detection utilities for responsive breakpoint system
+ * Minimal device detection helpers.
  *
- * These functions distinguish between mobile devices (phones) and desktop/tablet
- * devices to apply appropriate responsive strategies:
- * - Mobile: Percentage-based sizing (vh × 0.9)
- * - Desktop/Tablet: Height-based discrete breakpoints (800px, 700px, etc.)
+ * Currently only exposes a mobile device heuristic that combines
+ * user agent matching with a width/height fallback. Additional helpers
+ * can be reintroduced here if required, but the viewport sizing logic
+ * now lives in the viewport metrics hook.
  */
 
+const MOBILE_USER_AGENT_PATTERN = /Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i;
+const TABLET_USER_AGENT_PATTERN = /iPad|Android(?!.*Mobile)/i;
+
+type Dimensions = {
+  width: number;
+  height: number;
+};
+
+const getDimensions = (dimensions?: Partial<Dimensions>): Dimensions => {
+  if (dimensions && typeof dimensions.width === "number" && typeof dimensions.height === "number") {
+    return { width: dimensions.width, height: dimensions.height };
+  }
+
+  if (typeof window === "undefined") {
+    return { width: 0, height: 0 };
+  }
+
+  return {
+    width: window.innerWidth ?? 0,
+    height: window.innerHeight ?? 0,
+  };
+};
+
 /**
- * Detect if current device is a mobile phone
+ * Detect if current device is a mobile phone (not tablet).
  *
- * Uses multiple heuristics:
- * 1. User agent check for known mobile patterns
- * 2. Touch capability detection
- * 3. Screen size fallback for small devices
- *
- * Note: This distinguishes phones from tablets. Tablets are treated as
- * desktop devices and use height-based breakpoints.
- *
- * @returns true if device is a mobile phone, false otherwise
- *
- * @example
- * if (isMobileDevice()) {
- *   // Use percentage-based sizing
- *   cubeSize = windowHeight * 0.9;
- * } else {
- *   // Use height-based breakpoints
- *   cubeSize = getBreakpointSize(windowHeight);
- * }
+ * Combines UA sniffing with a size fallback so we do not rely purely on
+ * viewport measurements. Optional dimensions can be provided to avoid
+ * reading from `window` repeatedly.
  */
-export function isMobileDevice(): boolean {
-  if (typeof window === "undefined" || typeof navigator === "undefined") {
+export function isMobileDevice(dimensions?: Partial<Dimensions>): boolean {
+  if (typeof navigator === "undefined") {
     return false;
   }
 
-  const width = window.innerWidth || 0;
-  const height = window.innerHeight || 0;
+  const { width, height } = getDimensions(dimensions);
 
-  const userAgent =
-    navigator.userAgent || navigator.vendor || (window as any).opera;
-  const mobilePatterns =
-    /Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i;
-  const isMobileUA = mobilePatterns.test(userAgent);
+  const userAgent = navigator.userAgent || navigator.vendor || (window as any)?.opera || "";
+  const isMobileUA = MOBILE_USER_AGENT_PATTERN.test(userAgent);
+  const isTabletUA = TABLET_USER_AGENT_PATTERN.test(userAgent);
 
-  // Explicitly exclude tablets from mobile detection
-  // iPad has "iPad" in UA, Android tablets often have "Mobile" absent
-  const isTablet = /iPad|Android(?!.*Mobile)/i.test(userAgent);
-
-  return (isMobileUA && !isTablet) || (width < 600 && height < 600);
+  return (isMobileUA && !isTabletUA) || (width > 0 && height > 0 && width < 600 && height < 600);
 }
 
 /**
- * Get current mobile orientation
- *
- * Determines if device is in portrait or landscape mode based on
- * aspect ratio. Used to decide whether to calculate cube size from
- * height (portrait) or width (landscape).
- *
- * @returns 'portrait' if height > width, 'landscape' otherwise
- *
- * @example
- * const orientation = getMobileOrientation();
- * if (orientation === 'portrait') {
- *   cubeSize = windowHeight * 0.9;
- * } else {
- *   cubeSize = windowWidth * 0.9;
- * }
+ * Convenience helper used for logging.
  */
-export function getMobileOrientation(): "portrait" | "landscape" {
-  if (typeof window === "undefined") {
-    return "portrait"; // Default for SSR
-  }
-
-  const vw = window.visualViewport?.width ?? window.innerWidth;
-  const vh = window.visualViewport?.height ?? window.innerHeight;
-  return vw > vh ? "landscape" : "portrait";
-}
-
-/**
- * Calculate mobile cube size based on current orientation
- *
- * Mobile uses percentage-based sizing to accommodate various screen sizes:
- * - Portrait: 90% of window height (10% for margins)
- * - Landscape: 90% of window width (10% for margins)
- *
- * This keeps the cube square while maximizing screen usage.
- *
- * @param marginPercent - Percentage of dimension to reserve for margins (default: 0.1 = 10%)
- * @returns Cube size in pixels
- *
- * @example
- * // On iPhone 12 Pro (390×844) in portrait
- * const size = calculateMobileCubeSize();
- * // Returns: 844 × 0.9 = 759.6px
- *
- * @example
- * // Same device rotated to landscape (844×390)
- * const size = calculateMobileCubeSize();
- * // Returns: 844 × 0.9 = 759.6px (uses width now)
- */
-export function calculateMobileCubeSize(marginPercent: number = 0.15): number {
-  if (typeof window === "undefined") {
-    return 400; // Default for SSR
-  }
-
-  const vw = window.visualViewport?.width ?? window.innerWidth;
-  const vh = window.visualViewport?.height ?? window.innerHeight;
-
-  // DEBUG: Log what we're actually reading
-  console.log('🔍 calculateMobileCubeSize:', {
-    'visualViewport exists': !!window.visualViewport,
-    'visualViewport.width': window.visualViewport?.width,
-    'visualViewport.height': window.visualViewport?.height,
-    'window.innerWidth': window.innerWidth,
-    'window.innerHeight': window.innerHeight,
-    'vw (used)': vw,
-    'vh (used)': vh,
-    'max(vw, vh)': Math.max(vw, vh),
-    'final size': Math.max(vw, vh) * (1 - marginPercent)
-  });
-
-  // Use the larger visible dimension so the cube stays large on mobile.
-  // Letterboxing CSS will handle the smaller axis padding.
-  const dimension = Math.max(vw, vh);
-
-  // Apply margin percentage (e.g., 0.15 = 15% total)
-  const availableSize = dimension * (1 - marginPercent);
-
-  return availableSize;
-}
-
-/**
- * Detect if orientation has changed
- *
- * Useful for triggering recalculations when device rotates
- *
- * @param previousOrientation - Previous orientation to compare against
- * @returns true if orientation changed, false otherwise
- */
-export function hasOrientationChanged(
-  previousOrientation: "portrait" | "landscape"
-): boolean {
-  const currentOrientation = getMobileOrientation();
-  return currentOrientation !== previousOrientation;
-}
-
-/**
- * Get device type for logging/debugging
- *
- * @returns Device type string
- */
-export function getDeviceType(): "mobile" | "tablet" | "desktop" {
-  if (typeof window === "undefined") {
-    return "desktop";
-  }
-
-  if (isMobileDevice()) {
-    return "mobile";
-  }
-
-  return "desktop";
+export function getDeviceType(dimensions?: Partial<Dimensions>): "mobile" | "desktop" {
+  return isMobileDevice(dimensions) ? "mobile" : "desktop";
 }

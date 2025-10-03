@@ -1,9 +1,14 @@
 import { useEffect } from "react";
-import { useSetAtom } from "jotai";
-import { cubeSizeAtom, faceSizeAtom } from "@/atoms/atomStore";
-import { isMobileDevice } from "@/utils/deviceDetection";
+import { useAtomValue, useSetAtom } from "jotai";
+import {
+  cubeSizeAtom,
+  faceSizeAtom,
+  isMobileAtom,
+  viewportHeightAtom,
+  viewportOrientationAtom,
+  viewportWidthAtom,
+} from "@/atoms/atomStore";
 import { RESPONSIVE_CONFIG } from "@/config/responsive";
-import { calculateMobileCubeSize } from "@/utils/deviceDetection";
 
 /**
  * Responsive face size hook - manages cube and HTML face sizing across breakpoints
@@ -23,6 +28,10 @@ import { calculateMobileCubeSize } from "@/utils/deviceDetection";
 export const useResponsiveFaceSize = () => {
   const setFaceSize = useSetAtom(faceSizeAtom);
   const setCubeSize = useSetAtom(cubeSizeAtom);
+  const isMobile = useAtomValue(isMobileAtom);
+  const viewportHeight = useAtomValue(viewportHeightAtom);
+  const viewportWidth = useAtomValue(viewportWidthAtom);
+  const orientation = useAtomValue(viewportOrientationAtom);
 
   useEffect(() => {
     /**
@@ -30,21 +39,30 @@ export const useResponsiveFaceSize = () => {
      */
     const updateSize = () => {
       let faceSize: number;
+      const root = document.documentElement;
 
-      if (isMobileDevice()) {
-        // Mobile: Calculate 85% of viewport dimension (orientation-aware)
-        faceSize = calculateMobileCubeSize(
-          RESPONSIVE_CONFIG.mobile.marginPercentage
-        );
+      if (isMobile) {
+        const margin = RESPONSIVE_CONFIG.mobile.marginPercentage ?? 0.15;
+        const dimension = (() => {
+          if (orientation === "landscape") {
+            return viewportWidth || viewportHeight;
+          }
+          return viewportHeight || viewportWidth;
+        })();
 
-        // Set CSS variable dynamically for mobile
-        document.documentElement.style.setProperty(
-          "--face-size",
-          `${faceSize}px`
-        );
+        if (dimension && dimension > 0) {
+          faceSize = dimension * (1 - margin);
+          root.style.setProperty("--face-size", `${faceSize}px`);
+        } else {
+          const cssValue = getComputedStyle(root)
+            .getPropertyValue("--face-size")
+            .trim();
+          const parsed = parseInt(cssValue, 10);
+          faceSize = Number.isNaN(parsed) ? 400 : parsed;
+        }
       } else {
         // Desktop/Tablet: Read from CSS (media queries control this)
-        const cssValue = getComputedStyle(document.documentElement)
+        const cssValue = getComputedStyle(root)
           .getPropertyValue("--face-size")
           .trim();
 
@@ -63,33 +81,13 @@ export const useResponsiveFaceSize = () => {
       setFaceSize(faceSize);
       setCubeSize(faceSize / 100);
     };
-
-    /**
-     * Debounce helper
-     */
-    const debounce = <T extends (...args: any[]) => void>(
-      fn: T,
-      delay: number
-    ): ((...args: Parameters<T>) => void) => {
-      let timeoutId: ReturnType<typeof setTimeout>;
-      return (...args: Parameters<T>) => {
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout(() => fn(...args), delay);
-      };
-    };
-
-    // Initial update
     updateSize();
-
-    // Debounced resize handler (150ms)
-    const debouncedUpdate = debounce(updateSize, 150);
-    window.addEventListener("resize", debouncedUpdate);
-    // Also listen to visualViewport for accurate visible viewport changes
-    window.visualViewport?.addEventListener("resize", debouncedUpdate);
-
-    return () => {
-      window.removeEventListener("resize", debouncedUpdate);
-      window.visualViewport?.removeEventListener("resize", debouncedUpdate);
-    };
-  }, [setFaceSize, setCubeSize]);
+  }, [
+    isMobile,
+    orientation,
+    setCubeSize,
+    setFaceSize,
+    viewportHeight,
+    viewportWidth,
+  ]);
 };

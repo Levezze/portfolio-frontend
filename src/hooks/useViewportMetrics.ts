@@ -1,0 +1,239 @@
+import { useEffect, useRef } from "react";
+import { useSetAtom } from "jotai";
+import {
+  isMobileAtom,
+  viewportHeightAtom,
+  viewportOrientationAtom,
+  viewportWidthAtom,
+  virtualKeyboardVisibleAtom,
+} from "@/atoms/atomStore";
+import { isMobileDevice } from "@/utils/deviceDetection";
+
+type Orientation = "portrait" | "landscape";
+
+type ViewportSize = {
+  width: number;
+  height: number;
+};
+
+const readViewportSize = (): ViewportSize => {
+  if (typeof window === "undefined") {
+    return { width: 0, height: 0 };
+  }
+
+  const viewport = window.visualViewport;
+  const width =
+    viewport?.width ?? window.innerWidth ?? document.documentElement.clientWidth ?? 0;
+  const height =
+    viewport?.height ?? window.innerHeight ?? document.documentElement.clientHeight ?? 0;
+
+  return { width, height };
+};
+
+const detectOrientation = (
+  width: number,
+  height: number,
+  previous: Orientation,
+  portraitMax: number,
+  keyboardVisible: boolean
+): Orientation => {
+  if (keyboardVisible) {
+    return previous;
+  }
+
+  if (typeof window !== "undefined") {
+    const screenOrientation = window.screen?.orientation?.type;
+    if (typeof screenOrientation === "string") {
+      return screenOrientation.startsWith("portrait") ? "portrait" : "landscape";
+    }
+
+    if (typeof window.matchMedia === "function") {
+      return window.matchMedia("(orientation: portrait)").matches
+        ? "portrait"
+        : "landscape";
+    }
+  }
+
+  if (previous === "portrait" && portraitMax > 0) {
+    if (height < portraitMax * 0.9 && width > height) {
+      return "portrait";
+    }
+  }
+
+  return width >= height ? "landscape" : "portrait";
+};
+
+export const useViewportMetrics = () => {
+  const setViewportHeight = useSetAtom(viewportHeightAtom);
+  const setViewportWidth = useSetAtom(viewportWidthAtom);
+  const setOrientation = useSetAtom(viewportOrientationAtom);
+  const setIsMobile = useSetAtom(isMobileAtom);
+  const setKeyboardVisible = useSetAtom(virtualKeyboardVisibleAtom);
+
+  const maxHeightRef = useRef<{ portrait: number; landscape: number }>({
+    portrait: 0,
+    landscape: 0,
+  });
+  const orientationRef = useRef<Orientation>("portrait");
+  const keyboardVisibleRef = useRef<boolean>(false);
+  const rafId = useRef<number | null>(null);
+
+  const isKeyboardElement = (node: Element | null): boolean => {
+    if (!node) return false;
+
+    if (node instanceof HTMLInputElement) {
+      const type = node.type;
+      const ignored = new Set([
+        "button",
+        "checkbox",
+        "color",
+        "file",
+        "hidden",
+        "image",
+        "radio",
+        "range",
+        "reset",
+        "submit",
+      ]);
+      return !ignored.has(type);
+    }
+
+    if (node instanceof HTMLTextAreaElement) {
+      return true;
+    }
+
+    if (node instanceof HTMLElement && node.isContentEditable) {
+      return true;
+    }
+
+    return false;
+  };
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const root = document.documentElement;
+
+    const applyMetrics = (reset: boolean) => {
+      const { width, height } = readViewportSize();
+      const keyboardVisible = keyboardVisibleRef.current;
+      const orientation = detectOrientation(
+        width,
+        height,
+        orientationRef.current,
+        maxHeightRef.current.portrait,
+        keyboardVisible
+      );
+      orientationRef.current = orientation;
+
+      if (reset && !keyboardVisible) {
+        maxHeightRef.current[orientation] = 0;
+      }
+
+      let stableHeight = maxHeightRef.current[orientation];
+
+      if (!keyboardVisible) {
+        const previous = typeof stableHeight === "number" ? stableHeight : 0;
+        stableHeight = Math.max(previous, height);
+        maxHeightRef.current[orientation] = stableHeight;
+      }
+
+      if (typeof stableHeight !== "number" || stableHeight <= 0) {
+        stableHeight = height;
+        maxHeightRef.current[orientation] = stableHeight;
+      }
+
+      root.style.setProperty("--viewport-height", `${stableHeight}px`);
+
+      setViewportHeight(stableHeight);
+      setViewportWidth(width);
+      setOrientation(orientation);
+      setIsMobile(isMobileDevice({ width, height }));
+      setKeyboardVisible(keyboardVisible);
+    };
+
+    const scheduleUpdate = (reset = false) => {
+      if (rafId.current !== null) {
+        cancelAnimationFrame(rafId.current);
+      }
+      rafId.current = window.requestAnimationFrame(() => applyMetrics(reset));
+    };
+
+    applyMetrics(true);
+
+    const handleResize = () => scheduleUpdate(false);
+    const handleOrientationChange = () => scheduleUpdate(true);
+
+    const updateKeyboardVisibility = (visible: boolean) => {
+      if (keyboardVisibleRef.current === visible) {
+        return;
+      }
+      keyboardVisibleRef.current = visible;
+      scheduleUpdate(false);
+    };
+
+    const handleFocusIn = (event: FocusEvent) => {
+      const target = event.target as Element | null;
+      updateKeyboardVisibility(isKeyboardElement(target));
+    };
+
+    const handleFocusOut = () => {
+      requestAnimationFrame(() => {
+        const active = document.activeElement as Element | null;
+        updateKeyboardVisibility(isKeyboardElement(active));
+      });
+    };
+
+    window.addEventListener("focusin", handleFocusIn, true);
+    window.addEventListener("focusout", handleFocusOut, true);
+
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("orientationchange", handleOrientationChange);
+    window.visualViewport?.addEventListener("resize", handleResize);
+
+    const virtualKeyboard = (navigator as any)?.virtualKeyboard;
+    if (virtualKeyboard && typeof virtualKeyboard.addEventListener === "function") {
+      try {
+        virtualKeyboard.overlaysContent = true;
+      } catch (error) {
+        console.warn("Unable to enable virtual keyboard overlay", error);
+      }
+
+      const handleGeometryChange = (event: any) => {
+        const rect = event?.target?.boundingRect;
+        if (!rect) {
+          updateKeyboardVisibility(false);
+          return;
+        }
+        updateKeyboardVisibility(rect.height > 0);
+      };
+
+      virtualKeyboard.addEventListener("geometrychange", handleGeometryChange);
+
+      return () => {
+        if (rafId.current !== null) {
+          cancelAnimationFrame(rafId.current);
+        }
+        window.removeEventListener("focusin", handleFocusIn, true);
+        window.removeEventListener("focusout", handleFocusOut, true);
+        window.removeEventListener("resize", handleResize);
+        window.removeEventListener("orientationchange", handleOrientationChange);
+        window.visualViewport?.removeEventListener("resize", handleResize);
+        virtualKeyboard.removeEventListener("geometrychange", handleGeometryChange);
+      };
+    }
+
+    return () => {
+      if (rafId.current !== null) {
+        cancelAnimationFrame(rafId.current);
+      }
+      window.removeEventListener("focusin", handleFocusIn, true);
+      window.removeEventListener("focusout", handleFocusOut, true);
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("orientationchange", handleOrientationChange);
+      window.visualViewport?.removeEventListener("resize", handleResize);
+    };
+  }, [setIsMobile, setKeyboardVisible, setOrientation, setViewportHeight, setViewportWidth]);
+};

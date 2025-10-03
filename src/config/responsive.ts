@@ -11,10 +11,62 @@
  * - Mobile: Percentage-based sizing with dynamic calculation
  */
 
-import {
-  isMobileDevice,
-  calculateMobileCubeSize,
-} from "@/utils/deviceDetection";
+import { isMobileDevice } from "@/utils/deviceDetection";
+
+const FALLBACK_DIMENSION = 1000;
+
+const resolveViewportHeight = (): number => {
+  if (typeof window === "undefined") {
+    return FALLBACK_DIMENSION;
+  }
+
+  const fallback = window.innerHeight || FALLBACK_DIMENSION;
+
+  try {
+    const rawValue = getComputedStyle(document.documentElement)
+      .getPropertyValue("--viewport-height")
+      .trim();
+
+    if (!rawValue) {
+      return fallback;
+    }
+
+    const numeric = parseFloat(rawValue);
+    if (Number.isNaN(numeric) || numeric <= 0) {
+      return fallback;
+    }
+
+    if (rawValue.endsWith("vh")) {
+      return (numeric / 100) * fallback;
+    }
+
+    return numeric;
+  } catch (error) {
+    console.warn(
+      "Failed to resolve --viewport-height, falling back to window height",
+      error
+    );
+    return fallback;
+  }
+};
+
+const resolveViewportWidth = (): number => {
+  if (typeof window === "undefined") {
+    return FALLBACK_DIMENSION;
+  }
+
+  const viewportWidth = window.visualViewport?.width;
+  if (typeof viewportWidth === "number" && viewportWidth > 0) {
+    return viewportWidth;
+  }
+
+  return window.innerWidth || FALLBACK_DIMENSION;
+};
+
+const getViewportDimensions = () => ({
+  width: resolveViewportWidth(),
+  height: resolveViewportHeight(),
+});
 
 /**
  * Configuration for a single breakpoint
@@ -130,15 +182,15 @@ export type BreakpointKey = keyof typeof RESPONSIVE_CONFIG;
  * getCurrentBreakpoint() // → 'large' (not mobile, both >= 1000)
  */
 export function getCurrentBreakpoint(): BreakpointKey {
+  const { width, height } = getViewportDimensions();
+
   // Check for mobile device first
-  if (isMobileDevice()) {
+  if (isMobileDevice({ width, height })) {
     return "mobile";
   }
 
   // For desktop/tablet, check both width AND height
   // Check in order from largest to smallest
-  const width = typeof window !== "undefined" ? window.innerWidth : 1000;
-  const height = typeof window !== "undefined" ? window.innerHeight : 1000;
 
   if (width >= 1000 && height >= 1000) return "large";
   if (width >= 800 && height >= 800) return "medium";
@@ -181,7 +233,12 @@ export function getTargetPixelSize(breakpoint: BreakpointKey): number {
   // Mobile: calculate dynamically from viewport
   if (breakpoint === "mobile") {
     const mobileConfig = RESPONSIVE_CONFIG.mobile;
-    return calculateMobileCubeSize(mobileConfig.marginPercentage);
+    const { width, height } = getViewportDimensions();
+    const orientation = width > height ? "landscape" : "portrait";
+    const dimension = orientation === "landscape" ? width : height;
+    const margin = mobileConfig.marginPercentage ?? 0.15;
+
+    return dimension * (1 - margin);
   }
 
   // Desktop/Tablet: fixed value

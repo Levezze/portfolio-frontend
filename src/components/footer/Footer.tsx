@@ -1,12 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { StateControls } from "./StateControls";
 import { Navigation } from "./Navigation";
-import { useIsMobile } from "@/hooks/useIsMobile";
 import { useAtom, useAtomValue } from "jotai";
 import {
   cubeColorAtom,
   activeFaceAtom,
   drawerOpenAtom,
+  isMobileAtom,
+  viewportHeightAtom,
+  viewportOrientationAtom,
+  viewportWidthAtom,
 } from "@/atoms/atomStore";
 import {
   Drawer,
@@ -17,39 +20,26 @@ import {
 } from "@/components/ui/drawer";
 import { MenuIcon, MessageSquareTextIcon } from "lucide-react";
 import { RESPONSIVE_CONFIG } from "@/config/responsive";
-import { getMobileOrientation } from "@/utils/deviceDetection";
 import { ButtonFrame } from "../shared/ButtonFrame";
 import { TooltipButton } from "../shared/TooltipButton";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 export const Footer = () => {
-  const isMobile = useIsMobile();
+  const isMobile = useAtomValue(isMobileAtom);
   const cubeColor = useAtomValue(cubeColorAtom);
   const [activeFace, setActiveFace] = useAtom(activeFaceAtom);
   const [drawerOpen, setDrawerOpen] = useAtom(drawerOpenAtom);
-  const [orientation, setOrientation] = useState<"portrait" | "landscape">(
-    "portrait"
-  );
-
-  useEffect(() => {
-    if (!isMobile) return;
-
-    const updateOrientation = () => {
-      setOrientation(getMobileOrientation());
-    };
-
-    updateOrientation();
-
-    window.addEventListener("resize", updateOrientation);
-    return () => window.removeEventListener("resize", updateOrientation);
-  }, [isMobile]);
+  const orientation = useAtomValue(viewportOrientationAtom);
+  const viewportHeight = useAtomValue(viewportHeightAtom);
+  const viewportWidth = useAtomValue(viewportWidthAtom);
 
   if (!isMobile) {
     return (
       <div
         className="fixed bottom-0 left-0 right-0 flex items-center justify-center z-100"
         style={{
-          height: "clamp(50px, calc((100vh - var(--face-size)) / 2), 100px)",
+          height:
+            "clamp(50px, calc((var(--viewport-height) - var(--face-size)) / 2), 100px)",
         }}
       >
         <div className="footer gap-4 flex flex-row justify-between">
@@ -62,15 +52,24 @@ export const Footer = () => {
 
   // mobile:
   const marginPercent = RESPONSIVE_CONFIG.mobile.marginPercentage || 0.15;
-  const containerSize = (marginPercent / 2) * 100;
+  const containerFraction = marginPercent / 2;
   const drawerButtonColorClass = "text-white dark:text-muted";
+  const portraitHeight = viewportHeight
+    ? `${viewportHeight * containerFraction}px`
+    : undefined;
+  const landscapeWidth = viewportWidth
+    ? `${viewportWidth * containerFraction}px`
+    : undefined;
 
   return (
     <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
       {orientation === "portrait" ? (
         <div
           className="fixed bottom-0 left-0 right-0 flex flex-row gap-4 items-center justify-center z-100"
-          style={{ height: `${containerSize}vh` }}
+          style={{
+            height:
+              portraitHeight ?? `calc(var(--viewport-height) * ${containerFraction})`,
+          }}
         >
           <DrawerTrigger asChild>
             <div className="flex justify-center">
@@ -115,7 +114,10 @@ export const Footer = () => {
       ) : (
         <div
           className="fixed left-0 top-0 bottom-0 flex flex-col gap-4 items-center justify-center z-100"
-          style={{ width: `${containerSize}vw` }}
+          style={{
+            width:
+              landscapeWidth ?? `calc(100vw * ${containerFraction})`,
+          }}
         >
           <DrawerTrigger asChild>
             <div className="flex justify-center w-full">
