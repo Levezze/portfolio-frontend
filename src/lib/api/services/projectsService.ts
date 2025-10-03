@@ -15,7 +15,7 @@ export const getProjectsGallery = async () => {
 
 export const transformProjectGallery = async (project: ProjectGalleryType) => {
   const baseProjectGallery = {
-    thumbnailKey: project.thumbnail_key,
+    thumbnailKey: project.thumbnail_url,
     title: project.title,
     shortDescription: project.short_description,
     displayOrder: project.display_order,
