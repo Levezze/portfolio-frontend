@@ -50,12 +50,12 @@ const Projects = () => {
           <div className="absolute inset-0 rounded-[25px] bg-black/0 group-hover:bg-white/20 dark:group-hover:bg-black/20 transition-colors duration-300 pointer-events-none" />
           <div className="absolute inset-0 rounded-[25px] shadow-[inset_0px_-10px_10px_-10px_rgba(0,0,0,0.05)] pointer-events-none" />
           <div className="relative w-fit h-full z-10 flex flex-col items-start justify-between p-2 md:p-4">
-            <div className="bg-background/80 px-4 py-2 rounded-[25px] break-words">
+            <div className="bg-background/80 px-4 py-2 rounded-[25px] break-words shadow-sm shadow-muted-foreground/5">
               <h1 className="font-merriweather font-medium text-xs lg:text-sm">
                 {project.title}
               </h1>
             </div>
-            <div className="bg-background/80 px-4 py-2 rounded-[25px] break-words group-hover:opacity-100 opacity-0 transition-all duration-300">
+            <div className="bg-background/80 px-4 py-2 rounded-[25px] break-words group-hover:opacity-100 opacity-0 transition-all duration-300 shadow-sm shadow-muted-foreground/5">
               <h2 className="font-regular font-inter text-center text-xs lg:text-sm">
                 {project.short_description}
               </h2>
