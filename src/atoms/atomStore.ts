@@ -65,3 +65,6 @@ export const viewportWidthAtom = atom<number>(0);
 export const viewportOrientationAtom = atom<"portrait" | "landscape">(
   "portrait"
 );
+
+// Projects Gallery
+export const projectViewAtom = atom<string>("gallery");

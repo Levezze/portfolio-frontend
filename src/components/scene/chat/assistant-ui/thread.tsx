@@ -6,6 +6,8 @@ import {
   ErrorPrimitive,
   MessagePrimitive,
   ThreadPrimitive,
+  useAssistantRuntime,
+  useThread,
 } from "@assistant-ui/react";
 import {
   ArrowDownIcon,
@@ -43,6 +45,23 @@ import { gimliChoiceAtom } from "@/atoms/atomStore";
 import { ButtonFrame } from "@/components/shared/ButtonFrame";
 import { LinkButton } from "@/components/shared/LinkButton";
 import { FailedLoad } from "@/components/shared/FailedLoad";
+import { BackButton } from "@/components/shared/BackButton";
+
+const ChatBackButton: FC = () => {
+  const runtime = useAssistantRuntime();
+  const thread = useThread();
+
+  // Only show if thread has messages
+  if (!thread.messages || thread.messages.length === 0) {
+    return null;
+  }
+
+  const handleReset = () => {
+    runtime.switchToNewThread();
+  };
+
+  return <BackButton onClick={handleReset} tooltip="Start new chat" />;
+};
 
 export const Thread: FC = () => {
   const {
@@ -61,6 +80,7 @@ export const Thread: FC = () => {
 
   return (
     <div className="relative h-full">
+      <ChatBackButton />
       <div
         className={`h-full ${
           isLoading ? "opacity-0" : "opacity-100 transition-opacity"
