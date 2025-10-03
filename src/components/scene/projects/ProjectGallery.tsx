@@ -2,6 +2,7 @@ import React from "react";
 import useSWR from "swr";
 import { getProjectsGallery } from "@/lib/api/services/projectsService";
 import { FailedLoad } from "@/components/shared/FailedLoad";
+import { Loading } from "@/components/shared/Loading";
 import Image from "next/image";
 import { useSetAtom } from "jotai";
 import { projectViewAtom } from "@/atoms/atomStore";
@@ -21,7 +22,7 @@ export const ProjectGallery = () => {
     }
   );
 
-  if (isLoading) return <div>Loading projects...</div>;
+  if (isLoading) return <Loading />;
   if (error) {
     console.error(error);
     return <FailedLoad />;

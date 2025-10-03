@@ -15,6 +15,7 @@ export const getProjectsGallery = async () => {
 
 export const transformProjectGallery = async (project: ProjectGalleryType) => {
   const baseProjectGallery = {
+    slug: project.slug,
     thumbnailKey: project.thumbnail_url,
     title: project.title,
     shortDescription: project.short_description,
@@ -32,6 +33,7 @@ export const getProjectPage = async (id: string) => {
 
 export const transformProjectPage = async (project: ProjectPageType) => {
   const baseProjectPage = {
+    slug: project.slug,
     title: project.title,
     description: project.description,
     category: project.category,
