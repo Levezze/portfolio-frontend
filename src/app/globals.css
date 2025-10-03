@@ -2,6 +2,7 @@
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
+/* @custom-variant mobile-landscape (max-height: 600px) and (orientation: landscape); */
 
 @theme inline {
   --color-background: var(--background);
@@ -97,11 +98,15 @@
   --page-contact: #C7B8D4;
   --page-resume: #E6C9B5;
   --page-secret: #E4DFDA;
+  --viewport-height: 100vh;
 
   /* Responsive face padding for mobile/tablet letterboxing */
   /* Vertical padding: when face is taller than viewport + 10px margin */
   /* Production-safe: explicit parentheses and spaces around operators */
-  --face-padding-y: max(0px, calc(((var(--face-size) - 100vh) / 2) + 20px));
+  --face-padding-y: max(
+    0px,
+    calc(((var(--face-size) - var(--viewport-height)) / 2) + 20px)
+  );
   /* Horizontal padding: when face is wider than viewport + 10px margin */
   /* CRITICAL FIX: Extra parentheses prevent production build mangling */
   --face-padding-x: max(0px, calc(((var(--face-size) - 100vw) / 2) + 20px));
@@ -141,6 +146,36 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+}
+
+@media (max-height: 600px) and (orientation: landscape) {
+  .mobile-landscape\:grid-rows-3 {
+    grid-template-rows: repeat(3, minmax(0, 1fr)) !important;
+  }
+  .mobile-landscape\:grid-cols-1 {
+    grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+  }
+  .mobile-landscape\:aspect-auto {
+    aspect-ratio: auto !important;
+  }
+  .mobile-landscape\:p-0 {
+    padding: 0 !important;
+  }
+  .mobile-landscape\:p-1 {
+    padding: 1rem !important;
+  }
+  .mobile-landscape\:p-2 {
+    padding: 2rem !important;
+  }
+  .mobile-landscape\:p-3 {
+    padding: 3rem !important;
+  }
+  .mobile-landscape\:p-4 {
+    padding: 4rem !important;
+  }
+  .mobile-landscape\:hidden {
+    display: none !important;
+  }
 }
 
 @media (min-width: 600px) and (min-height: 600px) {

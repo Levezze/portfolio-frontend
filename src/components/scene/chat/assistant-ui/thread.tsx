@@ -6,6 +6,8 @@ import {
   ErrorPrimitive,
   MessagePrimitive,
   ThreadPrimitive,
+  useAssistantRuntime,
+  useThread,
 } from "@assistant-ui/react";
 import {
   ArrowDownIcon,
@@ -43,6 +45,23 @@ import { gimliChoiceAtom } from "@/atoms/atomStore";
 import { ButtonFrame } from "@/components/shared/ButtonFrame";
 import { LinkButton } from "@/components/shared/LinkButton";
 import { FailedLoad } from "@/components/shared/FailedLoad";
+import { BackButton } from "@/components/shared/BackButton";
+
+const ChatBackButton: FC = () => {
+  const runtime = useAssistantRuntime();
+  const thread = useThread();
+
+  // Only show if thread has messages
+  if (!thread.messages || thread.messages.length === 0) {
+    return null;
+  }
+
+  const handleReset = () => {
+    runtime.switchToNewThread();
+  };
+
+  return <BackButton onClick={handleReset} tooltip="Start new chat" />;
+};
 
 export const Thread: FC = () => {
   const {
@@ -61,6 +80,7 @@ export const Thread: FC = () => {
 
   return (
     <div className="relative h-full">
+      <ChatBackButton />
       <div
         className={`h-full ${
           isLoading ? "opacity-0" : "opacity-100 transition-opacity"
@@ -191,7 +211,7 @@ const ThreadWelcome: FC<{ config: ChatConfig }> = ({ config }) => {
   const welcome_messages = config.welcome_messages;
   return (
     <ThreadPrimitive.Empty>
-      <div className="aui-thread-welcome-root mx-auto my-auto flex w-full max-w-[var(--thread-max-width)] flex-col h-full justify-around overflow-y-auto px-0 md:px-8">
+      <div className="aui-thread-welcome-root mx-auto my-auto flex w-full max-w-[var(--thread-max-width)] flex-col h-full justify-around overflow-y-auto px-0 md:px-8 mobile-landscape:p-0">
         <div className="aui-thread-welcome-center flex w-full flex-col justify-center">
           <div className="aui-thread-welcome-message flex size-full flex-col justify-center">
             <m.div
@@ -298,7 +318,7 @@ const ThreadWelcomeSuggestions: FC<{ suggestions: any[] }> = ({
           exit={{ opacity: 0, y: 20 }}
           transition={{ delay: 0.05 * index }}
           key={`suggested-action-${suggestedAction.title}-${index}`}
-          className="aui-thread-welcome-suggestion-display [&:nth-child(n+3)]:hidden [@media(min-height:800px)]:[&:nth-child(n+3)]:block @md:[&:nth-child(n+3)]:block"
+          className="aui-thread-welcome-suggestion-display [&:nth-child(n+3)]:hidden [@media(min-height:800px)]:[&:nth-child(n+3)]:block @md:[&:nth-child(n+3)]:block [@media(max-height:500px)]:[&:nth-child(n+3)]:hidden"
         >
           <ThreadPrimitive.Suggestion
             prompt={suggestedAction.action}
@@ -336,11 +356,11 @@ const Composer: FC<{ chatConfig: ChatConfig | null; isLoading: boolean }> = ({
   isLoading,
 }) => {
   return (
-    <div className="aui-composer-wrapper sticky bottom-0 mx-auto flex w-full max-w-[var(--thread-max-width)] flex-col overflow-visible rounded-t-md bg-background pb-4 md:pb-6">
+    <div className="aui-composer-wrapper sticky bottom-0 mx-auto flex w-full max-w-[var(--thread-max-width)] flex-col overflow-visible rounded-t-md bg-background pb-4 md:pb-6 mobile-landscape:p-0">
       <ThreadScrollToBottom />
       <ThreadPrimitive.Empty>
         <div className="flex flex-col items-center justify-center mb-4">
-          <Separator className="my-4 w-full" />
+          <Separator className="my-4 w-full mobile-landscape:hidden" />
           {chatConfig && !isLoading && (
             <FakeAssistantMessage
               text={

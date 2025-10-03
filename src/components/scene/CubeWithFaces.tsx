@@ -29,6 +29,11 @@ export const CubeWithFaces = () => {
   const isMounted = useRef(false);
   const [, setIsRotating] = useState(false);
 
+  // Track which faces have been activated (lazy rendering optimization)
+  const [activatedFaces, setActivatedFaces] = useState<Set<string>>(
+    new Set([activeFace]) // Start with the initial active face
+  );
+
   const faceSize = useAtomValue(faceSizeAtom);
   const cubeSize = useAtomValue(cubeSizeAtom);
   const transitionDuration = useAtomValue(transitionDurationAtom);
@@ -122,6 +127,16 @@ export const CubeWithFaces = () => {
   );
 
   const activeFaceData = cubeFaces[activeFace];
+
+  // Add new face to activated set when activeFace changes
+  useEffect(() => {
+    setActivatedFaces((prev) => {
+      if (prev.has(activeFace)) return prev;
+      const newSet = new Set(prev);
+      newSet.add(activeFace);
+      return newSet;
+    });
+  }, [activeFace]);
 
   useEffect(() => {
     if (!isMounted.current) {
@@ -218,6 +233,10 @@ export const CubeWithFaces = () => {
 
       {Object.entries(cubeFaces).map(([face, data]) => {
         const isActive = face === activeFace;
+        const shouldRender = activatedFaces.has(face);
+
+        // Only render faces that have been activated at least once
+        if (!shouldRender) return null;
 
         return (
           <Html

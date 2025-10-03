@@ -1,15 +1,19 @@
 'use client';
 import { useSetAtom, useAtomValue } from 'jotai';
-import React, { useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
+import { useEffect, useState } from 'react';
 import { lightThemeAtom, cubeColorAtom, pageColorAtom, activeFaceAtom } from '@/atoms/atomStore';
 import { getCssColor } from '@/utils/general';
+import { useViewportMetrics } from '@/hooks/useViewportMetrics';
 
-export const ThemeWrapper = ({ children }:{ children: React.ReactNode }) => {
+export const ThemeWrapper = ({ children }:{ children: ReactNode }) => {
     const theme = useAtomValue(lightThemeAtom);
     const activeFace = useAtomValue(activeFaceAtom);
     const setCubeBgColor = useSetAtom(cubeColorAtom);
     const setPageColor = useSetAtom(pageColorAtom);
     const [mounted, setMounted] = useState(false);
+
+    useViewportMetrics();
 
     // Prevent hydration mismatch by waiting for mount
     useEffect(() => {
