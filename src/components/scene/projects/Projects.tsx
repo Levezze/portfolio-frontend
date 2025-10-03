@@ -27,20 +27,35 @@ const Projects = () => {
 
   const projectsArray = data?.projects || [];
 
+  const borderRadius = [
+    "md:rounded-br-[25px]",
+    "md:rounded-bl-[25px]",
+    "md:rounded-tr-[25px]",
+    "md:rounded-tl-[25px]",
+  ];
+
   return (
-    <div className="w-full h-full p-0 md:p-4 grid grid-rows-3 grid-cols-1 md:grid-rows-2 md:grid-cols-2 gap-4 md:gap-8 overflow-x-hidden overflow-y-hidden">
+    <div
+      className="
+      w-full h-full p-0 grid gap-4
+      overflow-x-hidden overflow-y-hidden
+      grid-rows-3 grid-cols-1
+      md:p-4 md:grid-rows-2 md:grid-cols-2 md:gap-8"
+    >
       {projectsArray.map((project, index) => (
         <button
           key={index}
-          className="min-h-[600px]:aspect-square w-full relative cursor-pointer rounded-[25px] group overflow-hidden"
+          className={`md:aspect-square mobile-landscape:aspect-auto w-full relative cursor-pointer group overflow-hidden md:rounded-none ${borderRadius[index]}`}
         >
           <Image
             src={project.thumbnail_url}
             alt={project.title}
             fill
-            className="object-cover rounded-[25px] group-hover:scale-105 transition-transform duration-300"
+            className={`object-cover group-hover:scale-105 rounded-[25px] transition-transform duration-300 md:rounded-none ${borderRadius[index]}`}
           />
-          <div className="absolute inset-0 rounded-[25px] bg-black/0 group-hover:bg-white/20 dark:group-hover:bg-black/20 transition-colors duration-300 pointer-events-none" />
+          <div
+            className={`absolute inset-0 rounded-[25px] bg-black/0 group-hover:bg-white/20 dark:group-hover:bg-black/20 transition-colors duration-300 pointer-events-none md:rounded-none ${borderRadius[index]}`}
+          />
           <div className="absolute inset-0 rounded-[25px] shadow-[inset_0px_-10px_10px_-10px_rgba(0,0,0,0.05)] pointer-events-none" />
           <div className="relative w-fit h-full z-10 flex flex-col items-start justify-between p-2 md:p-4">
             <div className="bg-background/80 px-4 py-2 rounded-[25px] break-words shadow-sm shadow-muted-foreground/5">
