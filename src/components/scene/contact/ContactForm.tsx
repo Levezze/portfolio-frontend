@@ -20,6 +20,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Spinner } from "@/components/ui/spinner";
 
 // Validation schema
 const contactFormSchema = z.object({
@@ -90,7 +91,9 @@ const ContactForm = () => {
         setSubmitStatus("idle");
       }, 5000);
     } catch (error) {
-      console.error("Failed to send email:", error);
+      console.debug("Failed to send email - Full error:", error);
+      console.debug("Error text:", (error as any)?.text);
+      console.debug("Error status:", (error as any)?.status);
       setSubmitStatus("error");
     } finally {
       setIsSubmitting(false);
@@ -100,7 +103,6 @@ const ContactForm = () => {
   return (
     <LazyMotion features={domAnimation}>
       <div className="flex flex-col items-center justify-start h-full w-full px-2 pt-2 gap-2 overflow-y-auto">
-        {/* Title */}
         <m.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -114,7 +116,6 @@ const ContactForm = () => {
 
         <Separator className="w-full" />
 
-        {/* Form */}
         <m.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -123,7 +124,6 @@ const ContactForm = () => {
         >
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              {/* Name Field */}
               <FormField
                 control={form.control}
                 name="name"
@@ -142,7 +142,6 @@ const ContactForm = () => {
                 )}
               />
 
-              {/* Email Field */}
               <FormField
                 control={form.control}
                 name="email"
@@ -162,7 +161,6 @@ const ContactForm = () => {
                 )}
               />
 
-              {/* Subject Field */}
               <FormField
                 control={form.control}
                 name="subject"
@@ -183,7 +181,6 @@ const ContactForm = () => {
                 )}
               />
 
-              {/* Message Field */}
               <FormField
                 control={form.control}
                 name="message"
@@ -205,7 +202,6 @@ const ContactForm = () => {
                 )}
               />
 
-              {/* Submit Button */}
               <div className="flex flex-col pt-2">
                 <Button
                   type="submit"
@@ -214,22 +210,30 @@ const ContactForm = () => {
                   variant="default"
                   matchBgColor={true}
                 >
-                  {isSubmitting ? "Sending..." : "Send Message"}
+                  {isSubmitting ? <Spinner /> : "Send Message"}
                 </Button>
 
-                {/* Success Message */}
                 {submitStatus === "success" && (
                   <p className="text-sm text-center text-green-600 dark:text-green-400 font-inter">
                     Message sent successfully! I'll get back to you soon.
                   </p>
                 )}
 
-                {/* Error Message */}
                 {submitStatus === "error" && (
-                  <p className="text-sm text-center text-destructive font-inter pt-2">
-                    Failed to send message. Please try again or email me
-                    directly at contact@levezze.com
-                  </p>
+                  <>
+                    <p className="text-sm text-center text-muted-foreground font-inter pt-2">
+                      Failed to send message. Please try again or email me
+                      directly at{" "}
+                      <span className="text-sm text-center text-muted-foreground font-inter">
+                        <a
+                          href="mailto:contact@levezze.com"
+                          className="text-sm underline-offset-4 hover:underline font-semibold"
+                        >
+                          contact@levezze.com
+                        </a>
+                      </span>
+                    </p>
+                  </>
                 )}
               </div>
             </form>
