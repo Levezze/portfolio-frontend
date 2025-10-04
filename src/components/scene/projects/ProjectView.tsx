@@ -6,7 +6,9 @@ import { Loading } from "@/components/shared/alerts/Loading";
 import { FailedLoad } from "@/components/shared/alerts/FailedLoad";
 import { getProjectPage } from "@/lib/api/services/projectsService";
 import { Separator } from "@/components/ui/separator";
-import { LazyMotion, MotionConfig, domAnimation } from "motion/react";
+import { LazyMotion, domAnimation } from "motion/react";
+import { LinkifyText } from "@/components/shared/LinkifyText";
+
 import * as m from "motion/react-m";
 
 export const ProjectView = ({ projectTitle }: { projectTitle: string }) => {
@@ -27,23 +29,15 @@ export const ProjectView = ({ projectTitle }: { projectTitle: string }) => {
     }
   );
 
-  // const handleBack = () => {
-  //   setProjectView("gallery");
-  // };
-
   if (isLoading) return <Loading />;
   if (error) return <FailedLoad />;
 
   const projectData = project?.project;
+  const linkifiedDescription = LinkifyText(projectData?.description || "");
 
   return (
     <LazyMotion features={domAnimation}>
       <div className="w-full h-full p-2 relative items-center justify-center">
-        {/* <BackButton
-          onClick={handleBack}
-          tooltip="Back to gallery"
-          className="!top-2 !left-2 my-auto mx-auto"
-        /> */}
         <div className="flex flex-col items-center justify-start h-full px-2 pt-2 gap-2">
           <m.div
             initial={{ opacity: 0, y: 10 }}
@@ -65,7 +59,7 @@ export const ProjectView = ({ projectTitle }: { projectTitle: string }) => {
             className="font-inter text-regular text-left w-full overflow-y-auto"
           >
             <p className="text-regular font-inter whitespace-pre-wrap text-left w-full">
-              {projectData?.description}
+              {linkifiedDescription}
             </p>
           </m.div>
         </div>
