@@ -7,7 +7,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/utils/general";
+import { cn } from "@/lib/utils/general";
 
 export interface BackButtonProps {
   onClick: () => void;

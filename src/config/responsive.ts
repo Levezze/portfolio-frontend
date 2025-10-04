@@ -11,7 +11,7 @@
  * - Mobile: Percentage-based sizing with dynamic calculation
  */
 
-import { isMobileDevice } from "@/utils/deviceDetection";
+import { isMobileDevice } from "@/lib/utils/deviceDetection";
 
 const FALLBACK_DIMENSION = 1000;
 
