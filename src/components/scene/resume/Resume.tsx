@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/button";
 
 import { apiClient } from "@/lib/api/core/client";
 import { resumeDownloadSchema } from "@/lib/api/schemas/resume";
-import { Loading } from "@/components/shared/Loading";
-import { FailedLoad } from "@/components/shared/FailedLoad";
+import { Loading } from "@/components/shared/alerts/Loading";
+import { FailedLoad } from "@/components/shared/alerts/FailedLoad";
 
 // dynamic import to avoid SSR issues
 const PDFViewer = dynamic(

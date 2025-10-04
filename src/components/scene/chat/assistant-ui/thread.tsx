@@ -33,7 +33,7 @@ import { ToolFallback } from "@/components/scene/chat/assistant-ui/tool-fallback
 import { TooltipIconButton } from "@/components/scene/chat/assistant-ui/tooltip-icon-button";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { cn } from "@/utils/general";
+import { cn } from "@/lib/utils/general";
 import { LazyMotion, MotionConfig, domAnimation } from "motion/react";
 import * as m from "motion/react-m";
 import { getChatConfig } from "@/lib/api/services/chatService";
@@ -44,7 +44,7 @@ import { useAtomValue } from "jotai";
 import { gimliChoiceAtom } from "@/atoms/atomStore";
 import { ButtonFrame } from "@/components/shared/ButtonFrame";
 import { LinkButton } from "@/components/shared/LinkButton";
-import { FailedLoad } from "@/components/shared/FailedLoad";
+import { FailedLoad } from "@/components/shared/alerts/FailedLoad";
 import { BackButton } from "@/components/shared/BackButton";
 
 const ChatBackButton: FC = () => {
@@ -88,12 +88,7 @@ export const Thread: FC = () => {
       >
         <LazyMotion features={domAnimation}>
           <MotionConfig reducedMotion="user">
-            <ThreadPrimitive.Root
-              className="aui-root aui-thread-root @container flex h-full flex-col bg-background"
-              style={{
-                ["--thread-max-width" as string]: "44rem",
-              }}
-            >
+            <ThreadPrimitive.Root className="aui-root aui-thread-root @container flex h-full flex-col bg-background">
               <ThreadPrimitive.Viewport className="aui-thread-viewport relative flex flex-1 flex-col overflow-x-auto overflow-y-auto">
                 {chatConfig && <ThreadWelcome config={chatConfig} />}
 

@@ -7,7 +7,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/utils/general";
+import { cn } from "@/lib/utils/general";
 
 export interface BackButtonProps {
   onClick: () => void;
@@ -29,7 +29,7 @@ export const BackButton = ({
           size="icon"
           onClick={onClick}
           className={cn(
-            "absolute size-[34px] rounded-full p-1 cursor-pointer z-10",
+            "absolute size-[34px] rounded-full p-1 cursor-pointer z-500",
             className
           )}
           aria-label={tooltip}

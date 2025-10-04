@@ -6,7 +6,7 @@ import {
   viewportOrientationAtom,
   viewportWidthAtom,
 } from "@/atoms/atomStore";
-import { isMobileDevice } from "@/utils/deviceDetection";
+import { isMobileDevice } from "@/lib/utils/deviceDetection";
 
 type Orientation = "portrait" | "landscape";
 
@@ -22,9 +22,15 @@ const readViewportSize = (): ViewportSize => {
 
   const viewport = window.visualViewport;
   const width =
-    viewport?.width ?? window.innerWidth ?? document.documentElement.clientWidth ?? 0;
+    viewport?.width ??
+    window.innerWidth ??
+    document.documentElement.clientWidth ??
+    0;
   const height =
-    viewport?.height ?? window.innerHeight ?? document.documentElement.clientHeight ?? 0;
+    viewport?.height ??
+    window.innerHeight ??
+    document.documentElement.clientHeight ??
+    0;
 
   return { width, height };
 };
@@ -38,7 +44,9 @@ const detectOrientation = (
   if (typeof window !== "undefined") {
     const screenOrientation = window.screen?.orientation?.type;
     if (typeof screenOrientation === "string") {
-      return screenOrientation.startsWith("portrait") ? "portrait" : "landscape";
+      return screenOrientation.startsWith("portrait")
+        ? "portrait"
+        : "landscape";
     }
 
     if (typeof window.matchMedia === "function") {
@@ -143,7 +151,7 @@ export const useViewportMetrics = () => {
       setViewportWidth(width);
       setOrientation(orientation);
       setIsMobile(isMobileDevice({ width, height }));
-          };
+    };
 
     const scheduleUpdate = (reset = false) => {
       if (rafId.current !== null) {
@@ -185,7 +193,10 @@ export const useViewportMetrics = () => {
     window.visualViewport?.addEventListener("resize", handleResize);
 
     const virtualKeyboard = (navigator as any)?.virtualKeyboard;
-    if (virtualKeyboard && typeof virtualKeyboard.addEventListener === "function") {
+    if (
+      virtualKeyboard &&
+      typeof virtualKeyboard.addEventListener === "function"
+    ) {
       try {
         virtualKeyboard.overlaysContent = true;
       } catch (error) {
@@ -210,9 +221,15 @@ export const useViewportMetrics = () => {
         window.removeEventListener("focusin", handleFocusIn, true);
         window.removeEventListener("focusout", handleFocusOut, true);
         window.removeEventListener("resize", handleResize);
-        window.removeEventListener("orientationchange", handleOrientationChange);
+        window.removeEventListener(
+          "orientationchange",
+          handleOrientationChange
+        );
         window.visualViewport?.removeEventListener("resize", handleResize);
-        virtualKeyboard.removeEventListener("geometrychange", handleGeometryChange);
+        virtualKeyboard.removeEventListener(
+          "geometrychange",
+          handleGeometryChange
+        );
       };
     }
 

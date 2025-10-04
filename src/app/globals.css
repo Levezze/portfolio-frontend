@@ -202,6 +202,12 @@
   }
 }
 
+@media (min-width: 1200px) and (min-height: 1200px) {
+  :root {
+    --face-size: 1000px;
+  }
+}
+
 .cube-face {
   width: var(--face-size);
   height: var(--face-size);
