@@ -7,11 +7,7 @@ import { ProjectView } from "./ProjectView";
 const Projects = () => {
   const projectView = useAtomValue(projectViewAtom);
 
-  return projectView === "gallery" ? (
-    <ProjectGallery />
-  ) : (
-    <ProjectView projectTitle={projectView} />
-  );
+  return true ? <ProjectGallery /> : <ProjectView projectTitle={projectView} />;
 };
 
 export default Projects;

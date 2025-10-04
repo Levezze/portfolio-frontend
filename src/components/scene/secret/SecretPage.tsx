@@ -1,11 +1,8 @@
-import React from 'react';
-import { Maintenance } from '@/components/shared/Maintenance';
-
+import React from "react";
+import { Maintenance } from "@/components/shared/alerts/Maintenance";
 
 const SecretPage = () => {
-  return (
-    <Maintenance />
-  )
-}
+  return <Maintenance />;
+};
 
 export default SecretPage;

@@ -2,10 +2,8 @@ import React from "react";
 import useSWR from "swr";
 import { useSetAtom } from "jotai";
 import { projectViewAtom } from "@/atoms/atomStore";
-import { Maintenance } from "@/components/shared/Maintenance";
-import { BackButton } from "@/components/shared/BackButton";
-import { Loading } from "@/components/shared/Loading";
-import { FailedLoad } from "@/components/shared/FailedLoad";
+import { Loading } from "@/components/shared/alerts/Loading";
+import { FailedLoad } from "@/components/shared/alerts/FailedLoad";
 import { getProjectPage } from "@/lib/api/services/projectsService";
 import { Separator } from "@/components/ui/separator";
 import { LazyMotion, MotionConfig, domAnimation } from "motion/react";
@@ -29,9 +27,9 @@ export const ProjectView = ({ projectTitle }: { projectTitle: string }) => {
     }
   );
 
-  const handleBack = () => {
-    setProjectView("gallery");
-  };
+  // const handleBack = () => {
+  //   setProjectView("gallery");
+  // };
 
   if (isLoading) return <Loading />;
   if (error) return <FailedLoad />;
@@ -40,13 +38,13 @@ export const ProjectView = ({ projectTitle }: { projectTitle: string }) => {
 
   return (
     <LazyMotion features={domAnimation}>
-      <div className="w-full h-full p-2 relative grid grid-rows-2 grid-cols-1 items-center justify-center">
-        <BackButton
+      <div className="w-full h-full p-2 relative items-center justify-center">
+        {/* <BackButton
           onClick={handleBack}
           tooltip="Back to gallery"
           className="!top-2 !left-2 my-auto mx-auto"
-        />
-        <div className="flex flex-col items-center justify-start h-full px-12 pt-12 gap-2">
+        /> */}
+        <div className="flex flex-col items-center justify-start h-full px-2 pt-2 gap-2">
           <m.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}

@@ -29,7 +29,7 @@ export const BackButton = ({
           size="icon"
           onClick={onClick}
           className={cn(
-            "absolute size-[34px] rounded-full p-1 cursor-pointer z-10",
+            "absolute size-[34px] rounded-full p-1 cursor-pointer z-500",
             className
           )}
           aria-label={tooltip}

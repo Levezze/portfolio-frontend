@@ -1,10 +1,8 @@
-import { Maintenance } from '@/components/shared/Maintenance';
-import React from 'react'
+import { Maintenance } from "@/components/shared/alerts/Maintenance";
+import React from "react";
 
 const ContactForm = () => {
-  return (
-    <Maintenance />
-  )
-}
+  return <Maintenance />;
+};
 
 export default ContactForm;

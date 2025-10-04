@@ -44,7 +44,7 @@ import { useAtomValue } from "jotai";
 import { gimliChoiceAtom } from "@/atoms/atomStore";
 import { ButtonFrame } from "@/components/shared/ButtonFrame";
 import { LinkButton } from "@/components/shared/LinkButton";
-import { FailedLoad } from "@/components/shared/FailedLoad";
+import { FailedLoad } from "@/components/shared/alerts/FailedLoad";
 import { BackButton } from "@/components/shared/BackButton";
 
 const ChatBackButton: FC = () => {
@@ -88,12 +88,7 @@ export const Thread: FC = () => {
       >
         <LazyMotion features={domAnimation}>
           <MotionConfig reducedMotion="user">
-            <ThreadPrimitive.Root
-              className="aui-root aui-thread-root @container flex h-full flex-col bg-background"
-              style={{
-                ["--thread-max-width" as string]: "44rem",
-              }}
-            >
+            <ThreadPrimitive.Root className="aui-root aui-thread-root @container flex h-full flex-col bg-background">
               <ThreadPrimitive.Viewport className="aui-thread-viewport relative flex flex-1 flex-col overflow-x-auto overflow-y-auto">
                 {chatConfig && <ThreadWelcome config={chatConfig} />}
 
