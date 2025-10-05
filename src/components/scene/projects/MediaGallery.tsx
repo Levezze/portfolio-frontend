@@ -68,7 +68,7 @@ export const MediaGallery = ({ items }: { items: MediaItem[] }) => {
             className="flex-none max-w-[75vw] snap-center"
           >
             {item.mediaType === "video" ? (
-              <VideoPlayer className="w-full aspect-video rounded-md overflow-hidden">
+              <VideoPlayer className="w-full aspect-video rounded-md overflow-hidden max-h-[50vh]">
                 <VideoPlayerContent
                   crossOrigin=""
                   muted
@@ -86,7 +86,7 @@ export const MediaGallery = ({ items }: { items: MediaItem[] }) => {
                 <img
                   src={item.original}
                   alt={`Project media ${idx + 1}`}
-                  className="w-full aspect-video object-cover rounded-md cursor-pointer hover:opacity-90 transition-opacity"
+                  className="w-full aspect-video object-cover rounded-md cursor-pointer hover:opacity-90 transition-opacity max-h-[50vh]"
                 />
               </Glimpse>
             )}

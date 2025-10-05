@@ -1,7 +1,7 @@
 import React from "react";
 import useSWR from "swr";
-import { useSetAtom } from "jotai";
-import { projectViewAtom } from "@/atoms/atomStore";
+import { useAtomValue, useSetAtom } from "jotai";
+import { isMobileAtom, projectViewAtom } from "@/atoms/atomStore";
 import { Loading } from "@/components/shared/alerts/Loading";
 import { FailedLoad } from "@/components/shared/alerts/FailedLoad";
 import { getProjectPage } from "@/lib/api/services/projectsService";
@@ -13,6 +13,7 @@ import { MediaGallery } from "./MediaGallery";
 import * as m from "motion/react-m";
 
 export const ProjectView = ({ projectTitle }: { projectTitle: string }) => {
+  const isMobile = useAtomValue(isMobileAtom);
   const {
     data: project,
     isLoading,
@@ -46,7 +47,10 @@ export const ProjectView = ({ projectTitle }: { projectTitle: string }) => {
 
   return (
     <LazyMotion features={domAnimation}>
-      <div className="w-full p-2 relative items-center justify-center max-h-[90vh]">
+      <div
+        className={`w-full relative items-center justify-center overflow-hidden 
+          `}
+      >
         <div className="flex flex-col items-center justify-start h-full px-2 pt-4 md:pt-0 gap-2">
           <m.div
             initial={{ opacity: 0, y: 10 }}
@@ -67,7 +71,7 @@ export const ProjectView = ({ projectTitle }: { projectTitle: string }) => {
             transition={{ delay: 0.2 }}
             className="font-inter text-regular text-left w-full flex-1 min-h-0"
           >
-            <div className="relative h-full overflow-y-auto">
+            <div className="relative h-full overflow-y-auto pb-4 md:pb-0">
               <MediaGallery items={mediaItems || []} />
               <p className="text-regular font-inter whitespace-pre-wrap text-left w-full">
                 {linkifiedDescription}
