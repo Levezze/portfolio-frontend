@@ -1,18 +1,19 @@
 import React from "react";
 import useSWR from "swr";
-import { useSetAtom } from "jotai";
-import { projectViewAtom } from "@/atoms/atomStore";
+import { useAtomValue, useSetAtom } from "jotai";
+import { isMobileAtom, projectViewAtom } from "@/atoms/atomStore";
 import { Loading } from "@/components/shared/alerts/Loading";
 import { FailedLoad } from "@/components/shared/alerts/FailedLoad";
 import { getProjectPage } from "@/lib/api/services/projectsService";
 import { Separator } from "@/components/ui/separator";
 import { LazyMotion, domAnimation } from "motion/react";
 import { LinkifyText } from "@/components/shared/LinkifyText";
+import { MediaGallery } from "./MediaGallery";
 
 import * as m from "motion/react-m";
 
 export const ProjectView = ({ projectTitle }: { projectTitle: string }) => {
-  const setProjectView = useSetAtom(projectViewAtom);
+  const isMobile = useAtomValue(isMobileAtom);
   const {
     data: project,
     isLoading,
@@ -35,10 +36,22 @@ export const ProjectView = ({ projectTitle }: { projectTitle: string }) => {
   const projectData = project?.project;
   const linkifiedDescription = LinkifyText(projectData?.description || "");
 
+  console.log(projectData?.media);
+  const mediaItems = projectData?.media.map((item: any) => ({
+    original: item.fileUrl,
+    thumbnail: item.fileUrl,
+    mediaType: item.mediaType,
+    mediaWidth: item.mediaWidth,
+    mediaHeight: item.mediaHeight,
+  }));
+
   return (
     <LazyMotion features={domAnimation}>
-      <div className="w-full h-full p-2 relative items-center justify-center">
-        <div className="flex flex-col items-center justify-start h-full px-2 pt-2 gap-2">
+      <div
+        className={`w-full relative items-center justify-center overflow-hidden 
+          `}
+      >
+        <div className="flex flex-col items-center justify-start h-full px-2 pt-4 md:pt-0 gap-2">
           <m.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -56,11 +69,14 @@ export const ProjectView = ({ projectTitle }: { projectTitle: string }) => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
             transition={{ delay: 0.2 }}
-            className="font-inter text-regular text-left w-full overflow-y-auto"
+            className="font-inter text-regular text-left w-full flex-1 min-h-0"
           >
-            <p className="text-regular font-inter whitespace-pre-wrap text-left w-full">
-              {linkifiedDescription}
-            </p>
+            <div className="relative h-full overflow-y-auto pb-4 md:pb-0">
+              <MediaGallery items={mediaItems || []} />
+              <p className="text-regular font-inter whitespace-pre-wrap text-left w-full">
+                {linkifiedDescription}
+              </p>
+            </div>
           </m.div>
         </div>
       </div>

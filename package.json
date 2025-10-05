@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
+    "build": "next build",
     "start": "next start",
     "lint": "biome check",
     "format": "biome format --write"
@@ -40,6 +40,7 @@
     "gsap": "^3.13.0",
     "jotai": "^2.14.0",
     "lucide-react": "^0.544.0",
+    "media-chrome": "^4.14.0",
     "motion": "^12.23.12",
     "nanoid": "^5.1.5",
     "next": "15.5.3",

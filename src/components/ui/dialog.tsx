@@ -62,7 +62,7 @@ function DialogContent({
         data-slot="dialog-content"
         className={cn(
           "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
-          "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-[25px] border-none p-2 pt-4 md:p-8 shadow-lg duration-200",
+          "fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-[25px] border-none p-2 pt-4 md:p-8 shadow-lg duration-200 overflow-hidden",
           "min-h-[300px] min-w-[300px]",
           "md:portrait:w-[var(--face-size)] md:portrait:max-h-[1400px] md:portrait:h-[calc(100vh-200px)]",
           "md:landscape:w-[calc(100vw-200px)] md:landscape:max-w-[1400px] md:landscape:h-[var(--face-size)]",
@@ -72,10 +72,7 @@ function DialogContent({
       >
         {children}
         {showCloseButton && (
-          <DialogPrimitive.Close
-            asChild
-            className="absolute top-4 left-4"
-          >
+          <DialogPrimitive.Close asChild className="absolute top-4 left-4">
             <BackButton onClick={() => {}} tooltip="Back to gallery" />
           </DialogPrimitive.Close>
         )}

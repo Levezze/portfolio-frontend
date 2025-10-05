@@ -1,7 +1,7 @@
-import { ZodError } from "zod";
 import { apiClient } from "../core/client";
 import {
   ProjectGalleryArraySchema,
+  ProjectMediaType,
   ProjectGalleryType,
   ProjectPageSchema,
   ProjectPageType,
@@ -45,7 +45,17 @@ export const transformProjectPage = (project: ProjectPageType) => {
     featured: project.featured,
     displayOrder: project.display_order,
     active: project.active,
-    media: project.media,
+    media: project.media.map((item: ProjectMediaType) => ({
+      fileUrl: item.file_url,
+      mediaType: item.media_type,
+      displayOrder: item.display_order,
+      isFeatured: item.is_featured,
+      altText: item.alt_text,
+      caption: item.caption,
+      filename: item.filename,
+      fileSize: item.file_size,
+      mimeType: item.mime_type,
+    })),
   };
 
   return baseProjectPage;
