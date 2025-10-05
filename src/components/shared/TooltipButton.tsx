@@ -2,8 +2,8 @@ import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
-} from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
+} from "@/components/shared/ui/tooltip";
+import { Button } from "@/components/shared/ui/button";
 
 interface TooltipButtonProps {
   tooltip: boolean;

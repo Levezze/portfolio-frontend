@@ -8,7 +8,7 @@ import {
 } from "../schemas/projects";
 
 export const getProjectsGallery = async () => {
-  const response = await apiClient.get("/projects");
+  const response = await apiClient.get("/projects/");
   const projectGallery = ProjectGalleryArraySchema.parse(response);
   const transformedProjects = projectGallery.map(transformProjectGallery);
   return { projects: transformedProjects };

@@ -14,7 +14,7 @@ import {
   transitionDurationAtom,
 } from "@/atoms/atomStore";
 import type { CubeFace } from "@/types/cubeTypes";
-import { Face } from "../shared/Face";
+import { Face } from "@/components/shared/Face";
 import AboutMe from "./about/AboutMe";
 import ChatUI from "./chat/ChatUI";
 import { MyRuntimeProvider } from "./chat/MyRuntimeProvider";
@@ -199,9 +199,24 @@ export const CubeWithFaces = () => {
     const target = targetColorRef.current;
 
     // Damp all RGB channels
-    material.color.r = THREE.MathUtils.damp(material.color.r, target.r, 1.6, delta);
-    material.color.g = THREE.MathUtils.damp(material.color.g, target.g, 1.6, delta);
-    material.color.b = THREE.MathUtils.damp(material.color.b, target.b, 1.6, delta);
+    material.color.r = THREE.MathUtils.damp(
+      material.color.r,
+      target.r,
+      1.6,
+      delta
+    );
+    material.color.g = THREE.MathUtils.damp(
+      material.color.g,
+      target.g,
+      1.6,
+      delta
+    );
+    material.color.b = THREE.MathUtils.damp(
+      material.color.b,
+      target.b,
+      1.6,
+      delta
+    );
 
     // Stop when close enough (threshold check)
     const threshold = 0.001;
@@ -253,9 +268,9 @@ export const CubeWithFaces = () => {
               WebkitFontSmoothing: "antialiased",
               opacity: isActive ? 1 : 0,
               transition: isActive
-                ? 'opacity 50ms ease-out'  // Quick appear
-                : `opacity ${transitionDuration}ms ease-in-out`,  // Slow fade-out
-              pointerEvents: isActive ? 'auto' : 'none',
+                ? "opacity 50ms ease-out" // Quick appear
+                : `opacity ${transitionDuration}ms ease-in-out`, // Slow fade-out
+              pointerEvents: isActive ? "auto" : "none",
             }}
             distanceFactor={4}
           >

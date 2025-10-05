@@ -5,7 +5,7 @@ import { isMobileAtom, projectViewAtom } from "@/atoms/atomStore";
 import { Loading } from "@/components/shared/alerts/Loading";
 import { FailedLoad } from "@/components/shared/alerts/FailedLoad";
 import { getProjectPage } from "@/lib/api/services/projectsService";
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "@/components/shared/ui/separator";
 import { LazyMotion, domAnimation } from "motion/react";
 import { LinkifyText } from "@/components/shared/LinkifyText";
 import { MediaGallery } from "./MediaGallery";

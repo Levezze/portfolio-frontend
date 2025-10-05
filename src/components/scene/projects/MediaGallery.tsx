@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Glimpse } from "@/components/kibo-ui/glimpse";
+import { Glimpse } from "@/components/shared/kibo-ui/glimpse";
 import {
   VideoPlayer,
   VideoPlayerContent,
-} from "@/components/kibo-ui/video-player";
+} from "@/components/shared/kibo-ui/video-player";
 
 interface MediaItem {
   original: string;
@@ -58,7 +58,7 @@ export const MediaGallery = ({ items }: { items: MediaItem[] }) => {
         ${autoCols}
         overflow-x-auto 
         snap-x snap-mandatory 
-        touch-pan-x 
+        touch-pan-x
         scrollbar-hide 
       `}
       >
@@ -68,7 +68,7 @@ export const MediaGallery = ({ items }: { items: MediaItem[] }) => {
             className="flex-none max-w-[75vw] snap-center"
           >
             {item.mediaType === "video" ? (
-              <VideoPlayer className="w-full aspect-video rounded-md overflow-hidden max-h-[50vh]">
+              <VideoPlayer className="w-full aspect-video rounded-md overflow-hidden max-h-[45vh]">
                 <VideoPlayerContent
                   crossOrigin=""
                   muted
@@ -86,7 +86,7 @@ export const MediaGallery = ({ items }: { items: MediaItem[] }) => {
                 <img
                   src={item.original}
                   alt={`Project media ${idx + 1}`}
-                  className="w-full aspect-video object-cover rounded-md cursor-pointer hover:opacity-90 transition-opacity max-h-[50vh]"
+                  className="w-full aspect-video object-cover rounded-md cursor-pointer hover:opacity-90 transition-opacity max-h-[45vh]"
                 />
               </Glimpse>
             )}

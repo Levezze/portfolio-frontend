@@ -11,7 +11,7 @@ import {
   DialogTrigger,
   DialogContent,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/components/shared/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { ProjectView } from "./ProjectView";
 

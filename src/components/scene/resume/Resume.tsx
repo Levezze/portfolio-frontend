@@ -4,7 +4,7 @@ import React from "react";
 import { Face } from "@/components/shared/Face";
 import useSWR from "swr";
 import dynamic from "next/dynamic";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/shared/ui/button";
 
 import { apiClient } from "@/lib/api/core/client";
 import { resumeDownloadSchema } from "@/lib/api/schemas/resume";

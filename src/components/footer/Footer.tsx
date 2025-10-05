@@ -17,11 +17,11 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "@/components/ui/drawer";
+} from "@/components/shared/ui/drawer";
 import { MenuIcon, MessageSquareTextIcon } from "lucide-react";
 import { RESPONSIVE_CONFIG } from "@/config/responsive";
-import { ButtonFrame } from "../shared/ButtonFrame";
-import { TooltipButton } from "../shared/TooltipButton";
+import { ButtonFrame } from "@/components/shared/ButtonFrame";
+import { TooltipButton } from "@/components/shared/TooltipButton";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 export const Footer = () => {

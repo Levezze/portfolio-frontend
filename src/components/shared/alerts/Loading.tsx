@@ -1,6 +1,6 @@
 import React from "react";
 import { AlertContainer } from "@/components/shared/alerts/AlertContainer";
-import { Spinner } from "@/components/ui/spinner";
+import { Spinner } from "@/components/shared/ui/spinner";
 
 export const Loading = () => {
   return (

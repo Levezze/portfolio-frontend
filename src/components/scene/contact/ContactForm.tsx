@@ -8,10 +8,10 @@ import emailjs from "@emailjs/browser";
 import { LazyMotion, domAnimation } from "motion/react";
 import * as m from "motion/react-m";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/shared/ui/button";
+import { Input } from "@/components/shared/ui/input";
+import { Textarea } from "@/components/shared/ui/textarea";
+import { Separator } from "@/components/shared/ui/separator";
 import {
   Form,
   FormControl,
@@ -19,8 +19,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Spinner } from "@/components/ui/spinner";
+} from "@/components/shared/ui/form";
+import { Spinner } from "@/components/shared/ui/spinner";
 
 // Validation schema
 const contactFormSchema = z.object({

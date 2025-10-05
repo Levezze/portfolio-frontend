@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ButtonFrame } from "../shared/ButtonFrame";
+import { ButtonFrame } from "@/components/shared/ButtonFrame";
 import {
   MessageSquareTextIcon,
   CircleUserIcon,
@@ -7,11 +7,11 @@ import {
   MailIcon,
   FileUserIcon,
 } from "lucide-react";
-import { TooltipButton } from "../shared/TooltipButton";
+import { TooltipButton } from "@/components/shared/TooltipButton";
 import { useAtom, useSetAtom } from "jotai";
 import { activeFaceAtom, drawerOpenAtom } from "@/atoms/atomStore";
 import { useIsMobile } from "@/hooks/useIsMobile";
-import { Separator } from "../ui/separator";
+import { Separator } from "@/components/shared/ui/separator";
 
 interface NavigationProps {
   variant?: "default" | "inverse";
