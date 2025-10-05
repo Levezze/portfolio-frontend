@@ -78,7 +78,7 @@ const Projects = () => {
               </div>
             </button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="min-h-0 max-h-[90vh]">
             <VisuallyHidden>
               <DialogTitle>Project Details</DialogTitle>
             </VisuallyHidden>
