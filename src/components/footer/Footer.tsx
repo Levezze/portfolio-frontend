@@ -36,7 +36,7 @@ export const Footer = () => {
   if (!isMobile) {
     return (
       <div
-        className="fixed bottom-0 left-0 right-0 flex items-center justify-center z-100"
+        className="fixed bottom-0 left-0 right-0 flex items-center justify-center z-10"
         style={{
           height:
             "clamp(50px, calc((var(--viewport-height) - var(--face-size)) / 2), 100px)",
@@ -65,10 +65,11 @@ export const Footer = () => {
     <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
       {orientation === "portrait" ? (
         <div
-          className="fixed bottom-0 left-0 right-0 flex flex-row gap-4 items-center justify-center z-100"
+          className="fixed bottom-0 left-0 right-0 flex flex-row gap-4 items-center justify-center z-20"
           style={{
             height:
-              portraitHeight ?? `calc(var(--viewport-height) * ${containerFraction})`,
+              portraitHeight ??
+              `calc(var(--viewport-height) * ${containerFraction})`,
           }}
         >
           <DrawerTrigger asChild>
@@ -115,8 +116,7 @@ export const Footer = () => {
         <div
           className="fixed left-0 top-0 bottom-0 flex flex-col gap-4 items-center justify-center z-100"
           style={{
-            width:
-              landscapeWidth ?? `calc(100vw * ${containerFraction})`,
+            width: landscapeWidth ?? `calc(100vw * ${containerFraction})`,
           }}
         >
           <DrawerTrigger asChild>
