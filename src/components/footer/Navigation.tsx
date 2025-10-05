@@ -62,25 +62,18 @@ export const Navigation = ({
           size={10}
         />
         {isMobile && <Separator />}
-        {/* <span
-            className={`text-sm my-auto text-foreground dark:text-muted text-left ${
-              activeFace === "chat" ? "text-sidebar-ring" : ""
-            } transition-colors ease-in-out transition-duration-300`}
-          >
-            Chat & Homepage
-          </span> */}
         <TooltipButton
-          tooltip={activeFace === "about" ? false : true}
-          disabled={activeFace === "about"}
+          tooltip={activeFace === "blog" ? false : true}
+          disabled={activeFace === "blog"}
           inputIcon={
             <div className={iconColorClass}>
               <CircleUserIcon style={{ width: "18px", height: "18px" }} />
             </div>
           }
-          inputText={isMobile ? "About Me" : undefined}
-          tooltipText={"About"}
+          inputText={isMobile ? "Blog" : undefined}
+          tooltipText={"Blog"}
           handleClick={() => {
-            setActiveFace("about");
+            setActiveFace("blog");
             if (isMobile) {
               setDrawerOpen(false);
             }
@@ -90,13 +83,6 @@ export const Navigation = ({
           size={10}
         />
         {isMobile && <Separator />}
-        {/* <span
-            className={`text-sm my-auto text-foreground dark:text-muted text-left ${
-              activeFace === "about" ? "text-sidebar-ring" : ""
-            } transition-colors ease-in-out transition-duration-300`}
-          >
-            About Me
-          </span> */}
         <TooltipButton
           tooltip={activeFace === "projects" ? false : true}
           disabled={activeFace === "projects"}
@@ -118,13 +104,6 @@ export const Navigation = ({
           size={10}
         />
         {isMobile && <Separator />}
-        {/* <span
-            className={`text-sm my-auto text-foreground dark:text-muted text-left ${
-              activeFace === "projects" ? "text-sidebar-ring" : ""
-            } transition-colors ease-in-out transition-duration-300`}
-          >
-            Projects Gallery
-          </span> */}
         <TooltipButton
           tooltip={activeFace === "contact" ? false : true}
           disabled={activeFace === "contact"}

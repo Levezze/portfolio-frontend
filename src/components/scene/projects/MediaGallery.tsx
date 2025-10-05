@@ -1,9 +1,20 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Glimpse } from "@/components/shared/kibo-ui/glimpse";
 import {
   VideoPlayer,
   VideoPlayerContent,
+  VideoPlayerControlBar,
+  VideoPlayerTimeRange,
+  VideoPlayerTimeDisplay,
+  VideoPlayerPlayButton,
+  VideoPlayerMuteButton,
+  VideoPlayerVolumeRange,
 } from "@/components/shared/kibo-ui/video-player";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+} from "@/components/shared/ui/dialog";
+import Zoom from "react-medium-image-zoom";
 
 interface MediaItem {
   original: string;
@@ -13,7 +24,13 @@ interface MediaItem {
   mediaHeight?: number;
 }
 
-export const MediaGallery = ({ items }: { items: MediaItem[] }) => {
+export const MediaGallery = ({
+  items,
+  setMediaView,
+}: {
+  items: MediaItem[];
+  setMediaView: (view: string) => void;
+}) => {
   if (!items || items.length === 0) return null;
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -70,6 +87,7 @@ export const MediaGallery = ({ items }: { items: MediaItem[] }) => {
             {item.mediaType === "video" ? (
               <VideoPlayer className="w-full aspect-video rounded-md overflow-hidden max-h-[45vh]">
                 <VideoPlayerContent
+                  onClick={() => setMediaView(item.original)}
                   crossOrigin=""
                   muted
                   preload="metadata"
@@ -82,13 +100,12 @@ export const MediaGallery = ({ items }: { items: MediaItem[] }) => {
                 />
               </VideoPlayer>
             ) : (
-              <Glimpse>
-                <img
-                  src={item.original}
-                  alt={`Project media ${idx + 1}`}
-                  className="w-full aspect-video object-cover rounded-md cursor-pointer hover:opacity-90 transition-opacity max-h-[45vh]"
-                />
-              </Glimpse>
+              <img
+                src={item.original}
+                alt={`Project media ${idx + 1}`}
+                className="w-full aspect-video object-cover rounded-md cursor-pointer hover:opacity-90 transition-opacity max-h-[45vh]"
+                onClick={() => setMediaView(item.original)}
+              />
             )}
           </div>
         ))}

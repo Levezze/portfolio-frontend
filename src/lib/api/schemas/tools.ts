@@ -10,7 +10,7 @@ export const toolCallBaseSchema = z.object({
 
 const pagesEnum = z.enum([
   "chat",
-  "about",
+  "blog",
   "projects",
   "contact",
   "resume",

@@ -4,7 +4,7 @@ import { getProjectsGallery } from "@/lib/api/services/projectsService";
 import { FailedLoad } from "@/components/shared/alerts/FailedLoad";
 import { Loading } from "@/components/shared/alerts/Loading";
 import Image from "next/image";
-import { useSetAtom } from "jotai";
+import { useAtom } from "jotai";
 import { projectViewAtom } from "@/atoms/atomStore";
 import {
   Dialog,
@@ -16,7 +16,7 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { ProjectView } from "./ProjectView";
 
 const Projects = () => {
-  const setProjectView = useSetAtom(projectViewAtom);
+  const [projectView, setProjectView] = useAtom(projectViewAtom);
 
   const { data, isLoading, error } = useSWR(
     "projectsGallery",
@@ -52,7 +52,7 @@ const Projects = () => {
             <button
               key={index}
               className={`md:aspect-square mobile-landscape:aspect-auto w-full h-full relative cursor-pointer group rounded-[25px] overflow-hidden`}
-              onClick={() => setProjectView(project.slug)}
+              onClick={() => setProjectView("project")}
             >
               <Image
                 src={project.thumbnailUrl}
