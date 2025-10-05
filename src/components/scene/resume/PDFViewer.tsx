@@ -1,19 +1,30 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { Document, Page, pdfjs } from 'react-pdf';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { ZoomOutIcon, ZoomInIcon, MaximizeIcon, MinimizeIcon, DownloadIcon, Box } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import React, { useState, useEffect } from "react";
+import { Document, Page, pdfjs } from "react-pdf";
+import { Button } from "@/components/shared/ui/button";
+import { Separator } from "@/components/shared/ui/separator";
+import {
+  ZoomOutIcon,
+  ZoomInIcon,
+  MaximizeIcon,
+  MinimizeIcon,
+  DownloadIcon,
+  Box,
+} from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/shared/ui/tooltip";
 
 // Import PDF.js styles
-import 'react-pdf/dist/Page/AnnotationLayer.css';
-import 'react-pdf/dist/Page/TextLayer.css';
-import { TooltipButton } from '@/components/shared/TooltipButton';
+import "react-pdf/dist/Page/AnnotationLayer.css";
+import "react-pdf/dist/Page/TextLayer.css";
+import { TooltipButton } from "@/components/shared/TooltipButton";
 
 // Configure PDF.js worker
-pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
+pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
 
 interface PDFViewerProps {
   url: string;
@@ -26,7 +37,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const handleFullscreen = () => {
-    const elem = document.getElementById('pdf-container');
+    const elem = document.getElementById("pdf-container");
     if (!isFullscreen && elem) {
       if (elem.requestFullscreen) {
         elem.requestFullscreen();
@@ -47,7 +58,11 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
           <Document
             file={url}
             onLoadSuccess={({ numPages }) => setNumPages(numPages)}
-            loading={<div className="flex text-center h-full justify-center items-center p-4">Loading PDF...</div>}
+            loading={
+              <div className="flex text-center h-full justify-center items-center p-4">
+                Loading PDF...
+              </div>
+            }
             error={
               <div className="flex text-center h-full justify-center items-center p-4 text-red-500">
                 Failed to load PDF. Please try downloading it instead.
@@ -106,7 +121,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
             <Button
               variant="ghost"
               matchBgColor={true}
-              onClick={() => setScale(s => Math.max(0.5, s - 0.2))}
+              onClick={() => setScale((s) => Math.max(0.5, s - 0.2))}
               className="w-10 h-10 cursor-pointer rounded-full border-none font-normal text-sm text-background shadow-sm shadow-muted-foreground/10"
             >
               <ZoomOutIcon />
@@ -124,7 +139,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
             <Button
               variant="ghost"
               matchBgColor={true}
-              onClick={() => setScale(s => Math.min(2, s + 0.2))}
+              onClick={() => setScale((s) => Math.min(2, s + 0.2))}
               className="w-10 h-10 cursor-pointer rounded-full border-none font-normal text-sm text-background shadow-sm shadow-muted-foreground/10"
             >
               <ZoomInIcon />
@@ -147,7 +162,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>{isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}</p>
+            <p>{isFullscreen ? "Exit Fullscreen" : "Fullscreen"}</p>
           </TooltipContent>
         </Tooltip>
 
@@ -159,10 +174,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
               asChild
               className="w-10 h-10 cursor-pointer rounded-full border-none font-normal text-sm text-background shadow-sm shadow-muted-foreground/10"
             >
-              <a
-                href={url}
-                download="Lev_Zhitnik_Resume.pdf"
-              >
+              <a href={url} download="Lev_Zhitnik_Resume.pdf">
                 <DownloadIcon />
               </a>
             </Button>

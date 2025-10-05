@@ -11,7 +11,7 @@ import {
   DialogTrigger,
   DialogContent,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/components/shared/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { ProjectView } from "./ProjectView";
 
@@ -78,7 +78,7 @@ const Projects = () => {
               </div>
             </button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="min-h-0 max-h-[90vh]">
             <VisuallyHidden>
               <DialogTitle>Project Details</DialogTitle>
             </VisuallyHidden>

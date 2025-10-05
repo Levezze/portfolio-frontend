@@ -24,22 +24,26 @@ import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@/components/shared/ui/tooltip";
 import { useEffect, useState, type FC } from "react";
 
 import { UserMessageAttachments } from "@/components/scene/chat/assistant-ui/attachment";
 import { MarkdownText } from "@/components/scene/chat/assistant-ui/markdown-text";
 import { ToolFallback } from "@/components/scene/chat/assistant-ui/tool-fallback";
 import { TooltipIconButton } from "@/components/scene/chat/assistant-ui/tooltip-icon-button";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/shared/ui/button";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/shared/ui/avatar";
 import { cn } from "@/lib/utils/general";
 import { LazyMotion, MotionConfig, domAnimation } from "motion/react";
 import * as m from "motion/react-m";
 import { getChatConfig } from "@/lib/api/services/chatService";
 import { type WelcomeMessage, type ChatConfig } from "@/lib/api/schemas/chat";
 import useSWR from "swr";
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "@/components/shared/ui/separator";
 import { useAtomValue } from "jotai";
 import { gimliChoiceAtom } from "@/atoms/atomStore";
 import { ButtonFrame } from "@/components/shared/ButtonFrame";

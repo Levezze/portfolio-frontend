@@ -15,14 +15,18 @@ import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@/components/shared/ui/tooltip";
 import {
   Dialog,
   DialogTitle,
   DialogContent,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+} from "@/components/shared/ui/dialog";
+import {
+  Avatar,
+  AvatarImage,
+  AvatarFallback,
+} from "@/components/shared/ui/avatar";
 import { TooltipIconButton } from "@/components/scene/chat/assistant-ui/tooltip-icon-button";
 import { cn } from "@/lib/utils/general";
 

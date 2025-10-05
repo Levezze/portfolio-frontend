@@ -5,7 +5,7 @@ import { isMobileAtom, projectViewAtom } from "@/atoms/atomStore";
 import { Loading } from "@/components/shared/alerts/Loading";
 import { FailedLoad } from "@/components/shared/alerts/FailedLoad";
 import { getProjectPage } from "@/lib/api/services/projectsService";
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "@/components/shared/ui/separator";
 import { LazyMotion, domAnimation } from "motion/react";
 import { LinkifyText } from "@/components/shared/LinkifyText";
 import { MediaGallery } from "./MediaGallery";
@@ -46,11 +46,10 @@ export const ProjectView = ({ projectTitle }: { projectTitle: string }) => {
   }));
 
   return (
-    <LazyMotion features={domAnimation}>
-      <div
-        className={`w-full relative items-center justify-center overflow-hidden 
-          `}
-      >
+    <div
+      className={`w-full relative items-center justify-center overflow-hidden`}
+    >
+      <LazyMotion features={domAnimation}>
         <div className="flex flex-col items-center justify-start h-full px-2 pt-4 md:pt-0 gap-2">
           <m.div
             initial={{ opacity: 0, y: 10 }}
@@ -79,7 +78,7 @@ export const ProjectView = ({ projectTitle }: { projectTitle: string }) => {
             </div>
           </m.div>
         </div>
-      </div>
-    </LazyMotion>
+      </LazyMotion>
+    </div>
   );
 };
