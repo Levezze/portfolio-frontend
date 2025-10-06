@@ -15,7 +15,7 @@ import {
 } from "@/atoms/atomStore";
 import type { CubeFace } from "@/types/cubeTypes";
 import { Face } from "@/components/shared/Face";
-import AboutMe from "./about/AboutMe";
+import Blog from "./blog/Blog";
 import ChatUI from "./chat/ChatUI";
 import { MyRuntimeProvider } from "./chat/MyRuntimeProvider";
 import ContactForm from "./contact/ContactForm";
@@ -72,13 +72,13 @@ export const CubeWithFaces = () => {
           </MyRuntimeProvider>
         ),
       },
-      about: {
+      blog: {
         position: [cubeHtmlSize, 0, 0],
         rotation: { x: 0, y: -Math.PI / 2 },
         htmlRotation: [0, Math.PI / 2, 0],
         page: (
           <Face>
-            <AboutMe />
+            <Blog />
           </Face>
         ),
       },

@@ -67,4 +67,4 @@ export const viewportOrientationAtom = atom<"portrait" | "landscape">(
 );
 
 // Projects Gallery
-export const projectViewAtom = atom<string>("gallery");
+export const projectViewAtom = atom<"project" | "zoomed">("project");

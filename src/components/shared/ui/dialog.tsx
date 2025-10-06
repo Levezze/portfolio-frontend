@@ -73,7 +73,7 @@ function DialogContent({
         {children}
         {showCloseButton && (
           <DialogPrimitive.Close asChild className="absolute top-4 left-4">
-            <BackButton onClick={() => {}} tooltip="Back to gallery" />
+            <BackButton onClick={() => {}} tooltip="Back" />
           </DialogPrimitive.Close>
         )}
       </DialogPrimitive.Content>

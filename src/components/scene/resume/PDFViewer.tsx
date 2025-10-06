@@ -1,27 +1,27 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import { Button } from "@/components/shared/ui/button";
 import { Separator } from "@/components/shared/ui/separator";
-import {
-  ZoomOutIcon,
-  ZoomInIcon,
-  MaximizeIcon,
-  MinimizeIcon,
-  DownloadIcon,
-  Box,
-} from "lucide-react";
+import { MaximizeIcon, DownloadIcon } from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/shared/ui/tooltip";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/shared/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { ZoomableContent } from "@/components/shared/ZoomableContent";
 
 // Import PDF.js styles
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
-import { TooltipButton } from "@/components/shared/TooltipButton";
 
 // Configure PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
@@ -33,157 +33,143 @@ interface PDFViewerProps {
 export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
   const [numPages, setNumPages] = useState<number | null>(null);
   const [pageNumber, setPageNumber] = useState(1);
-  const [scale, setScale] = useState(1.0);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-
-  const handleFullscreen = () => {
-    const elem = document.getElementById("pdf-container");
-    if (!isFullscreen && elem) {
-      if (elem.requestFullscreen) {
-        elem.requestFullscreen();
-      }
-      setIsFullscreen(true);
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      }
-      setIsFullscreen(false);
-    }
-  };
 
   return (
-    <div id="pdf-container" className="flex flex-col h-full w-full">
-      <div className="flex-1 overflow-auto bg-background p-4">
-        <div className="flex justify-center">
+    <Dialog>
+      <div className="flex flex-col h-full w-full">
+        {/* Cube Face - PDF Preview with Download and Maximize buttons */}
+        <DialogTrigger asChild>
+          <div className="flex-1 overflow-auto bg-background p-4 cursor-pointer">
+            <div className="flex justify-center">
+              <Document
+                file={url}
+                onLoadSuccess={({ numPages }) => setNumPages(numPages)}
+                loading={
+                  <div className="flex text-center h-full justify-center items-center p-4">
+                    Loading PDF...
+                  </div>
+                }
+                error={
+                  <div className="flex text-center h-full justify-center items-center p-4 text-red-500">
+                    Failed to load PDF. Please try downloading it instead.
+                  </div>
+                }
+              >
+                <Page
+                  pageNumber={pageNumber}
+                  scale={1.0}
+                  renderTextLayer={true}
+                  renderAnnotationLayer={true}
+                  className="shadow-lg pointer-events-none"
+                />
+              </Document>
+            </div>
+          </div>
+        </DialogTrigger>
+
+        <Separator />
+
+        {/* Cube Face Controls - Download and Maximize only */}
+        <div className="flex justify-center items-center gap-3 p-4 bg-background">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DialogTrigger asChild>
+                <Button
+                  variant="ghost"
+                  matchBgColor={true}
+                  className="w-10 h-10 cursor-pointer rounded-full border-none font-normal text-sm text-background shadow-sm shadow-muted-foreground/10"
+                >
+                  <MaximizeIcon />
+                </Button>
+              </DialogTrigger>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Fullscreen</p>
+            </TooltipContent>
+          </Tooltip>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                matchBgColor={true}
+                asChild
+                className="w-10 h-10 cursor-pointer rounded-full border-none font-normal text-sm text-background shadow-sm shadow-muted-foreground/10"
+              >
+                <a
+                  href={url}
+                  download="Lev_Zhitnik_Resume.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <DownloadIcon />
+                </a>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Download</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
+      </div>
+
+      {/* Fullscreen Dialog with Draggable & Zoomable PDF */}
+      <DialogContent
+        className="w-[95vw] h-[95vh] max-w-[1400px] max-h-[1400px] p-4 bg-black/95 flex flex-col gap-4"
+        showCloseButton={true}
+      >
+        <VisuallyHidden>
+          <DialogTitle>Resume PDF Viewer</DialogTitle>
+        </VisuallyHidden>
+        <ZoomableContent alwaysDraggable className="flex-1 overflow-auto">
           <Document
             file={url}
-            onLoadSuccess={({ numPages }) => setNumPages(numPages)}
             loading={
-              <div className="flex text-center h-full justify-center items-center p-4">
+              <div className="flex text-center h-full justify-center items-center p-4 text-white">
                 Loading PDF...
               </div>
             }
             error={
               <div className="flex text-center h-full justify-center items-center p-4 text-red-500">
-                Failed to load PDF. Please try downloading it instead.
+                Failed to load PDF.
               </div>
             }
           >
             <Page
               pageNumber={pageNumber}
-              scale={scale}
+              scale={1.5}
               renderTextLayer={true}
               renderAnnotationLayer={true}
               className="shadow-lg"
             />
           </Document>
-        </div>
+        </ZoomableContent>
 
+        {/* Page Navigation in Dialog */}
         {numPages && numPages > 1 && (
-          <div className="flex justify-center items-center gap-4 mt-4">
+          <div className="flex justify-center items-center gap-4">
             <Button
               variant="ghost"
-              matchBgColor={true}
               disabled={pageNumber <= 1}
               onClick={() => setPageNumber(pageNumber - 1)}
-              className="w-10 h-10 cursor-pointer rounded-none rounded-tl-2xl rounded-br-2xl border-none disabled:opacity-50 disabled:cursor-not-allowed font-normal text-background"
+              className="px-4 py-2 cursor-pointer rounded-full border-none disabled:opacity-50 disabled:cursor-not-allowed font-normal text-white bg-white/10 hover:bg-white/20"
             >
               Previous
             </Button>
-            <span className="text-muted-foreground font-medium">
+            <span className="text-white font-medium">
               Page {pageNumber} of {numPages}
             </span>
             <Button
               variant="ghost"
-              matchBgColor={true}
               disabled={pageNumber >= numPages}
               onClick={() => setPageNumber(pageNumber + 1)}
-              className="w-10 h-10 cursor-pointer rounded-none rounded-tl-2xl rounded-br-2xl border-none disabled:opacity-50 disabled:cursor-not-allowed font-normal text-background"
+              className="px-4 py-2 cursor-pointer rounded-full border-none disabled:opacity-50 disabled:cursor-not-allowed font-normal text-white bg-white/10 hover:bg-white/20"
             >
               Next
             </Button>
           </div>
         )}
-      </div>
-
-      <Separator />
-
-      <div className="flex justify-center items-center gap-3 p-4 bg-background">
-        {/* <TooltipButton
-          tooltip={true}
-          inputIcon={<ZoomOutIcon />}
-          tooltipText={"Zoom Out"}
-          handleClick={() => setScale(s => Math.max(0.5, s - 0.2))}
-          round={true}
-        /> */}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              matchBgColor={true}
-              onClick={() => setScale((s) => Math.max(0.5, s - 0.2))}
-              className="w-10 h-10 cursor-pointer rounded-full border-none font-normal text-sm text-background shadow-sm shadow-muted-foreground/10"
-            >
-              <ZoomOutIcon />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Zoom Out</p>
-          </TooltipContent>
-        </Tooltip>
-        <span className="text-muted-foreground min-w-[40px] text-center font-semibold text-sm">
-          {Math.round(scale * 100)}%
-        </span>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              matchBgColor={true}
-              onClick={() => setScale((s) => Math.min(2, s + 0.2))}
-              className="w-10 h-10 cursor-pointer rounded-full border-none font-normal text-sm text-background shadow-sm shadow-muted-foreground/10"
-            >
-              <ZoomInIcon />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Zoom In</p>
-          </TooltipContent>
-        </Tooltip>
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              matchBgColor={true}
-              onClick={handleFullscreen}
-              className="w-10 h-10 cursor-pointer rounded-full border-none font-normal text-sm text-background shadow-sm shadow-muted-foreground/10"
-            >
-              {isFullscreen ? <MinimizeIcon /> : <MaximizeIcon />}
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>{isFullscreen ? "Exit Fullscreen" : "Fullscreen"}</p>
-          </TooltipContent>
-        </Tooltip>
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              matchBgColor={true}
-              asChild
-              className="w-10 h-10 cursor-pointer rounded-full border-none font-normal text-sm text-background shadow-sm shadow-muted-foreground/10"
-            >
-              <a href={url} download="Lev_Zhitnik_Resume.pdf">
-                <DownloadIcon />
-              </a>
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Download</p>
-          </TooltipContent>
-        </Tooltip>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };

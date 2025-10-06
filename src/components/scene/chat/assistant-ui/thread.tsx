@@ -339,7 +339,7 @@ const ThreadWelcomeSuggestions: FC<{ suggestions: any[] }> = ({
               <span className="aui-thread-welcome-suggestion-text-1 text-base font-inter font-normal text-background [@media(max-width:600px)_or_(max-height:600px)]:text-sm m-0 p-0">
                 {suggestedAction.title}
               </span>
-              <span className="aui-thread-welcome-suggestion-text-2 text-md font-light text-muted-foreground dark:text-muted">
+              <span className="aui-thread-welcome-suggestion-text-2 text-md font-inter font-light text-muted-foreground dark:text-muted">
                 {suggestedAction.label}
               </span>
             </Button>
@@ -358,7 +358,7 @@ const Composer: FC<{ chatConfig: ChatConfig | null; isLoading: boolean }> = ({
     <div className="aui-composer-wrapper sticky bottom-0 mx-auto flex w-full max-w-[var(--thread-max-width)] flex-col overflow-visible rounded-t-md bg-background pb-4 md:pb-6 mobile-landscape:p-0">
       <ThreadScrollToBottom />
       <ThreadPrimitive.Empty>
-        <div className="flex flex-col items-center justify-center mb-4">
+        <div className="flex flex-col items-center justify-center mb-4 font-inter">
           <Separator className="my-4 w-full mobile-landscape:hidden" />
           {chatConfig && !isLoading && (
             <FakeAssistantMessage
@@ -375,7 +375,7 @@ const Composer: FC<{ chatConfig: ChatConfig | null; isLoading: boolean }> = ({
       <ComposerPrimitive.Root className="aui-composer-root relative rounded-full flex w-full flex-col bg-muted px-1 pt-2 dark:border-muted-foreground/15 shadow-inner shadow-muted-foreground/5">
         <ComposerPrimitive.Input
           placeholder="Send a message..."
-          className="aui-composer-input flex items-center justify-center mb-1 h-16 w-full resize-none bg-transparent px-3.5 pt-1.5 pb-3 text-base outline-none placeholder:text-muted-foreground focus:outline-primary"
+          className="aui-composer-input flex font-inter items-center justify-center mb-1 h-16 w-full resize-none bg-transparent px-3.5 pt-1.5 pb-3 text-base outline-none placeholder:text-muted-foreground focus:outline-primary"
           rows={1}
           autoFocus
           aria-label="Message input"
@@ -425,7 +425,7 @@ const ComposerAction: FC = () => {
 const MessageError: FC = () => {
   return (
     <MessagePrimitive.Error>
-      <ErrorPrimitive.Root className="aui-message-error-root mt-2 rounded-md border border-destructive bg-destructive/10 p-3 text-sm text-destructive dark:bg-destructive/5 dark:text-red-200">
+      <ErrorPrimitive.Root className="aui-message-error-root mt-2 font-inter rounded-md border border-destructive bg-destructive/10 p-3 text-sm text-destructive dark:bg-destructive/5 dark:text-red-200">
         <ErrorPrimitive.Message className="aui-message-error-message line-clamp-2" />
       </ErrorPrimitive.Root>
     </MessagePrimitive.Error>
@@ -438,7 +438,7 @@ const AssistantMessage: FC = () => {
   return (
     <MessagePrimitive.Root asChild>
       <div
-        className="aui-assistant-message-root relative mx-auto w-full max-w-[var(--thread-max-width)] animate-in py-4 duration-200 fade-in slide-in-from-bottom-1 last:mb-24"
+        className="aui-assistant-message-root relative mx-auto w-full max-w-[var(--thread-max-width)] animate-in py-4 duration-200 fade-in slide-in-from-bottom-1 last:mb-24 font-inter"
         data-role="assistant"
       >
         <div className="flex">
@@ -483,7 +483,7 @@ const AssistantActionBar: FC = () => {
       hideWhenRunning
       autohide="not-last"
       autohideFloat="single-branch"
-      className="aui-assistant-action-bar-root col-start-3 row-start-2 -ml-1 flex gap-1 text-muted-foreground data-floating:absolute data-floating:rounded-md data-floating:border data-floating:bg-background data-floating:p-1 data-floating:shadow-sm"
+      className="aui-assistant-action-bar-root col-start-3 row-start-2 -ml-1 flex gap-1 text-muted-foreground data-floating:absolute data-floating:rounded-md data-floating:border data-floating:bg-background data-floating:p-1 data-floating:shadow-sm font-inter"
     >
       <ActionBarPrimitive.Copy asChild>
         <TooltipIconButton tooltip="Copy">
@@ -508,7 +508,7 @@ const UserMessage: FC = () => {
   return (
     <MessagePrimitive.Root asChild>
       <div
-        className="aui-user-message-root mx-auto grid w-full max-w-[var(--thread-max-width)] animate-in auto-rows-auto grid-cols-[minmax(72px,1fr)_auto] gap-y-2 px-2 py-4 duration-200 fade-in slide-in-from-bottom-1 first:mt-3 last:mb-5 [&:where(>*)]:col-start-2"
+        className="aui-user-message-root font-inter mx-auto grid w-full max-w-[var(--thread-max-width)] animate-in auto-rows-auto grid-cols-[minmax(72px,1fr)_auto] gap-y-2 px-2 py-4 duration-200 fade-in slide-in-from-bottom-1 first:mt-3 last:mb-5 [&:where(>*)]:col-start-2"
         data-role="user"
       >
         <UserMessageAttachments />
@@ -546,7 +546,7 @@ const UserActionBar: FC = () => {
 
 const EditComposer: FC = () => {
   return (
-    <div className="aui-edit-composer-wrapper mx-auto flex w-full max-w-[var(--thread-max-width)] flex-col gap-4 px-2 first:mt-4">
+    <div className="aui-edit-composer-wrapper mx-auto flex w-full max-w-[var(--thread-max-width)] flex-col gap-4 px-2 first:mt-4 font-inter">
       <ComposerPrimitive.Root className="aui-edit-composer-root ml-auto flex w-full max-w-7/8 flex-col rounded-xl bg-muted">
         <ComposerPrimitive.Input
           className="aui-edit-composer-input flex min-h-[60px] w-full resize-none bg-transparent p-4 text-foreground outline-none"
@@ -578,7 +578,7 @@ const BranchPicker: FC<BranchPickerPrimitive.Root.Props> = ({
     <BranchPickerPrimitive.Root
       hideWhenSingleBranch
       className={cn(
-        "aui-branch-picker-root mr-2 -ml-2 inline-flex items-center text-xs text-muted-foreground",
+        "aui-branch-picker-root mr-2 -ml-2 inline-flex items-center text-xs text-muted-foreground font-inter",
         className
       )}
       {...rest}

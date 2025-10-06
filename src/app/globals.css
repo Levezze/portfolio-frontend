@@ -9,7 +9,7 @@
   --color-foreground: var(--foreground);
   --color-hover-header-color: var(--hover-header-color);
   --color-page-chat: var(--page-chat);
-  --color-page-about: var(--page-about);
+  --color-page-blog: var(--page-about);
   --color-page-projects: var(--page-projects);
   --color-page-contact: var(--page-contact);
   --color-page-resume: var(--page-resume);
@@ -93,7 +93,7 @@
   --header-color: #324041;
   --hover-header-color: #597374;
   --page-chat: #A8DADC;
-  --page-about: #B8D4B3;
+  --page-blog: #B8D4B3;
   --page-projects: #C1666B;
   --page-contact: #C7B8D4;
   --page-resume: #E6C9B5;
@@ -207,6 +207,53 @@
     --face-size: 1000px;
   }
 }
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: oklch(0.708 0 0 / 30%);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.556 0 0 / 50%);
+}
+
+::-webkit-scrollbar-button {
+  display: none;
+  height: 0;
+  width: 0;
+}
+
+::-webkit-scrollbar-corner {
+  display: none;
+}
+
+/* Firefox */
+@-moz-document url-prefix() {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: oklch(0.708 0 0 / 30%) transparent;
+  }
+}
+
+/* Dark mode scrollbars */
+.dark ::-webkit-scrollbar-thumb {
+  opacity: 0;
+  background: oklch(0.556 0 0 / 40%);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.708 0 0 / 60%);
+}
+
 
 .cube-face {
   width: var(--face-size);
