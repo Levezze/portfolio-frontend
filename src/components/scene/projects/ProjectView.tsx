@@ -74,7 +74,7 @@ export const ProjectView = ({ projectTitle }: { projectTitle: string }) => {
               <MediaGallery items={mediaItems || []} />
               <div className="w-full flex flex-row items-center justify-center">
                 {techStack && techStack.length > 0 && (
-                  <div className="flex flex-row items-center justify-center gap-4 flex-wrap">
+                  <div className="flex flex-row items-center justify-center gap-2 md:gap-4 flex-wrap">
                     {techStack.map((item: any) => (
                       <Badge key={item} variant="secondary" className="text-sm">
                         {item}
