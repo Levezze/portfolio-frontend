@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import ScrollContainer from "react-indiana-drag-scroll";
 import {
   VideoPlayer,
   VideoPlayerContent,
@@ -6,15 +7,13 @@ import {
   VideoPlayerTimeRange,
   VideoPlayerTimeDisplay,
   VideoPlayerPlayButton,
-  VideoPlayerMuteButton,
-  VideoPlayerVolumeRange,
 } from "@/components/shared/kibo-ui/video-player";
 import {
   Dialog,
   DialogContent,
   DialogTrigger,
 } from "@/components/shared/ui/dialog";
-import Zoom from "react-medium-image-zoom";
+import { ZoomableContent } from "@/components/shared/ZoomableContent";
 
 interface MediaItem {
   original: string;
@@ -27,7 +26,7 @@ interface MediaItem {
 export const MediaGallery = ({ items }: { items: MediaItem[] }) => {
   if (!items || items.length === 0) return null;
 
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<any>(null);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoScrolling, setIsAutoScrolling] = useState(false);
@@ -42,10 +41,10 @@ export const MediaGallery = ({ items }: { items: MediaItem[] }) => {
   useEffect(() => {
     const startAutoScroll = () => {
       scrollTimeoutRef.current = setTimeout(() => {
-        if (!scrollContainerRef.current) return;
+        const container = scrollContainerRef.current?.getElement?.();
+        if (!container) return;
 
         const nextIndex = (currentIndex + 1) % sortedItems.length;
-        const container = scrollContainerRef.current;
         const itemWidth = container.scrollWidth / sortedItems.length;
 
         setIsAutoScrolling(true);
@@ -73,7 +72,8 @@ export const MediaGallery = ({ items }: { items: MediaItem[] }) => {
   // Detect user scrolling
   useEffect(() => {
     const handleScroll = () => {
-      if (isAutoScrolling || !scrollContainerRef.current) return;
+      const container = scrollContainerRef.current?.getElement?.();
+      if (isAutoScrolling || !container) return;
 
       // User scrolled manually
       if (scrollTimeoutRef.current) {
@@ -81,7 +81,6 @@ export const MediaGallery = ({ items }: { items: MediaItem[] }) => {
       }
 
       // Calculate current index from scroll position
-      const container = scrollContainerRef.current;
       const itemWidth = container.scrollWidth / sortedItems.length;
       const newIndex = Math.round(container.scrollLeft / itemWidth);
 
@@ -90,7 +89,7 @@ export const MediaGallery = ({ items }: { items: MediaItem[] }) => {
       }
     };
 
-    const container = scrollContainerRef.current;
+    const container = scrollContainerRef.current?.getElement?.();
     if (container) {
       container.addEventListener("scroll", handleScroll);
     }
@@ -107,7 +106,7 @@ export const MediaGallery = ({ items }: { items: MediaItem[] }) => {
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
       const target = e.target as HTMLElement;
-      const container = scrollContainerRef.current;
+      const container = scrollContainerRef.current?.getElement?.();
 
       // Only convert vertical scroll to horizontal if we're scrolling on the gallery
       // Allow normal vertical scrolling in dialogs
@@ -121,7 +120,7 @@ export const MediaGallery = ({ items }: { items: MediaItem[] }) => {
       }
     };
 
-    const container = scrollContainerRef.current;
+    const container = scrollContainerRef.current?.getElement?.();
     if (container) {
       container.addEventListener("wheel", handleWheel, { passive: false });
     }
@@ -133,6 +132,25 @@ export const MediaGallery = ({ items }: { items: MediaItem[] }) => {
     };
   }, []);
 
+  // Reset auto-scroll timeout when user manually scrolls
+  const handleEndScroll = () => {
+    const container = scrollContainerRef.current?.getElement?.();
+    if (!container || isAutoScrolling) return;
+
+    // User scrolled manually
+    if (scrollTimeoutRef.current) {
+      clearTimeout(scrollTimeoutRef.current);
+    }
+
+    // Calculate current index from scroll position
+    const itemWidth = container.scrollWidth / sortedItems.length;
+    const newIndex = Math.round(container.scrollLeft / itemWidth);
+
+    if (newIndex !== currentIndex) {
+      setCurrentIndex(newIndex);
+    }
+  };
+
   const autoCols =
     sortedItems.length !== 1
       ? "grid grid-flow-col gap-2 auto-cols-[90%]"
@@ -140,15 +158,17 @@ export const MediaGallery = ({ items }: { items: MediaItem[] }) => {
 
   return (
     <div className="w-full mb-6">
-      <div
-        ref={scrollContainerRef}
+      <ScrollContainer
+        innerRef={scrollContainerRef}
+        horizontal={true}
+        vertical={false}
+        hideScrollbars={true}
+        activationDistance={10}
+        onEndScroll={handleEndScroll}
         className={`
         pt-4
         ${autoCols}
-        overflow-x-auto
         snap-x snap-mandatory
-        touch-pan-x
-        scrollbar-hide
       `}
       >
         {sortedItems.map((item, idx) => (
@@ -183,21 +203,21 @@ export const MediaGallery = ({ items }: { items: MediaItem[] }) => {
               </DialogTrigger>
             </div>
             <DialogContent
-              className="w-[95vw] h-[95vh] max-w-none max-h-none p-4 bg-black/55"
+              className="w-[95vw] h-[95vh] max-w-[1400px] max-h-[1400px] p-4 bg-black/95"
               showCloseButton={true}
             >
               <div className="w-full h-full flex items-center justify-center">
                 {item.mediaType === "video" ? (
-                  <VideoPlayer className="w-full max-w-full max-h-full aspect-video rounded-[25px]">
+                  <VideoPlayer className="w-full max-w-full max-h-full aspect-video">
                     <VideoPlayerContent
                       crossOrigin=""
                       preload="metadata"
                       slot="media"
                       src={item.original}
-                      className="w-full h-full rounded-[25px]"
+                      className="w-full h-full"
                       autoPlay
-                      playsInline
                       loop
+                      playsInline
                     />
                     <VideoPlayerControlBar>
                       <VideoPlayerPlayButton />
@@ -206,21 +226,21 @@ export const MediaGallery = ({ items }: { items: MediaItem[] }) => {
                     </VideoPlayerControlBar>
                   </VideoPlayer>
                 ) : (
-                  <Zoom>
+                  <ZoomableContent>
                     <img
                       src={item.original}
                       alt={`Project media ${idx + 1}`}
                       draggable={false}
                       onDragStart={(e) => e.preventDefault()}
-                      className="max-w-full max-h-[90vh] object-contain"
+                      className="max-w-full max-h-[85vh] object-contain"
                     />
-                  </Zoom>
+                  </ZoomableContent>
                 )}
               </div>
             </DialogContent>
           </Dialog>
         ))}
-      </div>
+      </ScrollContainer>
     </div>
   );
 };
