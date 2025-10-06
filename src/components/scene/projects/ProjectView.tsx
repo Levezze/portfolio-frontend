@@ -9,9 +9,9 @@ import { LinkifyText } from "@/components/shared/LinkifyText";
 import { MediaGallery } from "./MediaGallery";
 
 import * as m from "motion/react-m";
+import { Badge } from "@/components/shared/ui/badge";
 
 export const ProjectView = ({ projectTitle }: { projectTitle: string }) => {
-
   const {
     data: project,
     isLoading,
@@ -43,6 +43,8 @@ export const ProjectView = ({ projectTitle }: { projectTitle: string }) => {
     mediaHeight: item.mediaHeight,
   }));
 
+  const techStack = projectData?.techStack;
+
   return (
     <div
       className={`w-full relative items-center justify-center overflow-hidden`}
@@ -70,6 +72,18 @@ export const ProjectView = ({ projectTitle }: { projectTitle: string }) => {
           >
             <div className="relative h-full overflow-y-auto pb-4 md:pb-0">
               <MediaGallery items={mediaItems || []} />
+              <div className="w-full flex flex-row items-center justify-center">
+                {techStack && techStack.length > 0 && (
+                  <div className="flex flex-row items-center justify-center gap-4 flex-wrap">
+                    {techStack.map((item: any) => (
+                      <Badge key={item} variant="secondary" className="text-sm">
+                        {item}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {<Separator className="w-full my-4" />}
               <p className="text-regular font-inter whitespace-pre-wrap text-left w-full">
                 {linkifiedDescription}
               </p>

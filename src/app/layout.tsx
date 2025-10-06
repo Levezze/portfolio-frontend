@@ -5,22 +5,14 @@ import {
   Inter,
   Merriweather,
   Saira,
+  Saira_Stencil_One,
   Titillium_Web,
+  Exo_2,
 } from "next/font/google";
 import { ThemeWrapper } from "@/components/ThemeWrapper";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-const inter = Titillium_Web({
+const inter = Saira({
   variable: "--font-inter",
   weight: ["400", "600"],
   subsets: ["latin"],
@@ -61,7 +53,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable}${inter.variable} ${merriweather.variable} antialiased bg-background font-inter-regular`}
+        className={`${inter.variable} ${merriweather.variable} antialiased bg-background font-inter-regular`}
       >
         <ThemeWrapper>{children}</ThemeWrapper>
       </body>

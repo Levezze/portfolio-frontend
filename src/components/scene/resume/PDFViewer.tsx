@@ -13,8 +13,10 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogTitle,
   DialogTrigger,
 } from "@/components/shared/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { ZoomableContent } from "@/components/shared/ZoomableContent";
 
 // Import PDF.js styles
@@ -69,9 +71,9 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
 
         {/* Cube Face Controls - Download and Maximize only */}
         <div className="flex justify-center items-center gap-3 p-4 bg-background">
-          <DialogTrigger asChild>
-            <Tooltip>
-              <TooltipTrigger asChild>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DialogTrigger asChild>
                 <Button
                   variant="ghost"
                   matchBgColor={true}
@@ -79,12 +81,12 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
                 >
                   <MaximizeIcon />
                 </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Fullscreen</p>
-              </TooltipContent>
-            </Tooltip>
-          </DialogTrigger>
+              </DialogTrigger>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Fullscreen</p>
+            </TooltipContent>
+          </Tooltip>
 
           <Tooltip>
             <TooltipTrigger asChild>
@@ -94,7 +96,12 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
                 asChild
                 className="w-10 h-10 cursor-pointer rounded-full border-none font-normal text-sm text-background shadow-sm shadow-muted-foreground/10"
               >
-                <a href={url} download="Lev_Zhitnik_Resume.pdf">
+                <a
+                  href={url}
+                  download="Lev_Zhitnik_Resume.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <DownloadIcon />
                 </a>
               </Button>
@@ -106,61 +113,62 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
         </div>
       </div>
 
-      {/* Fullscreen Dialog with Zoomable PDF */}
+      {/* Fullscreen Dialog with Draggable & Zoomable PDF */}
       <DialogContent
-        className="w-[95vw] h-[95vh] max-w-[1400px] max-h-[1400px] p-4 bg-black/95"
+        className="w-[95vw] h-[95vh] max-w-[1400px] max-h-[1400px] p-4 bg-black/95 flex flex-col gap-4"
         showCloseButton={true}
       >
-        <div className="w-full h-full flex flex-col">
-          <ZoomableContent className="flex-1">
-            <Document
-              file={url}
-              loading={
-                <div className="flex text-center h-full justify-center items-center p-4 text-white">
-                  Loading PDF...
-                </div>
-              }
-              error={
-                <div className="flex text-center h-full justify-center items-center p-4 text-red-500">
-                  Failed to load PDF.
-                </div>
-              }
-            >
-              <Page
-                pageNumber={pageNumber}
-                scale={1.5}
-                renderTextLayer={true}
-                renderAnnotationLayer={true}
-                className="shadow-lg"
-              />
-            </Document>
-          </ZoomableContent>
+        <VisuallyHidden>
+          <DialogTitle>Resume PDF Viewer</DialogTitle>
+        </VisuallyHidden>
+        <ZoomableContent alwaysDraggable className="flex-1 overflow-auto">
+          <Document
+            file={url}
+            loading={
+              <div className="flex text-center h-full justify-center items-center p-4 text-white">
+                Loading PDF...
+              </div>
+            }
+            error={
+              <div className="flex text-center h-full justify-center items-center p-4 text-red-500">
+                Failed to load PDF.
+              </div>
+            }
+          >
+            <Page
+              pageNumber={pageNumber}
+              scale={1.5}
+              renderTextLayer={true}
+              renderAnnotationLayer={true}
+              className="shadow-lg"
+            />
+          </Document>
+        </ZoomableContent>
 
-          {/* Page Navigation in Dialog */}
-          {numPages && numPages > 1 && (
-            <div className="flex justify-center items-center gap-4 mt-4">
-              <Button
-                variant="ghost"
-                disabled={pageNumber <= 1}
-                onClick={() => setPageNumber(pageNumber - 1)}
-                className="px-4 py-2 cursor-pointer rounded-full border-none disabled:opacity-50 disabled:cursor-not-allowed font-normal text-white bg-white/10 hover:bg-white/20"
-              >
-                Previous
-              </Button>
-              <span className="text-white font-medium">
-                Page {pageNumber} of {numPages}
-              </span>
-              <Button
-                variant="ghost"
-                disabled={pageNumber >= numPages}
-                onClick={() => setPageNumber(pageNumber + 1)}
-                className="px-4 py-2 cursor-pointer rounded-full border-none disabled:opacity-50 disabled:cursor-not-allowed font-normal text-white bg-white/10 hover:bg-white/20"
-              >
-                Next
-              </Button>
-            </div>
-          )}
-        </div>
+        {/* Page Navigation in Dialog */}
+        {numPages && numPages > 1 && (
+          <div className="flex justify-center items-center gap-4">
+            <Button
+              variant="ghost"
+              disabled={pageNumber <= 1}
+              onClick={() => setPageNumber(pageNumber - 1)}
+              className="px-4 py-2 cursor-pointer rounded-full border-none disabled:opacity-50 disabled:cursor-not-allowed font-normal text-white bg-white/10 hover:bg-white/20"
+            >
+              Previous
+            </Button>
+            <span className="text-white font-medium">
+              Page {pageNumber} of {numPages}
+            </span>
+            <Button
+              variant="ghost"
+              disabled={pageNumber >= numPages}
+              onClick={() => setPageNumber(pageNumber + 1)}
+              className="px-4 py-2 cursor-pointer rounded-full border-none disabled:opacity-50 disabled:cursor-not-allowed font-normal text-white bg-white/10 hover:bg-white/20"
+            >
+              Next
+            </Button>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );

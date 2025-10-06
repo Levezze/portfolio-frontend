@@ -6,11 +6,13 @@ import { cn } from "@/lib/utils/general";
 interface ZoomableContentProps {
   children: ReactNode;
   className?: string;
+  alwaysDraggable?: boolean;
 }
 
 export const ZoomableContent = ({
   children,
   className,
+  alwaysDraggable = false,
 }: ZoomableContentProps) => {
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -39,7 +41,7 @@ export const ZoomableContent = ({
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (scale > 1) {
+    if (scale > 1 || alwaysDraggable) {
       e.preventDefault();
       setIsDragging(true);
       dragDistanceRef.current = 0;
@@ -53,7 +55,7 @@ export const ZoomableContent = ({
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging || scale === 1) return;
+    if (!isDragging || (scale === 1 && !alwaysDraggable)) return;
 
     e.preventDefault();
     const deltaX = e.clientX - dragStartRef.current.x;
@@ -73,7 +75,7 @@ export const ZoomableContent = ({
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (scale > 1 && e.touches.length === 1) {
+    if ((scale > 1 || alwaysDraggable) && e.touches.length === 1) {
       setIsDragging(true);
       dragDistanceRef.current = 0;
       dragStartRef.current = {
@@ -86,7 +88,7 @@ export const ZoomableContent = ({
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging || scale === 1 || e.touches.length !== 1) return;
+    if (!isDragging || (scale === 1 && !alwaysDraggable) || e.touches.length !== 1) return;
 
     const deltaX = e.touches[0].clientX - dragStartRef.current.x;
     const deltaY = e.touches[0].clientY - dragStartRef.current.y;
@@ -106,7 +108,7 @@ export const ZoomableContent = ({
 
   const getCursor = () => {
     if (isDragging) return "cursor-grabbing";
-    if (scale > 1) return "cursor-grab";
+    if (scale > 1 || alwaysDraggable) return "cursor-grab";
     return "cursor-zoom-in";
   };
 
