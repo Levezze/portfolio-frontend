@@ -26,6 +26,7 @@ Welcome to my portfolio's frontend repository! This isn't your typical portfolio
 ### Core Experience
 
 - **🎲 3D Cube Navigation** - Six interactive faces, each serving a unique purpose
+- **⬅️ Browser Back Button** - Intelligent navigation stack that reverses state changes (pages, dialogs, chat)
 - **🤖 AI-Powered Chat** - Natural conversation interface powered by OpenAI
 - **🎨 Smooth Animations** - GSAP-powered transitions with optimized rotation paths
 - **📱 Responsive Design** - Seamless experience across all devices
@@ -35,7 +36,7 @@ Welcome to my portfolio's frontend repository! This isn't your typical portfolio
 ### The Six Faces
 
 1. **Chat** - AI assistant for interactive Q&A about my experience
-2. **About** - Personal introduction, skills, and links
+2. **Blog** - Insights, thoughts, and technical writing
 3. **Projects** - Showcase of technical work and achievements
 4. **Contact** - Direct communication form
 5. **Resume** - Professional experience and skills
@@ -49,6 +50,7 @@ Welcome to my portfolio's frontend repository! This isn't your typical portfolio
 const frontend = {
   framework: "Next.js 15 with App Router",
   language: "TypeScript",
+  runtime: "React 19",
   rendering: "React Three Fiber + Drei",
   animations: "GSAP",
   state: "Jotai",
@@ -59,6 +61,7 @@ const frontend = {
     assistant: "assistant-ui",
     documents: "react-pdf",
   },
+  forms: "EmailJS + React Hook Form",
   validation: "Zod",
   package: "pnpm",
   tooling: "Turbopack + Biome",
@@ -113,8 +116,18 @@ backend = {
    Required variables:
 
    ```env
-   NEXT_PUBLIC_API_URL=http://localhost:8000  # Your backend API URL
+   # API Configuration
+   NEXT_PUBLIC_API_URL=http://localhost:8000
    NEXT_PUBLIC_SITE_URL=http://localhost:3000
+
+   # Debug Settings
+   NEXT_PUBLIC_DEBUG_VIEWPORT=false
+
+   # EmailJS Configuration (for contact form)
+   # Get these from https://dashboard.emailjs.com/
+   NEXT_PUBLIC_EMAILJS_SERVICE_ID=your_service_id_here
+   NEXT_PUBLIC_EMAILJS_TEMPLATE_ID=your_template_id_here
+   NEXT_PUBLIC_EMAILJS_PUBLIC_KEY=your_public_key_here
    ```
 
 4. **Run the development server**
@@ -142,28 +155,49 @@ pnpm format       # Format code with Biome
 
 ```
 src/
-├── app/                    # Next.js app router
+├── app/                    # Next.js App Router
+│   ├── globals.css        # Tailwind v4 config + global styles
+│   ├── layout.tsx         # Root layout
+│   └── page.tsx           # Home page
+├── atoms/                  # Jotai state atoms
+│   └── atomStore.ts       # All global state definitions
 ├── components/
-│   ├── 3d/                # Three.js components
-│   │   ├── CubeWithFaces  # Main cube logic
-│   │   ├── Scene          # 3D scene setup
-│   │   └── ...
-│   ├── faces/             # Cube face components
-│   ├── assistant-ui/      # AI chat interface
-│   └── ui/                # shadcn/ui components
+│   ├── scene/             # 3D scene and face components
+│   │   ├── CubeWithFaces.tsx   # Main cube with 6 faces
+│   │   ├── Scene.tsx           # R3F Canvas setup
+│   │   ├── chat/               # Chat face components
+│   │   ├── blog/               # Blog face components
+│   │   ├── projects/           # Projects face components
+│   │   ├── contact/            # Contact face components
+│   │   ├── resume/             # Resume face components
+│   │   └── secret/             # Secret face components
+│   ├── shared/            # Reusable components
+│   │   ├── ui/            # shadcn/ui components
+│   │   ├── kibo-ui/       # Custom UI components
+│   │   └── alerts/        # Alert components
+│   ├── footer/            # Navigation footer
+│   └── GlobalNavigationManager.tsx
 ├── lib/
 │   ├── api/               # API client & services
-│   └── hooks/             # Custom React hooks
-└── atoms/                 # Jotai state atoms
+│   └── utils/             # Utility functions
+├── hooks/                 # Custom React hooks
+├── types/                 # TypeScript type definitions
+└── config/                # Configuration files
 ```
 
 ### State Management
 
-The app uses a hybrid approach:
+- **Jotai** - All application state (active face, dimensions, navigation stack, UI state)
+  - Atomic state updates with minimal re-renders
+  - Simple API: `atom()`, `useAtomValue()`, `useSetAtom()`
+  - All atoms defined in `src/atoms/atomStore.ts`
+- **Local React state** - Component-specific UI state (form inputs, local toggles)
 
-- **Jotai** for global UI state (active face, dimensions)
-- **Zustand** for complex state logic
-- **Local state** for component-specific needs
+**Note:** Zustand is installed as a dependency but only used internally by third-party libraries (@react-three/fiber for 3D scene state, @assistant-ui/react for chat state). Application state is managed entirely with Jotai.
+
+### Browser Navigation System
+
+Since navigation is state-driven (no URL routing), the app implements a custom browser back button system using a callback-based approach. See [`docs/decisions/adr_0003.md`](docs/decisions/adr_0003.md) for architecture details.
 
 ### API Integration
 
