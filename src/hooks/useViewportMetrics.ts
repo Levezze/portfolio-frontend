@@ -41,28 +41,20 @@ const detectOrientation = (
   previous: Orientation,
   portraitMax: number
 ): Orientation => {
-  if (typeof window !== "undefined") {
-    const screenOrientation = window.screen?.orientation?.type;
-    if (typeof screenOrientation === "string") {
-      return screenOrientation.startsWith("portrait")
-        ? "portrait"
-        : "landscape";
-    }
+  // Primary detection: viewport dimensions
+  // This works correctly in both real devices and DevTools simulation
+  // (screen.orientation APIs report physical screen, breaking DevTools)
+  const dimensionBasedOrientation = width >= height ? "landscape" : "portrait";
 
-    if (typeof window.matchMedia === "function") {
-      return window.matchMedia("(orientation: portrait)").matches
-        ? "portrait"
-        : "landscape";
-    }
-  }
-
+  // Special case: if keyboard was open in portrait, maintain portrait
+  // even if viewport temporarily becomes wider due to keyboard
   if (previous === "portrait" && portraitMax > 0) {
     if (height < portraitMax * 0.9 && width > height) {
       return "portrait";
     }
   }
 
-  return width >= height ? "landscape" : "portrait";
+  return dimensionBasedOrientation;
 };
 
 export const useViewportMetrics = () => {
