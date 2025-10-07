@@ -5,7 +5,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useAtomValue } from "jotai";
 import { domAnimation, LazyMotion } from "motion/react";
 import * as m from "motion/react-m";
-import { useEffect, useState } from "react";
+import {
+  type ChangeEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -47,6 +54,40 @@ const contactFormSchema = z.object({
 });
 
 type ContactFormValues = z.infer<typeof contactFormSchema>;
+
+type ContactFieldName = keyof ContactFormValues;
+
+type ContactFieldConfig = {
+  label: string;
+  placeholder: string;
+  type: "text" | "email" | "textarea";
+};
+
+const CONTACT_FIELD_ORDER: ContactFieldName[] = [
+  "name",
+  "email",
+  "subject",
+  "message",
+];
+
+const CONTACT_FIELD_CONFIG: Record<ContactFieldName, ContactFieldConfig> = {
+  name: { label: "Name", placeholder: "Your name", type: "text" },
+  email: {
+    label: "Email",
+    placeholder: "your.email@example.com",
+    type: "email",
+  },
+  subject: {
+    label: "Subject",
+    placeholder: "What's this about?",
+    type: "text",
+  },
+  message: {
+    label: "Message",
+    placeholder: "Your message...",
+    type: "textarea",
+  },
+};
 
 const ContactForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -137,59 +178,16 @@ const ContactForm = () => {
   // Helper to render a floating field
   const renderFloatingField = () => {
     if (!activeFieldName) return null;
-
-    const fieldConfig = {
-      name: { label: "Name", placeholder: "Your name", type: "text" as const },
-      email: {
-        label: "Email",
-        placeholder: "your.email@example.com",
-        type: "email" as const,
-      },
-      subject: {
-        label: "Subject",
-        placeholder: "What's this about?",
-        type: "text" as const,
-      },
-      message: {
-        label: "Message",
-        placeholder: "Your message...",
-        type: "textarea" as const,
-      },
-    };
-
-    const config = fieldConfig[activeFieldName as keyof typeof fieldConfig];
+    const fieldName = activeFieldName as ContactFieldName;
+    const config = CONTACT_FIELD_CONFIG[fieldName];
     if (!config) return null;
 
     return (
-      <FormField
-        control={form.control}
-        name={activeFieldName as keyof ContactFormValues}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel className="font-inter text-sm">{config.label}</FormLabel>
-            <FormControl>
-              {config.type === "textarea" ? (
-                <Textarea
-                  placeholder={config.placeholder}
-                  className="min-h-32 resize-none px-4 py-2"
-                  {...field}
-                  disabled={isSubmitting}
-                  autoFocus
-                />
-              ) : (
-                <Input
-                  type={config.type}
-                  placeholder={config.placeholder}
-                  {...field}
-                  disabled={isSubmitting}
-                  className="px-4 py-2"
-                  autoFocus
-                />
-              )}
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
+      <FloatingContactField
+        key={fieldName}
+        fieldName={fieldName}
+        config={config}
+        isSubmitting={isSubmitting}
       />
     );
   };
@@ -234,6 +232,7 @@ const ContactForm = () => {
                           {...field}
                           disabled={isSubmitting}
                           className="px-4 py-2"
+                          data-contact-input="name"
                         />
                       </FormControl>
                       <FormMessage />
@@ -256,6 +255,7 @@ const ContactForm = () => {
                           {...field}
                           disabled={isSubmitting}
                           className="px-4 py-2"
+                          data-contact-input="email"
                         />
                       </FormControl>
                       <FormMessage />
@@ -277,6 +277,7 @@ const ContactForm = () => {
                           {...field}
                           className="px-4 py-2"
                           disabled={isSubmitting}
+                          data-contact-input="subject"
                         />
                       </FormControl>
                       <FormMessage />
@@ -298,6 +299,7 @@ const ContactForm = () => {
                           className="min-h-32 resize-none px-4 py-2"
                           {...field}
                           disabled={isSubmitting}
+                          data-contact-input="message"
                         />
                       </FormControl>
                       <FormMessage />
@@ -348,11 +350,194 @@ const ContactForm = () => {
         showFloating &&
         createPortal(
           <div className="fixed left-0 right-0 bottom-0 z-[9999] py-2 bg-background/95 px-4">
-            <Form {...form}>{renderFloatingField()}</Form>
+            {renderFloatingField()}
           </div>,
           document.body,
         )}
     </>
+  );
+};
+
+type FloatingContactFieldProps = {
+  fieldName: ContactFieldName;
+  config: ContactFieldConfig;
+  isSubmitting: boolean;
+};
+
+const FloatingContactField = ({
+  fieldName,
+  config,
+  isSubmitting,
+}: FloatingContactFieldProps) => {
+  const [value, setValue] = useState("");
+  const mirrorRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
+  const sourceRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
+
+  const setMirrorRef = useCallback(
+    (node: HTMLInputElement | HTMLTextAreaElement | null) => {
+      mirrorRef.current = node;
+    },
+    [],
+  );
+
+  useEffect(() => {
+    const selector = `[data-contact-input='${fieldName}']`;
+    const source = document.querySelector<HTMLInputElement | HTMLTextAreaElement>(
+      selector,
+    );
+    sourceRef.current = source ?? null;
+
+    if (!source) {
+      setValue("");
+      return;
+    }
+
+    setValue(source.value);
+
+    const syncValue = () => setValue(source.value);
+    source.addEventListener("input", syncValue);
+
+    return () => {
+      source.removeEventListener("input", syncValue);
+    };
+  }, [fieldName]);
+
+  useEffect(() => {
+    const rafId = requestAnimationFrame(() => {
+      const mirror = mirrorRef.current;
+      if (!mirror) {
+        return;
+      }
+
+      mirror.focus({ preventScroll: true });
+      const length = mirror.value.length;
+      mirror.setSelectionRange(length, length);
+    });
+
+    return () => cancelAnimationFrame(rafId);
+  }, [fieldName]);
+
+  const adjustTextareaHeight = useCallback(() => {
+    const mirror = mirrorRef.current;
+    if (!mirror || mirror.tagName !== "TEXTAREA") {
+      return;
+    }
+
+    mirror.style.height = "auto";
+    mirror.style.height = `${mirror.scrollHeight}px`;
+  }, []);
+
+  useEffect(() => {
+    adjustTextareaHeight();
+  }, [adjustTextareaHeight, value]);
+
+  const handleChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const nextValue = event.target.value;
+      setValue(nextValue);
+
+      const source = sourceRef.current;
+      if (!source) {
+        return;
+      }
+
+      const selectionStart = mirrorRef.current?.selectionStart ?? nextValue.length;
+      const selectionEnd = mirrorRef.current?.selectionEnd ?? nextValue.length;
+
+      source.value = nextValue;
+      source.dispatchEvent(new Event("input", { bubbles: true }));
+
+      try {
+        source.setSelectionRange(selectionStart, selectionEnd);
+      } catch (error) {
+        if (process.env.NODE_ENV === "development") {
+          console.debug("Unable to sync contact field selection", error);
+        }
+      }
+    },
+    []);
+
+  const handleBlur = useCallback(() => {
+    sourceRef.current?.blur();
+  }, []);
+
+  const handleKeyDown = useCallback(
+    (event: ReactKeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      if (event.key !== "Tab") {
+        return;
+      }
+
+      const source = sourceRef.current;
+      if (!source) {
+        return;
+      }
+
+      event.preventDefault();
+
+      const form = source.form ?? source.closest("form");
+      if (!form) {
+        return;
+      }
+
+      const fields = CONTACT_FIELD_ORDER.map((name) =>
+        form.querySelector<HTMLInputElement | HTMLTextAreaElement>(
+          `[data-contact-input='${name}']`,
+        ),
+      ).filter(Boolean) as Array<HTMLInputElement | HTMLTextAreaElement>;
+
+      if (!fields.length) {
+        return;
+      }
+
+      const currentIndex = fields.indexOf(source);
+      const direction = event.shiftKey ? -1 : 1;
+
+      const fallbackIndex = event.shiftKey ? fields.length - 1 : 0;
+      const nextIndex =
+        currentIndex === -1
+          ? fallbackIndex
+          : (currentIndex + direction + fields.length) % fields.length;
+
+      fields[nextIndex]?.focus();
+    },
+    []);
+
+  return (
+    <div className="grid gap-2">
+      <label className="font-inter text-sm" htmlFor={`floating-${fieldName}`}>
+        {config.label}
+      </label>
+      {config.type === "textarea" ? (
+        <textarea
+          ref={setMirrorRef}
+          id={`floating-${fieldName}`}
+          name={fieldName}
+          placeholder={config.placeholder}
+          disabled={isSubmitting}
+          value={value}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          onKeyDown={handleKeyDown}
+          data-keyboard-element="true"
+          className="min-h-32 resize-none px-4 py-2 font-inter rounded-[25px] bg-muted text-base outline-none placeholder:text-muted-foreground"
+        />
+      ) : (
+        <input
+          ref={setMirrorRef}
+          type={config.type}
+          id={`floating-${fieldName}`}
+          name={fieldName}
+          placeholder={config.placeholder}
+          disabled={isSubmitting}
+          value={value}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          onKeyDown={handleKeyDown}
+          data-keyboard-element="true"
+          className="px-4 py-2 font-inter rounded-[25px] bg-muted text-base outline-none placeholder:text-muted-foreground"
+        />
+      )}
+    </div>
   );
 };
 

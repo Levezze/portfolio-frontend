@@ -24,9 +24,9 @@ import {
 import { domAnimation, LazyMotion, MotionConfig } from "motion/react";
 import * as m from "motion/react-m";
 import {
+  type ChangeEvent as ReactChangeEvent,
   type FC,
-  type MouseEvent as ReactMouseEvent,
-  type PointerEvent as ReactPointerEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
   useCallback,
   useEffect,
   useRef,
@@ -426,6 +426,7 @@ const Composer: FC<{ chatConfig: ChatConfig | null; isLoading: boolean }> = ({
             className="aui-composer-input flex font-inter items-center justify-center mb-1 h-16 w-full resize-none bg-transparent px-3.5 pt-1.5 pb-2 text-base outline-none placeholder:text-muted-foreground focus:outline-primary"
             rows={1}
             aria-label="Message input"
+            data-floating-source="chat"
           />
           <ComposerAction />
         </ComposerPrimitive.Root>
@@ -434,60 +435,12 @@ const Composer: FC<{ chatConfig: ChatConfig | null; isLoading: boolean }> = ({
       {/* Floating Input Portal for Mobile */}
       {isMounted &&
         showFloating &&
-        createPortal(
-          <div className="fixed left-0 right-0 bottom-0 z-[9999] py-2 px-2 bg-background/95">
-            <ComposerPrimitive.Root className="aui-composer-root relative rounded-[25px] flex w-full flex-col bg-muted px-1 pt-2 dark:border-muted-foreground/15 shadow-inner shadow-muted-foreground/5">
-              <ComposerPrimitive.Input
-                placeholder="Send a message..."
-                className="aui-composer-input flex font-inter items-center justify-center mb-1 h-16 w-full resize-none bg-transparent px-3.5 pt-1.5 pb-2 text-base outline-none placeholder:text-muted-foreground focus:outline-primary"
-                rows={1}
-                autoFocus
-                aria-label="Message input"
-              />
-              <ComposerAction immediateSend />
-            </ComposerPrimitive.Root>
-          </div>,
-          document.body,
-        )}
+        createPortal(<FloatingComposerMirror />, document.body)}
     </>
   );
 };
 
-const ComposerAction: FC<{ immediateSend?: boolean }> = ({
-  immediateSend = false,
-}) => {
-  const handlePointerDown = useCallback(
-    (event: ReactPointerEvent<HTMLButtonElement>) => {
-      if (!immediateSend) {
-        return;
-      }
-
-      if (event.pointerType === "mouse" && event.button === 0) {
-        event.preventDefault();
-      }
-    },
-    [immediateSend],
-  );
-
-  const handleClick = useCallback(
-    (event: ReactMouseEvent<HTMLButtonElement>) => {
-      if (!immediateSend) {
-        return;
-      }
-
-      const button = event.currentTarget;
-
-      requestAnimationFrame(() => {
-        const root = button.closest(".aui-composer-root");
-        const input = root?.querySelector<HTMLInputElement | HTMLTextAreaElement>(
-          ".aui-composer-input",
-        );
-        input?.focus();
-      });
-    },
-    [immediateSend],
-  );
-
+const ComposerAction: FC = () => {
   return (
     <div className="aui-composer-action-wrapper absolute bottom-1 right-2 mb-1 flex items-center ml-auto">
       <ThreadPrimitive.If running={false}>
@@ -500,9 +453,6 @@ const ComposerAction: FC<{ immediateSend?: boolean }> = ({
             size="icon"
             className="aui-composer-send size-[34px] rounded-full p-1"
             aria-label="Send message"
-            onPointerDown={handlePointerDown}
-            onClick={handleClick}
-            data-keyboard-element={immediateSend ? "true" : undefined}
           >
             <ArrowUpIcon className="aui-composer-send-icon size-5" />
           </TooltipIconButton>
@@ -522,6 +472,165 @@ const ComposerAction: FC<{ immediateSend?: boolean }> = ({
           </Button>
         </ComposerPrimitive.Cancel>
       </ThreadPrimitive.If>
+    </div>
+  );
+};
+
+const FloatingComposerMirror: FC = () => {
+  const [value, setValue] = useState("");
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const sourceInputRef = useRef<HTMLTextAreaElement | null>(null);
+  const sendButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    const source = document.querySelector<HTMLTextAreaElement>(
+      ".aui-composer-input[data-floating-source='chat']",
+    );
+    sourceInputRef.current = source;
+
+    if (!source) {
+      setValue("");
+      return;
+    }
+
+    setValue(source.value);
+
+    const syncValue = () => setValue(source.value);
+    source.addEventListener("input", syncValue);
+
+    return () => {
+      source.removeEventListener("input", syncValue);
+    };
+  }, []);
+
+  useEffect(() => {
+    const source = sourceInputRef.current;
+    if (!source) {
+      sendButtonRef.current = null;
+      return;
+    }
+
+    sendButtonRef.current =
+      source
+        .closest(".aui-composer-root")
+        ?.querySelector<HTMLButtonElement>(".aui-composer-send") ?? null;
+  }, [value]);
+
+  useEffect(() => {
+    const rafId = requestAnimationFrame(() => {
+      textareaRef.current?.focus({ preventScroll: true });
+      const length = textareaRef.current?.value.length ?? 0;
+      textareaRef.current?.setSelectionRange(length, length);
+    });
+
+    return () => cancelAnimationFrame(rafId);
+  }, []);
+
+  useEffect(() => {
+    const adjust = () => {
+      const node = textareaRef.current;
+      if (!node) return;
+      node.style.height = "auto";
+      node.style.height = `${node.scrollHeight}px`;
+    };
+
+    adjust();
+  }, [value]);
+
+  const updateSource = useCallback(
+    (nextValue: string) => {
+      const source = sourceInputRef.current;
+      if (!source) {
+        return;
+      }
+
+      const mirror = textareaRef.current;
+      const selectionStart = mirror?.selectionStart ?? nextValue.length;
+      const selectionEnd = mirror?.selectionEnd ?? nextValue.length;
+
+      source.value = nextValue;
+      source.dispatchEvent(new Event("input", { bubbles: true }));
+
+      try {
+        source.setSelectionRange(selectionStart, selectionEnd);
+      } catch (error) {
+        if (process.env.NODE_ENV === "development") {
+          console.debug("Unable to sync selection to source input", error);
+        }
+      }
+    },
+    [],
+  );
+
+  const handleChange = useCallback(
+    (event: ReactChangeEvent<HTMLTextAreaElement>) => {
+      const nextValue = event.target.value;
+      setValue(nextValue);
+      updateSource(nextValue);
+    },
+    [updateSource],
+  );
+
+  const closeKeyboard = useCallback(() => {
+    textareaRef.current?.blur();
+    sourceInputRef.current?.blur();
+  }, []);
+
+  const sendMessage = useCallback(() => {
+    const sendButton = sendButtonRef.current;
+    if (!sendButton || sendButton.disabled) {
+      return;
+    }
+
+    sendButton.click();
+    requestAnimationFrame(closeKeyboard);
+  }, [closeKeyboard]);
+
+  const handleKeyDown = useCallback(
+    (event: ReactKeyboardEvent<HTMLTextAreaElement>) => {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
+      }
+    },
+    [sendMessage],
+  );
+
+  const handleBlur = useCallback(() => {
+    sourceInputRef.current?.blur();
+  }, []);
+
+  return (
+    <div className="fixed left-0 right-0 bottom-0 z-[9999] py-2 px-2 bg-background/95">
+      <div className="aui-composer-root relative rounded-[25px] flex w-full flex-col bg-muted px-1 pt-2 dark:border-muted-foreground/15 shadow-inner shadow-muted-foreground/5">
+        <textarea
+          ref={textareaRef}
+          placeholder="Send a message..."
+          className="aui-composer-input flex font-inter items-center justify-center mb-1 min-h-16 max-h-48 w-full resize-none bg-transparent px-3.5 pt-1.5 pb-2 text-base outline-none placeholder:text-muted-foreground focus:outline-primary"
+          rows={1}
+          value={value}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
+          onBlur={handleBlur}
+          data-keyboard-element="true"
+          data-floating-role="chat-mirror"
+          aria-label="Message input"
+        />
+        <div className="aui-composer-action-wrapper absolute bottom-1 right-2 mb-1 flex items-center ml-auto">
+          <TooltipIconButton
+            tooltip="Send message"
+            side="bottom"
+            type="button"
+            variant="default"
+            size="icon"
+            className="aui-composer-send size-[34px] rounded-full p-1"
+            aria-label="Send message"
+            onClick={sendMessage}
+          >
+            <ArrowUpIcon className="aui-composer-send-icon size-5" />
+          </TooltipIconButton>
+        </div>
+      </div>
     </div>
   );
 };
