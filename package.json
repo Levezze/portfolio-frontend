@@ -6,8 +6,9 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "biome check",
-    "format": "biome format --write"
+    "lint": "biome check /src",
+    "format": "biome format --write",
+    "lint-format": "biome format --write && biome check --write --unsafe && biome lint --write"
   },
   "dependencies": {
     "@assistant-ui/react": "^0.11.8",
