@@ -20,6 +20,8 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { ZoomableContent } from "@/components/shared/ZoomableContent";
 import { Loading } from "@/components/shared/alerts/Loading";
 import { FailedLoad } from "@/components/shared/alerts/FailedLoad";
+import { useSetAtom } from "jotai";
+import { pushNavigationCallbackAtom } from "@/atoms/atomStore";
 
 // Import PDF.js styles
 import "react-pdf/dist/Page/AnnotationLayer.css";
@@ -37,6 +39,18 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
   const [pdfWidth, setPdfWidth] = useState(400);
   const [numPages, setNumPages] = useState<number | null>(null);
   const [pageNumber, setPageNumber] = useState(1);
+  const [isOpen, setIsOpen] = useState(false);
+  const pushCallback = useSetAtom(pushNavigationCallbackAtom);
+
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    if (open) {
+      pushCallback({
+        callback: () => setIsOpen(false),
+        label: "Close PDF viewer",
+      });
+    }
+  };
 
   // Measure actual container width with ResizeObserver
   useEffect(() => {
@@ -53,7 +67,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
   }, []);
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <div className="flex flex-col h-full w-full">
         {/* Cube Face - PDF Preview (click to open fullscreen) */}
         <DialogTrigger asChild>
@@ -136,65 +150,64 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
       {/* Fullscreen Dialog with Draggable & Zoomable PDF */}
       <DialogContent
         fullscreen={true}
-        className="bg-black/95 flex flex-col gap-4 p-4"
+        className="bg-black/95 p-4"
         showCloseButton={true}
       >
         <VisuallyHidden>
           <DialogTitle>Resume PDF Viewer</DialogTitle>
         </VisuallyHidden>
-        <ZoomableContent
-          alwaysDraggable
-          className="flex-1 flex items-center justify-center"
-        >
-          <div className="max-w-full max-h-[90dvh] flex items-center justify-center">
-            <Document
-              file={url}
-              loading={
-                <div className="flex text-center h-full justify-center items-center p-4 text-white">
-                  Loading PDF...
-                </div>
-              }
-              error={
-                <div className="flex text-center h-full justify-center items-center p-4 text-red-500">
-                  Failed to load PDF.
-                </div>
-              }
-            >
-              <Page
-                pageNumber={pageNumber}
-                devicePixelRatio={2.5}
-                renderTextLayer={true}
-                renderAnnotationLayer={true}
-                className="shadow-lg max-w-full max-h-full"
-              />
-            </Document>
-          </div>
-        </ZoomableContent>
+        <div className="w-full h-full flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4 max-h-full">
+            <ZoomableContent alwaysDraggable>
+              <Document
+                file={url}
+                loading={
+                  <div className="flex text-center h-full justify-center items-center p-4 text-white">
+                    Loading PDF...
+                  </div>
+                }
+                error={
+                  <div className="flex text-center h-full justify-center items-center p-4 text-red-500">
+                    Failed to load PDF.
+                  </div>
+                }
+              >
+                <Page
+                  pageNumber={pageNumber}
+                  devicePixelRatio={2.5}
+                  renderTextLayer={true}
+                  renderAnnotationLayer={true}
+                  className="max-w-full max-h-[85vh] object-contain"
+                />
+              </Document>
+            </ZoomableContent>
 
-        {/* Page Navigation in Dialog */}
-        {numPages && numPages > 1 && (
-          <div className="flex justify-center items-center gap-4">
-            <Button
-              variant="ghost"
-              disabled={pageNumber <= 1}
-              onClick={() => setPageNumber(pageNumber - 1)}
-              className="px-4 py-2 cursor-pointer rounded-full border-none disabled:opacity-50 disabled:cursor-not-allowed font-normal text-white bg-white/10 hover:bg-white/20"
-            >
-              Previous
-            </Button>
-            <span className="text-white font-medium">
-              Page {pageNumber} of {numPages}
-            </span>
-            <Button
-              variant="ghost"
-              disabled={pageNumber >= numPages}
-              onClick={() => setPageNumber(pageNumber + 1)}
-              className="px-4 py-2 cursor-pointer rounded-full border-none disabled:opacity-50 disabled:cursor-not-allowed font-normal text-white bg-white/10 hover:bg-white/20"
-            >
-              Next
-            </Button>
+            {/* Page Navigation in Dialog */}
+            {numPages && numPages > 1 && (
+              <div className="flex justify-center items-center gap-4">
+                <Button
+                  variant="ghost"
+                  disabled={pageNumber <= 1}
+                  onClick={() => setPageNumber(pageNumber - 1)}
+                  className="px-4 py-2 cursor-pointer rounded-full border-none disabled:opacity-50 disabled:cursor-not-allowed font-normal text-white bg-white/10 hover:bg-white/20"
+                >
+                  Previous
+                </Button>
+                <span className="text-white font-medium">
+                  Page {pageNumber} of {numPages}
+                </span>
+                <Button
+                  variant="ghost"
+                  disabled={pageNumber >= numPages}
+                  onClick={() => setPageNumber(pageNumber + 1)}
+                  className="px-4 py-2 cursor-pointer rounded-full border-none disabled:opacity-50 disabled:cursor-not-allowed font-normal text-white bg-white/10 hover:bg-white/20"
+                >
+                  Next
+                </Button>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </DialogContent>
     </Dialog>
   );
