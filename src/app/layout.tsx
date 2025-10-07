@@ -11,6 +11,7 @@ import {
 } from "next/font/google";
 import { ThemeWrapper } from "@/components/ThemeWrapper";
 import { GlobalNavigationManager } from "@/components/GlobalNavigationManager";
+import { FloatingInputMirror } from "@/components/shared/FloatingInputMirror";
 import "./globals.css";
 
 const inter = Saira({
@@ -58,6 +59,7 @@ export default function RootLayout({
       >
         <GlobalNavigationManager />
         <ThemeWrapper>{children}</ThemeWrapper>
+        <FloatingInputMirror />
       </body>
     </html>
   );

@@ -135,6 +135,7 @@ const ContactForm = () => {
                         placeholder="Your name"
                         {...field}
                         disabled={isSubmitting}
+                        className="px-4 py-2"
                       />
                     </FormControl>
                     <FormMessage />
@@ -154,6 +155,7 @@ const ContactForm = () => {
                         placeholder="your.email@example.com"
                         {...field}
                         disabled={isSubmitting}
+                        className="px-4 py-2"
                       />
                     </FormControl>
                     <FormMessage />
@@ -173,6 +175,7 @@ const ContactForm = () => {
                       <Input
                         placeholder="What's this about?"
                         {...field}
+                        className="px-4 py-2"
                         disabled={isSubmitting}
                       />
                     </FormControl>
@@ -192,7 +195,7 @@ const ContactForm = () => {
                     <FormControl>
                       <Textarea
                         placeholder="Your message..."
-                        className="min-h-32 resize-none"
+                        className="min-h-32 resize-none px-4 py-2"
                         {...field}
                         disabled={isSubmitting}
                       />
@@ -206,7 +209,7 @@ const ContactForm = () => {
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full font-inter rounded-[25px] max-w-50 mx-auto cursor-pointer"
+                  className="w-full font-inter rounded-[25px] max-w-50 mx-auto cursor-pointer h-[45px]"
                   variant="default"
                   matchBgColor={true}
                 >
@@ -214,8 +217,8 @@ const ContactForm = () => {
                 </Button>
 
                 {submitStatus === "success" && (
-                  <p className="text-sm text-center text-green-600 dark:text-green-400 font-inter">
-                    Message sent successfully! I'll get back to you soon.
+                  <p className="text-sm text-center text-muted-foreground font-inter">
+                    Message sent successfully!
                   </p>
                 )}
 
