@@ -18,7 +18,7 @@ const PDFViewer = dynamic(
         <Loading />
       </div>
     ),
-  },
+  }
 );
 
 const resumeFetcher = async (url: string) => {
@@ -56,7 +56,7 @@ const Resume = () => {
       {error && !isLoading && (
         <div className="flex flex-col items-center justify-center h-full p-8">
           <div className="text-center space-y-4">
-            <div className="text-red-500 text-lg font-semibold">
+            <div className="text-muted-foreground text-lg font-semibold">
               Unable to Load Resume
             </div>
             <p className="text-muted-foreground">

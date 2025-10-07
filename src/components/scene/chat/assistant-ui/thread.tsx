@@ -6,6 +6,7 @@ import {
   ErrorPrimitive,
   MessagePrimitive,
   ThreadPrimitive,
+  useAssistantApi,
   useAssistantRuntime,
   useThread,
 } from "@assistant-ui/react";
@@ -23,7 +24,15 @@ import {
 } from "lucide-react";
 import { domAnimation, LazyMotion, MotionConfig } from "motion/react";
 import * as m from "motion/react-m";
-import { type FC, useEffect, useRef, useState } from "react";
+import {
+  type FC,
+  type MouseEvent as ReactMouseEvent,
+  type PointerEvent as ReactPointerEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
 import useSWR from "swr";
 import {
@@ -436,7 +445,7 @@ const Composer: FC<{ chatConfig: ChatConfig | null; isLoading: boolean }> = ({
                 autoFocus
                 aria-label="Message input"
               />
-              <ComposerAction />
+              <ComposerAction immediateSend />
             </ComposerPrimitive.Root>
           </div>,
           document.body,
@@ -445,7 +454,57 @@ const Composer: FC<{ chatConfig: ChatConfig | null; isLoading: boolean }> = ({
   );
 };
 
-const ComposerAction: FC = () => {
+const ComposerAction: FC<{ immediateSend?: boolean }> = ({
+  immediateSend = false,
+}) => {
+  const assistantApi = useAssistantApi();
+
+  const handlePointerDown = useCallback(
+    (event: ReactPointerEvent<HTMLButtonElement>) => {
+      if (!immediateSend) {
+        return;
+      }
+
+      if (event.button !== 0) {
+        return;
+      }
+
+      const target = event.currentTarget;
+
+      if (target.disabled) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+
+      assistantApi.composer().send();
+
+      requestAnimationFrame(() => {
+        const activeEl = document.activeElement;
+        if (
+          activeEl instanceof HTMLInputElement ||
+          activeEl instanceof HTMLTextAreaElement
+        ) {
+          activeEl.blur();
+        }
+      });
+    },
+    [assistantApi, immediateSend],
+  );
+
+  const handleClick = useCallback(
+    (event: ReactMouseEvent<HTMLButtonElement>) => {
+      if (!immediateSend) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+    },
+    [immediateSend],
+  );
+
   return (
     <div className="aui-composer-action-wrapper absolute bottom-1 right-2 mb-1 flex items-center ml-auto">
       <ThreadPrimitive.If running={false}>
@@ -458,6 +517,8 @@ const ComposerAction: FC = () => {
             size="icon"
             className="aui-composer-send size-[34px] rounded-full p-1"
             aria-label="Send message"
+            onPointerDown={handlePointerDown}
+            onClick={handleClick}
           >
             <ArrowUpIcon className="aui-composer-send-icon size-5" />
           </TooltipIconButton>
