@@ -20,7 +20,7 @@ const variables = {
   "--media-primary-color": "var(--primary)",
   "--media-secondary-color": "var(--background)",
   "--media-text-color": "var(--foreground)",
-  "--media-background-color": "var(--background)",
+  "--media-background-color": "none",
   "--media-control-hover-background": "var(--accent)",
   "--media-font-family": "var(--font-sans)",
   "--media-live-button-icon-color": "var(--muted-foreground)",

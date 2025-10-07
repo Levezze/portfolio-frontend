@@ -10,6 +10,7 @@ import {
   Exo_2,
 } from "next/font/google";
 import { ThemeWrapper } from "@/components/ThemeWrapper";
+import { NavigationListener } from "@/components/NavigationListener";
 import "./globals.css";
 
 const inter = Saira({
@@ -55,6 +56,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${merriweather.variable} antialiased bg-background font-inter-regular`}
       >
+        <NavigationListener />
         <ThemeWrapper>{children}</ThemeWrapper>
       </body>
     </html>

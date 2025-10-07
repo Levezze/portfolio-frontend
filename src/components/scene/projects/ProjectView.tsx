@@ -76,7 +76,11 @@ export const ProjectView = ({ projectTitle }: { projectTitle: string }) => {
                 {techStack && techStack.length > 0 && (
                   <div className="flex flex-row items-center justify-center gap-2 md:gap-4 flex-wrap">
                     {techStack.map((item: any) => (
-                      <Badge key={item} variant="secondary" className="text-sm">
+                      <Badge
+                        key={item}
+                        variant="secondary"
+                        className="text-sm hover:bg-muted-foreground/50 cursor-default transition-colors transition-duration-300"
+                      >
                         {item}
                       </Badge>
                     ))}

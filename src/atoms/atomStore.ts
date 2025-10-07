@@ -68,3 +68,12 @@ export const viewportOrientationAtom = atom<"portrait" | "landscape">(
 
 // Projects Gallery
 export const projectViewAtom = atom<"project" | "zoomed">("project");
+
+// Navigation Stack
+export type NavigationStackItem = {
+  callback: () => void;
+  label?: string;
+  timestamp: number;
+};
+
+export const navigationStackAtom = atom<NavigationStackItem[]>([]);
