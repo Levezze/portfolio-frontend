@@ -103,6 +103,15 @@ export const useViewportMetrics = () => {
       return true;
     }
 
+    if (node instanceof HTMLElement) {
+      if (
+        node.dataset.keyboardElement === "true" ||
+        node.closest("[data-keyboard-element='true']")
+      ) {
+        return true;
+      }
+    }
+
     return false;
   };
 
@@ -176,12 +185,13 @@ export const useViewportMetrics = () => {
       updateKeyboardVisibility(isKeyboardEl);
 
       // Set active input element for FloatingInputMirror
-      if (
-        isKeyboardEl &&
-        (target instanceof HTMLInputElement ||
-          target instanceof HTMLTextAreaElement)
-      ) {
-        setActiveInput(target);
+      if (isKeyboardEl) {
+        if (
+          target instanceof HTMLInputElement ||
+          target instanceof HTMLTextAreaElement
+        ) {
+          setActiveInput(target);
+        }
       } else {
         setActiveInput(null);
       }

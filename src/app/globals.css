@@ -186,19 +186,31 @@
 
 @media (min-width: 600px) and (min-height: 700px) {
   :root {
-    --face-size: 600px;
+    --face-size: 550px;
   }
 }
 
 @media (min-width: 700px) and (min-height: 800px) {
   :root {
-    --face-size: 650px;
+    --face-size: 600px;
+  }
+}
+
+@media (min-width: 800px) and (min-height: 900px) {
+  :root {
+    --face-size: 700px;
   }
 }
 
 @media (min-width: 900px) and (min-height: 1000px) {
   :root {
     --face-size: 800px;
+  }
+}
+
+@media (min-width: 1000px) and (min-height: 1100px) {
+  :root {
+    --face-size: 900px;
   }
 }
 

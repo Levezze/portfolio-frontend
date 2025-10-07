@@ -6,7 +6,6 @@ import {
   ErrorPrimitive,
   MessagePrimitive,
   ThreadPrimitive,
-  useAssistantApi,
   useAssistantRuntime,
   useThread,
 } from "@assistant-ui/react";
@@ -457,40 +456,17 @@ const Composer: FC<{ chatConfig: ChatConfig | null; isLoading: boolean }> = ({
 const ComposerAction: FC<{ immediateSend?: boolean }> = ({
   immediateSend = false,
 }) => {
-  const assistantApi = useAssistantApi();
-
   const handlePointerDown = useCallback(
     (event: ReactPointerEvent<HTMLButtonElement>) => {
       if (!immediateSend) {
         return;
       }
 
-      if (event.button !== 0) {
-        return;
+      if (event.pointerType === "mouse" && event.button === 0) {
+        event.preventDefault();
       }
-
-      const target = event.currentTarget;
-
-      if (target.disabled) {
-        return;
-      }
-
-      event.preventDefault();
-      event.stopPropagation();
-
-      assistantApi.composer().send();
-
-      requestAnimationFrame(() => {
-        const activeEl = document.activeElement;
-        if (
-          activeEl instanceof HTMLInputElement ||
-          activeEl instanceof HTMLTextAreaElement
-        ) {
-          activeEl.blur();
-        }
-      });
     },
-    [assistantApi, immediateSend],
+    [immediateSend],
   );
 
   const handleClick = useCallback(
@@ -499,8 +475,15 @@ const ComposerAction: FC<{ immediateSend?: boolean }> = ({
         return;
       }
 
-      event.preventDefault();
-      event.stopPropagation();
+      const button = event.currentTarget;
+
+      requestAnimationFrame(() => {
+        const root = button.closest(".aui-composer-root");
+        const input = root?.querySelector<HTMLInputElement | HTMLTextAreaElement>(
+          ".aui-composer-input",
+        );
+        input?.focus();
+      });
     },
     [immediateSend],
   );
@@ -519,6 +502,7 @@ const ComposerAction: FC<{ immediateSend?: boolean }> = ({
             aria-label="Send message"
             onPointerDown={handlePointerDown}
             onClick={handleClick}
+            data-keyboard-element={immediateSend ? "true" : undefined}
           >
             <ArrowUpIcon className="aui-composer-send-icon size-5" />
           </TooltipIconButton>
