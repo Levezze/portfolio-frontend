@@ -1,12 +1,12 @@
 "use client";
 
 import { ArrowLeftIcon } from "lucide-react";
+import { Button } from "@/components/shared/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/shared/ui/tooltip";
-import { Button } from "@/components/shared/ui/button";
 import { cn } from "@/lib/utils/general";
 
 export interface BackButtonProps {
@@ -30,7 +30,7 @@ export const BackButton = ({
           onClick={onClick}
           className={cn(
             "absolute size-[34px] rounded-full p-1 cursor-pointer z-500",
-            className
+            className,
           )}
           aria-label={tooltip}
         >

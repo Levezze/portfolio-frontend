@@ -1,15 +1,15 @@
 "use client";
-import { useSetAtom, useAtomValue } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import {
-  lightThemeAtom,
-  cubeColorAtom,
-  pageColorAtom,
   activeFaceAtom,
+  cubeColorAtom,
+  lightThemeAtom,
+  pageColorAtom,
 } from "@/atoms/atomStore";
-import { getCssColor } from "@/lib/utils/general";
 import { useViewportMetrics } from "@/hooks/useViewportMetrics";
+import { getCssColor } from "@/lib/utils/general";
 
 export const ThemeWrapper = ({ children }: { children: ReactNode }) => {
   const theme = useAtomValue(lightThemeAtom);

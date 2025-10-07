@@ -1,12 +1,12 @@
-import { useEffect, useRef } from "react";
 import { useSetAtom } from "jotai";
+import { useEffect, useRef } from "react";
 import {
+  activeInputElementAtom,
   isMobileAtom,
+  keyboardVisibleAtom,
   viewportHeightAtom,
   viewportOrientationAtom,
   viewportWidthAtom,
-  activeInputElementAtom,
-  keyboardVisibleAtom,
 } from "@/atoms/atomStore";
 import { isMobileDevice } from "@/lib/utils/deviceDetection";
 
@@ -41,7 +41,7 @@ const detectOrientation = (
   width: number,
   height: number,
   previous: Orientation,
-  portraitMax: number
+  portraitMax: number,
 ): Orientation => {
   // Primary detection: viewport dimensions
   // This works correctly in both real devices and DevTools simulation
@@ -120,7 +120,7 @@ export const useViewportMetrics = () => {
         width,
         height,
         orientationRef.current,
-        maxHeightRef.current.portrait
+        maxHeightRef.current.portrait,
       );
       orientationRef.current = orientation;
 
@@ -176,7 +176,11 @@ export const useViewportMetrics = () => {
       updateKeyboardVisibility(isKeyboardEl);
 
       // Set active input element for FloatingInputMirror
-      if (isKeyboardEl && (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement)) {
+      if (
+        isKeyboardEl &&
+        (target instanceof HTMLInputElement ||
+          target instanceof HTMLTextAreaElement)
+      ) {
         setActiveInput(target);
       } else {
         setActiveInput(null);
@@ -228,12 +232,12 @@ export const useViewportMetrics = () => {
         window.removeEventListener("resize", handleResize);
         window.removeEventListener(
           "orientationchange",
-          handleOrientationChange
+          handleOrientationChange,
         );
         window.visualViewport?.removeEventListener("resize", handleResize);
         virtualKeyboard.removeEventListener(
           "geometrychange",
-          handleGeometryChange
+          handleGeometryChange,
         );
       };
     }
@@ -248,5 +252,13 @@ export const useViewportMetrics = () => {
       window.removeEventListener("orientationchange", handleOrientationChange);
       window.visualViewport?.removeEventListener("resize", handleResize);
     };
-  }, [setIsMobile, setOrientation, setViewportHeight, setViewportWidth]);
+  }, [
+    setIsMobile,
+    setOrientation,
+    setViewportHeight,
+    setViewportWidth,
+    isKeyboardElement,
+    setActiveInput,
+    setKeyboardVisible,
+  ]);
 };

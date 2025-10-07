@@ -1,9 +1,8 @@
-import { TooltipButton } from "@/components/shared/TooltipButton";
-import { Icon } from "@/components/shared/Icon";
-import React from "react";
-import { LinkButtonProps } from "@/types/buttonTypes";
 import { useAtomValue } from "jotai";
 import { isMobileAtom } from "@/atoms/atomStore";
+import { Icon } from "@/components/shared/Icon";
+import { TooltipButton } from "@/components/shared/TooltipButton";
+import type { LinkButtonProps } from "@/types/buttonTypes";
 
 export const LinkButton = ({
   className,

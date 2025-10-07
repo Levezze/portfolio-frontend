@@ -44,7 +44,7 @@ const resolveViewportHeight = (): number => {
   } catch (error) {
     console.warn(
       "Failed to resolve --viewport-height, falling back to window height",
-      error
+      error,
     );
     return fallback;
   }
@@ -207,7 +207,7 @@ export function getCurrentBreakpoint(): BreakpointKey {
  * @returns Breakpoint configuration
  */
 export function getBreakpointConfig(
-  breakpoint: BreakpointKey
+  breakpoint: BreakpointKey,
 ): BreakpointConfig {
   return RESPONSIVE_CONFIG[breakpoint];
 }
@@ -255,7 +255,7 @@ export function getTargetPixelSize(breakpoint: BreakpointKey): number {
  */
 export function hasBreakpointChanged(
   previousBreakpoint: BreakpointKey | null,
-  currentBreakpoint: BreakpointKey
+  currentBreakpoint: BreakpointKey,
 ): boolean {
   return previousBreakpoint !== currentBreakpoint;
 }

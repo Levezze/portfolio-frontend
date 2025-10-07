@@ -1,5 +1,5 @@
-import { useEffect } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
+import { useEffect } from "react";
 import {
   cubeSizeAtom,
   faceSizeAtom,
@@ -69,9 +69,9 @@ export const useResponsiveFaceSize = () => {
         faceSize = parseInt(cssValue, 10);
 
         // Fallback to DEFAULT CSS value if parsing fails
-        if (isNaN(faceSize)) {
+        if (Number.isNaN(faceSize)) {
           console.warn(
-            "Failed to read --face-size from CSS, using default 400px"
+            "Failed to read --face-size from CSS, using default 400px",
           );
           faceSize = 400;
         }

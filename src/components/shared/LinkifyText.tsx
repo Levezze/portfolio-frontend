@@ -17,7 +17,7 @@ export const LinkifyText = (text: string) => {
           </a>
         ) : (
           part
-        )
+        ),
       )}
     </>
   );

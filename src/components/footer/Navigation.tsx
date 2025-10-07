@@ -1,20 +1,19 @@
-import React, { useState } from "react";
-import { ButtonFrame } from "@/components/shared/ButtonFrame";
+import { useAtomValue, useSetAtom } from "jotai";
 import {
-  MessageSquareTextIcon,
   CircleUserIcon,
+  FileUserIcon,
   FolderGit2Icon,
   MailIcon,
-  FileUserIcon,
+  MessageSquareTextIcon,
 } from "lucide-react";
-import { TooltipButton } from "@/components/shared/TooltipButton";
-import { useAtomValue, useSetAtom } from "jotai";
 import {
   activeFaceAtom,
   drawerOpenAtom,
   isMobileAtom,
   navigateToFaceAtom,
 } from "@/atoms/atomStore";
+import { ButtonFrame } from "@/components/shared/ButtonFrame";
+import { TooltipButton } from "@/components/shared/TooltipButton";
 import { Separator } from "@/components/shared/ui/separator";
 
 interface NavigationProps {
@@ -45,7 +44,7 @@ export const Navigation = ({
         }`}
       >
         <TooltipButton
-          tooltip={activeFace === "chat" ? false : true}
+          tooltip={activeFace !== "chat"}
           disabled={activeFace === "chat"}
           inputIcon={
             <div className={iconColorClass}>
@@ -68,7 +67,7 @@ export const Navigation = ({
         />
         {isMobile && <Separator />}
         <TooltipButton
-          tooltip={activeFace === "blog" ? false : true}
+          tooltip={activeFace !== "blog"}
           disabled={activeFace === "blog"}
           inputIcon={
             <div className={iconColorClass}>
@@ -89,7 +88,7 @@ export const Navigation = ({
         />
         {isMobile && <Separator />}
         <TooltipButton
-          tooltip={activeFace === "projects" ? false : true}
+          tooltip={activeFace !== "projects"}
           disabled={activeFace === "projects"}
           inputIcon={
             <div className={iconColorClass}>
@@ -110,7 +109,7 @@ export const Navigation = ({
         />
         {isMobile && <Separator />}
         <TooltipButton
-          tooltip={activeFace === "contact" ? false : true}
+          tooltip={activeFace !== "contact"}
           disabled={activeFace === "contact"}
           inputIcon={
             <div className={iconColorClass}>
@@ -131,7 +130,7 @@ export const Navigation = ({
         />
         {isMobile && <Separator />}
         <TooltipButton
-          tooltip={activeFace === "resume" ? false : true}
+          tooltip={activeFace !== "resume"}
           disabled={activeFace === "resume"}
           inputIcon={
             <div className={iconColorClass}>

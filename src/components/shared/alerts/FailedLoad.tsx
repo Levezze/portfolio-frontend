@@ -1,4 +1,3 @@
-import React from "react";
 import { FrownIcon } from "lucide-react";
 import { AlertContainer } from "@/components/shared/alerts/AlertContainer";
 

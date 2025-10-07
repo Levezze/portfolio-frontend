@@ -1,4 +1,3 @@
-import React from "react";
 import { ConstructionIcon } from "lucide-react";
 import { AlertContainer } from "@/components/shared/alerts/AlertContainer";
 

@@ -1,15 +1,13 @@
-import React from "react";
-import useSWR from "swr";
-import { Loading } from "@/components/shared/alerts/Loading";
-import { FailedLoad } from "@/components/shared/alerts/FailedLoad";
-import { getProjectPage } from "@/lib/api/services/projectsService";
-import { Separator } from "@/components/shared/ui/separator";
-import { LazyMotion, domAnimation } from "motion/react";
-import { LinkifyText } from "@/components/shared/LinkifyText";
-import { MediaGallery } from "./MediaGallery";
-
+import { domAnimation, LazyMotion } from "motion/react";
 import * as m from "motion/react-m";
+import useSWR from "swr";
+import { FailedLoad } from "@/components/shared/alerts/FailedLoad";
+import { Loading } from "@/components/shared/alerts/Loading";
+import { LinkifyText } from "@/components/shared/LinkifyText";
 import { Badge } from "@/components/shared/ui/badge";
+import { Separator } from "@/components/shared/ui/separator";
+import { getProjectPage } from "@/lib/api/services/projectsService";
+import { MediaGallery } from "./MediaGallery";
 
 export const ProjectView = ({ projectTitle }: { projectTitle: string }) => {
   const {
@@ -17,7 +15,7 @@ export const ProjectView = ({ projectTitle }: { projectTitle: string }) => {
     isLoading,
     error,
   } = useSWR(
-    "projectPage-" + projectTitle,
+    `projectPage-${projectTitle}`,
     () => getProjectPage(projectTitle),
     {
       revalidateOnFocus: false,
@@ -25,7 +23,7 @@ export const ProjectView = ({ projectTitle }: { projectTitle: string }) => {
       onError: (err) => {
         console.error("Failed to load project page:", err);
       },
-    }
+    },
   );
 
   if (isLoading) return <Loading />;

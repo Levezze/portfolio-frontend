@@ -1,9 +1,9 @@
-import { navigateToFaceAtom } from "@/atoms/atomStore";
-import { makeAssistantToolUI, useThreadRuntime } from "@assistant-ui/react";
+import { makeAssistantToolUI } from "@assistant-ui/react";
 import { useSetAtom } from "jotai";
 import { useEffect } from "react";
+import { navigateToFaceAtom } from "@/atoms/atomStore";
+import type { PagesType } from "@/lib/api/schemas/tools";
 import { capitalFirstLetter } from "@/lib/utils/general";
-import { type PagesType } from "@/lib/api/schemas/tools";
 
 export const NavigationToolUI = makeAssistantToolUI<
   { page: PagesType },

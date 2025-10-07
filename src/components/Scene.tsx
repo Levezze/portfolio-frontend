@@ -1,19 +1,18 @@
-import { Canvas } from "@react-three/fiber";
 import {
+  Float,
   OrbitControls,
   OrthographicCamera,
-  PerspectiveCamera,
   Preload,
   SoftShadows,
 } from "@react-three/drei";
-import { CubeWithFaces } from "./scene/CubeWithFaces";
-import { CameraController } from "./scene/CameraController";
-import { BowlGroundPlane } from "./scene/BowlGroundPlane";
-import { Float } from "@react-three/drei";
+import { Canvas } from "@react-three/fiber";
 import { useAtomValue } from "jotai";
-import { isLoadedAtom, bgMotionAtom } from "@/atoms/atomStore";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { bgMotionAtom, isLoadedAtom } from "@/atoms/atomStore";
 import { useResponsiveFaceSize } from "@/hooks/useResponsiveFaceSize";
+import { BowlGroundPlane } from "./scene/BowlGroundPlane";
+import { CameraController } from "./scene/CameraController";
+import { CubeWithFaces } from "./scene/CubeWithFaces";
 
 export const Scene = () => {
   // Activate responsive sizing system
@@ -53,29 +52,32 @@ export const Scene = () => {
         canvas.removeEventListener("webglcontextlost", handleContextLost);
         canvas.removeEventListener(
           "webglcontextrestored",
-          handleContextRestored
+          handleContextRestored,
         );
       };
     }
-  }, [isLoaded]);
+  }, []);
 
   // Auto-retry context recovery
   useEffect(() => {
     if (contextLost && retryCount < maxRetries) {
-      const timeout = setTimeout(() => {
-        console.log(
-          `Retrying WebGL context recovery (attempt ${
-            retryCount + 1
-          }/${maxRetries})`
-        );
-        setRetryCount((prev) => prev + 1);
-        // Force re-render to attempt context recreation
-        setContextLost(false);
-      }, 1000 * (retryCount + 1)); // Exponential backoff
+      const timeout = setTimeout(
+        () => {
+          console.log(
+            `Retrying WebGL context recovery (attempt ${
+              retryCount + 1
+            }/${maxRetries})`,
+          );
+          setRetryCount((prev) => prev + 1);
+          // Force re-render to attempt context recreation
+          setContextLost(false);
+        },
+        1000 * (retryCount + 1),
+      ); // Exponential backoff
 
       return () => clearTimeout(timeout);
     }
-  }, [contextLost, retryCount, maxRetries]);
+  }, [contextLost, retryCount]);
 
   // Show fallback UI if context is permanently lost
   if (contextLost && retryCount >= maxRetries) {

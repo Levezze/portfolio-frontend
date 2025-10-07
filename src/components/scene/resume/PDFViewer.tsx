@@ -1,27 +1,28 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { useSetAtom } from "jotai";
+import { DownloadIcon, MaximizeIcon } from "lucide-react";
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
+import { pushNavigationCallbackAtom } from "@/atoms/atomStore";
+import { FailedLoad } from "@/components/shared/alerts/FailedLoad";
+import { Loading } from "@/components/shared/alerts/Loading";
 import { Button } from "@/components/shared/ui/button";
-import { Separator } from "@/components/shared/ui/separator";
-import { MaximizeIcon, DownloadIcon } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/shared/ui/tooltip";
 import {
   Dialog,
   DialogContent,
   DialogTitle,
   DialogTrigger,
 } from "@/components/shared/ui/dialog";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { Separator } from "@/components/shared/ui/separator";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/shared/ui/tooltip";
 import { ZoomableContent } from "@/components/shared/ZoomableContent";
-import { Loading } from "@/components/shared/alerts/Loading";
-import { FailedLoad } from "@/components/shared/alerts/FailedLoad";
-import { useSetAtom } from "jotai";
-import { pushNavigationCallbackAtom } from "@/atoms/atomStore";
 
 // Import PDF.js styles
 import "react-pdf/dist/Page/AnnotationLayer.css";

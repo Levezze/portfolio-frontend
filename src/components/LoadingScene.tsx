@@ -1,8 +1,8 @@
+import { OrthographicCamera } from "@react-three/drei";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { useRef } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { AsciiRenderer, OrthographicCamera } from "@react-three/drei";
 // import { getCssColor } from '@/lib/utils';
-import * as THREE from "three";
+import type * as THREE from "three";
 
 export const LoadingScene = () => {
   // const asciiColor = getCssColor('--primary');

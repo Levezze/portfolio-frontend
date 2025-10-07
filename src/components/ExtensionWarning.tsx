@@ -1,11 +1,12 @@
-'use client';
+"use client";
 
-import { useExtensionDetection } from '@/hooks/useExtensionDetection';
-import { useState } from 'react';
-import { X, AlertTriangle, RefreshCw } from 'lucide-react';
+import { AlertTriangle, RefreshCw, X } from "lucide-react";
+import { useState } from "react";
+import { useExtensionDetection } from "@/hooks/useExtensionDetection";
 
 export const ExtensionWarning = () => {
-  const { problematicExtensions, hasInterference, suggestions } = useExtensionDetection();
+  const { problematicExtensions, hasInterference, suggestions } =
+    useExtensionDetection();
   const [dismissed, setDismissed] = useState(false);
 
   // Don't show if no interference detected or user dismissed
@@ -13,19 +14,25 @@ export const ExtensionWarning = () => {
     return null;
   }
 
-  const highInterferenceExtensions = problematicExtensions.filter(ext => ext.interference === 'high');
+  const highInterferenceExtensions = problematicExtensions.filter(
+    (ext) => ext.interference === "high",
+  );
   const isHighRisk = highInterferenceExtensions.length > 0;
 
   return (
-    <div className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 max-w-md w-full mx-4 ${
-      isHighRisk ? 'bg-red-500/95' : 'bg-yellow-500/95'
-    } text-white rounded-lg shadow-lg border border-white/20`}>
+    <div
+      className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 max-w-md w-full mx-4 ${
+        isHighRisk ? "bg-red-500/95" : "bg-yellow-500/95"
+      } text-white rounded-lg shadow-lg border border-white/20`}
+    >
       <div className="p-4">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 flex-shrink-0" />
             <h3 className="font-semibold text-sm">
-              {isHighRisk ? 'Browser Extension Interference' : 'Potential Extension Issues'}
+              {isHighRisk
+                ? "Browser Extension Interference"
+                : "Potential Extension Issues"}
             </h3>
           </div>
           <button
@@ -45,7 +52,7 @@ export const ExtensionWarning = () => {
             {problematicExtensions.map((ext, index) => (
               <li key={index}>
                 <span className="font-medium">{ext.name}</span>
-                {ext.interference === 'high' && (
+                {ext.interference === "high" && (
                   <span className="ml-1 px-1.5 py-0.5 bg-white/20 rounded text-xs">
                     High Impact
                   </span>
@@ -66,12 +73,18 @@ export const ExtensionWarning = () => {
           <button
             onClick={() => {
               // Open a new incognito window (where available)
-              if (navigator.userAgent.includes('Chrome')) {
-                alert('Try opening this page in an Incognito window (Ctrl+Shift+N) to disable extensions.');
-              } else if (navigator.userAgent.includes('Firefox')) {
-                alert('Try opening this page in a Private window (Ctrl+Shift+P) to disable extensions.');
+              if (navigator.userAgent.includes("Chrome")) {
+                alert(
+                  "Try opening this page in an Incognito window (Ctrl+Shift+N) to disable extensions.",
+                );
+              } else if (navigator.userAgent.includes("Firefox")) {
+                alert(
+                  "Try opening this page in a Private window (Ctrl+Shift+P) to disable extensions.",
+                );
               } else {
-                alert('Try opening this page in a private/incognito window to disable extensions.');
+                alert(
+                  "Try opening this page in a private/incognito window to disable extensions.",
+                );
               }
             }}
             className="px-3 py-1.5 bg-white/20 hover:bg-white/30 rounded text-xs font-medium transition-colors"
@@ -83,8 +96,8 @@ export const ExtensionWarning = () => {
         {isHighRisk && (
           <div className="mt-3 pt-3 border-t border-white/20 text-xs text-white/90">
             <p>
-              <strong>Tip:</strong> Temporarily disable security extensions or add this site to your whitelist
-              for the best experience.
+              <strong>Tip:</strong> Temporarily disable security extensions or
+              add this site to your whitelist for the best experience.
             </p>
           </div>
         )}

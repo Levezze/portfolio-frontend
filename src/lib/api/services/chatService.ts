@@ -1,9 +1,9 @@
 import { apiClient } from "../core/client";
 import { ChatConfigSchema } from "../schemas/chat";
-import {
-  NavigateParams,
-  DownloadParams,
+import type {
   ContactParams,
+  DownloadParams,
+  NavigateParams,
 } from "../schemas/tools";
 
 export const getChatConfig = async () => {
@@ -16,7 +16,7 @@ export const getChatConfig = async () => {
 };
 
 export const transformTool = async (
-  toolMessage: NavigateParams | DownloadParams | ContactParams
+  toolMessage: NavigateParams | DownloadParams | ContactParams,
 ) => {
   const baseTool = {
     type: "tool-call" as const,

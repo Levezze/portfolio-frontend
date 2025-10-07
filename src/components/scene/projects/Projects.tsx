@@ -1,25 +1,22 @@
-import React, { useState } from "react";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { useAtom, useSetAtom } from "jotai";
+import Image from "next/image";
+import { useState } from "react";
 import useSWR from "swr";
-import { getProjectsGallery } from "@/lib/api/services/projectsService";
+import { projectViewAtom, pushNavigationCallbackAtom } from "@/atoms/atomStore";
 import { FailedLoad } from "@/components/shared/alerts/FailedLoad";
 import { Loading } from "@/components/shared/alerts/Loading";
-import Image from "next/image";
-import { useAtom, useSetAtom } from "jotai";
-import {
-  projectViewAtom,
-  pushNavigationCallbackAtom,
-} from "@/atoms/atomStore";
 import {
   Dialog,
-  DialogTrigger,
   DialogContent,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/shared/ui/dialog";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { getProjectsGallery } from "@/lib/api/services/projectsService";
 import { ProjectView } from "./ProjectView";
 
 const ProjectDialog = ({ project, index }: { project: any; index: number }) => {
-  const [projectView, setProjectView] = useAtom(projectViewAtom);
+  const [_projectView, setProjectView] = useAtom(projectViewAtom);
   const [isOpen, setIsOpen] = useState(false);
   const pushCallback = useSetAtom(pushNavigationCallbackAtom);
 
@@ -77,7 +74,6 @@ const ProjectDialog = ({ project, index }: { project: any; index: number }) => {
 };
 
 const Projects = () => {
-
   const { data, isLoading, error } = useSWR(
     "projectsGallery",
     getProjectsGallery,
@@ -87,7 +83,7 @@ const Projects = () => {
       onError: (err) => {
         console.error("Failed to load projects:", err);
       },
-    }
+    },
   );
 
   if (isLoading) return <Loading />;

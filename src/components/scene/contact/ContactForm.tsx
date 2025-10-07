@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useAtomValue } from "jotai";
 import { domAnimation, LazyMotion } from "motion/react";
 import * as m from "motion/react-m";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -76,7 +76,7 @@ const ContactForm = () => {
 
   // Track which form field is active based on the focused input
   useEffect(() => {
-    if (activeInput && activeInput.name) {
+    if (activeInput?.name) {
       // Check if it's one of our contact form inputs
       const validFields = ["name", "email", "subject", "message"];
       if (validFields.includes(activeInput.name)) {
@@ -323,20 +323,18 @@ const ContactForm = () => {
                   )}
 
                   {submitStatus === "error" && (
-                    <>
-                      <p className="text-sm text-center text-muted-foreground font-inter pt-2">
-                        Failed to send message. Please try again or email me
-                        directly at{" "}
-                        <span className="text-sm text-center text-muted-foreground font-inter">
-                          <a
-                            href="mailto:contact@levezze.com"
-                            className="text-sm underline-offset-4 hover:underline font-semibold"
-                          >
-                            contact@levezze.com
-                          </a>
-                        </span>
-                      </p>
-                    </>
+                    <p className="text-sm text-center text-muted-foreground font-inter pt-2">
+                      Failed to send message. Please try again or email me
+                      directly at{" "}
+                      <span className="text-sm text-center text-muted-foreground font-inter">
+                        <a
+                          href="mailto:contact@levezze.com"
+                          className="text-sm underline-offset-4 hover:underline font-semibold"
+                        >
+                          contact@levezze.com
+                        </a>
+                      </span>
+                    </p>
                   )}
                 </div>
               </form>

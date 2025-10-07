@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
+import { useEffect, useRef } from "react";
 import {
   activeFaceAtom,
-  navigationStackAtom,
   navigateToFaceAtom,
+  navigationStackAtom,
 } from "@/atoms/atomStore";
 import type { PagesType } from "@/lib/api/schemas/tools";
 
@@ -22,7 +22,7 @@ import type { PagesType } from "@/lib/api/schemas/tools";
  */
 export const GlobalNavigationManager = () => {
   const activeFace = useAtomValue(activeFaceAtom);
-  const navigateToFace = useSetAtom(navigateToFaceAtom);
+  const _navigateToFace = useSetAtom(navigateToFaceAtom);
   const stack = useAtomValue(navigationStackAtom);
   const setStack = useSetAtom(navigationStackAtom);
 
@@ -39,16 +39,21 @@ export const GlobalNavigationManager = () => {
 
   // Push browser history state when stack grows (forward navigation)
   useEffect(() => {
-    if (stack.length > previousStackLengthRef.current && typeof window !== "undefined") {
+    if (
+      stack.length > previousStackLengthRef.current &&
+      typeof window !== "undefined"
+    ) {
       // Stack grew - user navigated forward
       window.history.pushState(
         { navId: `nav-${Date.now()}`, managed: true },
         "",
-        window.location.href
+        window.location.href,
       );
 
       if (process.env.NODE_ENV === "development") {
-        console.log(`[Navigation] History pushed (stack size: ${stack.length})`);
+        console.log(
+          `[Navigation] History pushed (stack size: ${stack.length})`,
+        );
       }
     }
     previousStackLengthRef.current = stack.length;
@@ -76,7 +81,9 @@ export const GlobalNavigationManager = () => {
 
     if (previousFaceRef.current !== activeFace) {
       if (process.env.NODE_ENV === "development") {
-        console.log(`[Navigation] Face changed: ${previousFaceRef.current} → ${activeFace}`);
+        console.log(
+          `[Navigation] Face changed: ${previousFaceRef.current} → ${activeFace}`,
+        );
       }
       previousFaceRef.current = activeFace;
     }
@@ -94,7 +101,7 @@ export const GlobalNavigationManager = () => {
       if (process.env.NODE_ENV === "development") {
         console.log(
           `[Navigation] popstate fired, stack size: ${currentStack.length}`,
-          event.state
+          event.state,
         );
       }
 
@@ -107,7 +114,7 @@ export const GlobalNavigationManager = () => {
 
           if (process.env.NODE_ENV === "development") {
             console.log(
-              `[Navigation] Executing: ${item.label || "unnamed"} (remaining: ${prev.length - 1})`
+              `[Navigation] Executing: ${item.label || "unnamed"} (remaining: ${prev.length - 1})`,
             );
           }
 
@@ -127,7 +134,7 @@ export const GlobalNavigationManager = () => {
         window.history.pushState(
           { navId: `trap-${Date.now()}`, managed: true },
           "",
-          window.location.href
+          window.location.href,
         );
 
         if (process.env.NODE_ENV === "development") {

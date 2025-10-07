@@ -92,12 +92,12 @@
   --face-size: 400px;
   --header-color: #324041;
   --hover-header-color: #597374;
-  --page-chat: #A8DADC;
-  --page-blog: #B8D4B3;
-  --page-projects: #C1666B;
-  --page-contact: #C7B8D4;
-  --page-resume: #E6C9B5;
-  --page-secret: #E4DFDA;
+  --page-chat: #a8dadc;
+  --page-blog: #b8d4b3;
+  --page-projects: #c1666b;
+  --page-contact: #c7b8d4;
+  --page-resume: #e6c9b5;
+  --page-secret: #e4dfda;
   --viewport-height: 100vh;
 
   /* Responsive face padding for mobile/tablet letterboxing */
@@ -150,31 +150,31 @@
 
 @media (max-height: 600px) and (orientation: landscape) {
   .mobile-landscape\:grid-rows-3 {
-    grid-template-rows: repeat(3, minmax(0, 1fr)) !important;
+    grid-template-rows: repeat(3, minmax(0, 1fr));
   }
   .mobile-landscape\:grid-cols-1 {
-    grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
   }
   .mobile-landscape\:aspect-auto {
-    aspect-ratio: auto !important;
+    aspect-ratio: auto;
   }
   .mobile-landscape\:p-0 {
-    padding: 0 !important;
+    padding: 0;
   }
   .mobile-landscape\:p-1 {
-    padding: 1rem !important;
+    padding: 1rem;
   }
   .mobile-landscape\:p-2 {
-    padding: 2rem !important;
+    padding: 2rem;
   }
   .mobile-landscape\:p-3 {
-    padding: 3rem !important;
+    padding: 3rem;
   }
   .mobile-landscape\:p-4 {
-    padding: 4rem !important;
+    padding: 4rem;
   }
   .mobile-landscape\:hidden {
-    display: none !important;
+    display: none;
   }
 }
 
@@ -254,7 +254,6 @@
   background: oklch(0.708 0 0 / 60%);
 }
 
-
 .cube-face {
   width: var(--face-size);
   height: var(--face-size);
@@ -287,7 +286,7 @@
 }
 
 .header-button:hover {
-  color: var(--hover-header-color); 
+  color: var(--hover-header-color);
   transition: color 0.3s ease;
 }
 

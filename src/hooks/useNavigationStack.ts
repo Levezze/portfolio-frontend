@@ -1,8 +1,11 @@
 "use client";
 
 import { useAtom } from "jotai";
-import { navigationStackAtom, type NavigationStackItem } from "@/atoms/atomStore";
 import { useCallback, useEffect, useRef } from "react";
+import {
+  type NavigationStackItem,
+  navigationStackAtom,
+} from "@/atoms/atomStore";
 
 /**
  * Hook to manage the browser navigation stack with custom callbacks.
@@ -34,7 +37,7 @@ export const useNavigationStack = () => {
         window.history.replaceState(
           { navId: `nav-${Date.now()}` },
           "",
-          window.location.href
+          window.location.href,
         );
       }
     }
@@ -60,16 +63,16 @@ export const useNavigationStack = () => {
       window.history.pushState(
         { navId: `nav-${Date.now()}` },
         "",
-        window.location.href
+        window.location.href,
       );
 
       if (process.env.NODE_ENV === "development") {
         console.log(
-          `[Navigation] Pushed: ${label || "unnamed"} (stack size: ${stack.length + 1})`
+          `[Navigation] Pushed: ${label || "unnamed"} (stack size: ${stack.length + 1})`,
         );
       }
     },
-    [setStack, stack.length]
+    [setStack, stack.length],
   );
 
   /**
@@ -85,7 +88,7 @@ export const useNavigationStack = () => {
 
       if (process.env.NODE_ENV === "development") {
         console.log(
-          `[Navigation] Popped: ${item.label || "unnamed"} (stack size: ${newStack.length})`
+          `[Navigation] Popped: ${item.label || "unnamed"} (stack size: ${newStack.length})`,
         );
       }
 

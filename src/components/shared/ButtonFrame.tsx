@@ -1,5 +1,4 @@
-import React from "react";
-import { ButtonFrameProps } from "@/types/buttonTypes";
+import type { ButtonFrameProps } from "@/types/buttonTypes";
 
 export const ButtonFrame = ({
   children,

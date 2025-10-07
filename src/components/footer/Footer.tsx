@@ -1,16 +1,17 @@
-import React from "react";
-import { StateControls } from "./StateControls";
-import { Navigation } from "./Navigation";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { useAtom, useAtomValue } from "jotai";
+import { MenuIcon, MessageSquareTextIcon } from "lucide-react";
 import {
-  cubeColorAtom,
   activeFaceAtom,
+  cubeColorAtom,
   drawerOpenAtom,
   isMobileAtom,
   viewportHeightAtom,
   viewportOrientationAtom,
   viewportWidthAtom,
 } from "@/atoms/atomStore";
+import { ButtonFrame } from "@/components/shared/ButtonFrame";
+import { TooltipButton } from "@/components/shared/TooltipButton";
 import {
   Drawer,
   DrawerContent,
@@ -18,11 +19,9 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/shared/ui/drawer";
-import { MenuIcon, MessageSquareTextIcon } from "lucide-react";
 import { RESPONSIVE_CONFIG } from "@/config/responsive";
-import { ButtonFrame } from "@/components/shared/ButtonFrame";
-import { TooltipButton } from "@/components/shared/TooltipButton";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { Navigation } from "./Navigation";
+import { StateControls } from "./StateControls";
 
 export const Footer = () => {
   const isMobile = useAtomValue(isMobileAtom);

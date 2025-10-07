@@ -1,28 +1,28 @@
-import React, { useState } from "react";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import Autoplay from "embla-carousel-auto-scroll";
+import { useSetAtom } from "jotai";
+import { useState } from "react";
+import { pushNavigationCallbackAtom } from "@/atoms/atomStore";
 import {
   VideoPlayer,
   VideoPlayerContent,
   VideoPlayerControlBar,
-  VideoPlayerTimeRange,
-  VideoPlayerTimeDisplay,
   VideoPlayerPlayButton,
+  VideoPlayerTimeDisplay,
+  VideoPlayerTimeRange,
 } from "@/components/shared/kibo-ui/video-player";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from "@/components/shared/ui/carousel";
 import {
   Dialog,
   DialogContent,
   DialogTitle,
   DialogTrigger,
 } from "@/components/shared/ui/dialog";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-} from "@/components/shared/ui/carousel";
-import Autoplay from "embla-carousel-auto-scroll";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { ZoomableContent } from "@/components/shared/ZoomableContent";
-import { useSetAtom } from "jotai";
-import { pushNavigationCallbackAtom } from "@/atoms/atomStore";
 
 interface MediaItem {
   original: string;

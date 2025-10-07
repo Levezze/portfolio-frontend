@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useRef, ReactNode } from "react";
+import type React from "react";
+import { type ReactNode, useRef, useState } from "react";
 import { cn } from "@/lib/utils/general";
 
 interface ZoomableContentProps {
@@ -21,7 +22,7 @@ export const ZoomableContent = ({
   const dragDistanceRef = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const handleClick = (e: React.MouseEvent) => {
+  const handleClick = (_e: React.MouseEvent) => {
     // Don't toggle zoom if user was dragging (threshold 5px)
     if (dragDistanceRef.current > 5) {
       dragDistanceRef.current = 0;
@@ -88,7 +89,12 @@ export const ZoomableContent = ({
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging || (scale === 1 && !alwaysDraggable) || e.touches.length !== 1) return;
+    if (
+      !isDragging ||
+      (scale === 1 && !alwaysDraggable) ||
+      e.touches.length !== 1
+    )
+      return;
 
     const deltaX = e.touches[0].clientX - dragStartRef.current.x;
     const deltaY = e.touches[0].clientY - dragStartRef.current.y;
@@ -126,7 +132,7 @@ export const ZoomableContent = ({
       className={cn(
         "w-full h-full flex items-center justify-center overflow-hidden select-none",
         getCursor(),
-        className
+        className,
       )}
     >
       <div
