@@ -67,7 +67,7 @@ function DialogContent({
           "fixed top-[50%] left-[50%] z-50 grid w-full translate-x-[-50%] translate-y-[-50%] border-none shadow-lg duration-200",
           fullscreen
             ? "w-screen h-screen max-w-none max-h-none p-0 rounded-none overflow-hidden"
-            : "max-w-[calc(100%-2rem)] gap-4 rounded-[25px] p-2 pt-4 md:p-8 overflow-hidden min-h-[300px] min-w-[300px] md:portrait:w-[var(--face-size)] portrait:h-[90vh] portrait:max-h-[1400px] md:landscape:w-[calc(100vw-200px)] md:landscape:max-w-[1400px] md:landscape:h-[var(--face-size)]",
+            : "max-w-[calc(100%-2rem)] gap-4 rounded-[25px] p-2 pt-4 md:p-8 overflow-hidden min-h-[300px] min-w-[300px] md:portrait:w-[var(--face-size)] portrait:h-[90dvh] portrait:max-h-[1400px] md:landscape:w-[calc(100vw-200px)] md:landscape:max-w-[1400px] md:landscape:h-[var(--face-size)]",
           className
         )}
         {...props}

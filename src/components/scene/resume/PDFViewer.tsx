@@ -146,7 +146,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
           alwaysDraggable
           className="flex-1 flex items-center justify-center"
         >
-          <div className="max-w-full max-h-[90vh] flex items-center justify-center">
+          <div className="max-w-full max-h-[90dvh] flex items-center justify-center">
             <Document
               file={url}
               loading={

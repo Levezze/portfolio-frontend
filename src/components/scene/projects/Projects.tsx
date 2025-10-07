@@ -66,7 +66,7 @@ const ProjectDialog = ({ project, index }: { project: any; index: number }) => {
           </div>
         </button>
       </DialogTrigger>
-      <DialogContent className="min-h-0 max-h-[90vh]">
+      <DialogContent className="min-h-0 max-h-[90dvh]">
         <VisuallyHidden>
           <DialogTitle>Project Details</DialogTitle>
         </VisuallyHidden>
