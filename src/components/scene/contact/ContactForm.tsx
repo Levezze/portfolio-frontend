@@ -1,24 +1,21 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import emailjs from "@emailjs/browser";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useAtomValue } from "jotai";
+import { domAnimation, LazyMotion } from "motion/react";
+import * as m from "motion/react-m";
+import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import emailjs from "@emailjs/browser";
-import { LazyMotion, domAnimation } from "motion/react";
-import * as m from "motion/react-m";
-import { useAtomValue } from "jotai";
 import {
+  activeInputElementAtom,
   isMobileAtom,
   keyboardVisibleAtom,
-  activeInputElementAtom,
 } from "@/atoms/atomStore";
 
 import { Button } from "@/components/shared/ui/button";
-import { Input } from "@/components/shared/ui/input";
-import { Textarea } from "@/components/shared/ui/textarea";
-import { Separator } from "@/components/shared/ui/separator";
 import {
   Form,
   FormControl,
@@ -27,7 +24,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/shared/ui/form";
+import { Input } from "@/components/shared/ui/input";
+import { Separator } from "@/components/shared/ui/separator";
 import { Spinner } from "@/components/shared/ui/spinner";
+import { Textarea } from "@/components/shared/ui/textarea";
 
 // Validation schema
 const contactFormSchema = z.object({
@@ -114,7 +114,7 @@ const ContactForm = () => {
           subject: data.subject,
           message: data.message,
         },
-        publicKey
+        publicKey,
       );
 
       setSubmitStatus("success");
@@ -174,6 +174,7 @@ const ContactForm = () => {
                   className="min-h-32 resize-none px-4 py-2"
                   {...field}
                   disabled={isSubmitting}
+                  autoFocus
                 />
               ) : (
                 <Input
@@ -182,6 +183,7 @@ const ContactForm = () => {
                   {...field}
                   disabled={isSubmitting}
                   className="px-4 py-2"
+                  autoFocus
                 />
               )}
             </FormControl>
@@ -220,137 +222,139 @@ const ContactForm = () => {
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="space-y-4"
               >
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="font-inter text-sm">Name</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Your name"
-                        {...field}
-                        disabled={isSubmitting}
-                        className="px-4 py-2"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="font-inter text-sm">Name</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Your name"
+                          {...field}
+                          disabled={isSubmitting}
+                          className="px-4 py-2"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="font-inter text-sm">Email</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="your.email@example.com"
-                        {...field}
-                        disabled={isSubmitting}
-                        className="px-4 py-2"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="font-inter text-sm">
+                        Email
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="email"
+                          placeholder="your.email@example.com"
+                          {...field}
+                          disabled={isSubmitting}
+                          className="px-4 py-2"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="subject"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="font-inter text-sm">
-                      Subject
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="What's this about?"
-                        {...field}
-                        className="px-4 py-2"
-                        disabled={isSubmitting}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="subject"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="font-inter text-sm">
+                        Subject
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="What's this about?"
+                          {...field}
+                          className="px-4 py-2"
+                          disabled={isSubmitting}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="message"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="font-inter text-sm">
-                      Message
-                    </FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Your message..."
-                        className="min-h-32 resize-none px-4 py-2"
-                        {...field}
-                        disabled={isSubmitting}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="message"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="font-inter text-sm">
+                        Message
+                      </FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Your message..."
+                          className="min-h-32 resize-none px-4 py-2"
+                          {...field}
+                          disabled={isSubmitting}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <div className="flex flex-col pt-2">
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full font-inter rounded-[25px] max-w-50 mx-auto cursor-pointer h-[45px]"
-                  variant="default"
-                  matchBgColor={true}
-                >
-                  {isSubmitting ? <Spinner /> : "Send Message"}
-                </Button>
+                <div className="flex flex-col pt-2">
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full font-inter rounded-[25px] max-w-50 mx-auto cursor-pointer h-[45px]"
+                    variant="default"
+                    matchBgColor={true}
+                  >
+                    {isSubmitting ? <Spinner /> : "Send Message"}
+                  </Button>
 
-                {submitStatus === "success" && (
-                  <p className="text-sm text-center text-muted-foreground font-inter">
-                    Message sent successfully!
-                  </p>
-                )}
-
-                {submitStatus === "error" && (
-                  <>
-                    <p className="text-sm text-center text-muted-foreground font-inter pt-2">
-                      Failed to send message. Please try again or email me
-                      directly at{" "}
-                      <span className="text-sm text-center text-muted-foreground font-inter">
-                        <a
-                          href="mailto:contact@levezze.com"
-                          className="text-sm underline-offset-4 hover:underline font-semibold"
-                        >
-                          contact@levezze.com
-                        </a>
-                      </span>
+                  {submitStatus === "success" && (
+                    <p className="text-sm text-center text-muted-foreground font-inter">
+                      Message sent successfully!
                     </p>
-                  </>
-                )}
-              </div>
-            </form>
-          </Form>
-        </m.div>
-      </div>
-    </LazyMotion>
+                  )}
 
-    {/* Floating Input Portal for Mobile */}
-    {isMounted &&
-      showFloating &&
-      createPortal(
-        <div className="fixed left-0 right-0 bottom-0 z-[9999] py-2 bg-background/95 px-4">
-          <Form {...form}>{renderFloatingField()}</Form>
-        </div>,
-        document.body
-      )}
-  </>
+                  {submitStatus === "error" && (
+                    <>
+                      <p className="text-sm text-center text-muted-foreground font-inter pt-2">
+                        Failed to send message. Please try again or email me
+                        directly at{" "}
+                        <span className="text-sm text-center text-muted-foreground font-inter">
+                          <a
+                            href="mailto:contact@levezze.com"
+                            className="text-sm underline-offset-4 hover:underline font-semibold"
+                          >
+                            contact@levezze.com
+                          </a>
+                        </span>
+                      </p>
+                    </>
+                  )}
+                </div>
+              </form>
+            </Form>
+          </m.div>
+        </div>
+      </LazyMotion>
+
+      {/* Floating Input Portal for Mobile */}
+      {isMounted &&
+        showFloating &&
+        createPortal(
+          <div className="fixed left-0 right-0 bottom-0 z-[9999] py-2 bg-background/95 px-4">
+            <Form {...form}>{renderFloatingField()}</Form>
+          </div>,
+          document.body,
+        )}
+    </>
   );
 };
 

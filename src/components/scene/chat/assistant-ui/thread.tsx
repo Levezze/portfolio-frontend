@@ -1,6 +1,4 @@
 "use client";
-import { useEffect, useState, useRef, type FC } from "react";
-import { createPortal } from "react-dom";
 import {
   ActionBarPrimitive,
   BranchPickerPrimitive,
@@ -11,6 +9,7 @@ import {
   useAssistantRuntime,
   useThread,
 } from "@assistant-ui/react";
+import { useAtomValue, useSetAtom } from "jotai";
 import {
   ArrowDownIcon,
   ArrowUpIcon,
@@ -22,41 +21,41 @@ import {
   RefreshCwIcon,
   Square,
 } from "lucide-react";
+import { domAnimation, LazyMotion, MotionConfig } from "motion/react";
+import * as m from "motion/react-m";
+import { type FC, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import useSWR from "swr";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/shared/ui/tooltip";
-
+  activeInputElementAtom,
+  gimliChoiceAtom,
+  isMobileAtom,
+  keyboardVisibleAtom,
+  pushNavigationCallbackAtom,
+} from "@/atoms/atomStore";
 import { UserMessageAttachments } from "@/components/scene/chat/assistant-ui/attachment";
 import { MarkdownText } from "@/components/scene/chat/assistant-ui/markdown-text";
 import { ToolFallback } from "@/components/scene/chat/assistant-ui/tool-fallback";
 import { TooltipIconButton } from "@/components/scene/chat/assistant-ui/tooltip-icon-button";
-import { Button } from "@/components/shared/ui/button";
+import { FailedLoad } from "@/components/shared/alerts/FailedLoad";
+import { BackButton } from "@/components/shared/BackButton";
+import { ButtonFrame } from "@/components/shared/ButtonFrame";
+import { LinkButton } from "@/components/shared/LinkButton";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
 } from "@/components/shared/ui/avatar";
-import { cn } from "@/lib/utils/general";
-import { LazyMotion, MotionConfig, domAnimation } from "motion/react";
-import * as m from "motion/react-m";
-import { getChatConfig } from "@/lib/api/services/chatService";
-import { type WelcomeMessage, type ChatConfig } from "@/lib/api/schemas/chat";
-import useSWR from "swr";
+import { Button } from "@/components/shared/ui/button";
 import { Separator } from "@/components/shared/ui/separator";
-import { useAtomValue, useSetAtom } from "jotai";
 import {
-  gimliChoiceAtom,
-  pushNavigationCallbackAtom,
-  isMobileAtom,
-  keyboardVisibleAtom,
-  activeInputElementAtom,
-} from "@/atoms/atomStore";
-import { ButtonFrame } from "@/components/shared/ButtonFrame";
-import { LinkButton } from "@/components/shared/LinkButton";
-import { FailedLoad } from "@/components/shared/alerts/FailedLoad";
-import { BackButton } from "@/components/shared/BackButton";
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/shared/ui/tooltip";
+import type { ChatConfig, WelcomeMessage } from "@/lib/api/schemas/chat";
+import { getChatConfig } from "@/lib/api/services/chatService";
+import { cn } from "@/lib/utils/general";
 
 const ChatBackButton: FC = () => {
   const runtime = useAssistantRuntime();
@@ -248,7 +247,7 @@ const ThreadWelcome: FC<{ config: ChatConfig }> = ({ config }) => {
               {
                 welcome_messages.filter(
                   (message: WelcomeMessage) =>
-                    message.message_type === "primary"
+                    message.message_type === "primary",
                 )[0]?.message_text
               }
             </m.div>
@@ -262,7 +261,7 @@ const ThreadWelcome: FC<{ config: ChatConfig }> = ({ config }) => {
               {
                 welcome_messages.filter(
                   (message: WelcomeMessage) =>
-                    message.message_type === "secondary"
+                    message.message_type === "secondary",
                 )[0]?.message_text
               }
             </m.div>
@@ -406,7 +405,7 @@ const Composer: FC<{ chatConfig: ChatConfig | null; isLoading: boolean }> = ({
                 text={
                   chatConfig.welcome_messages.filter(
                     (message: WelcomeMessage) =>
-                      message.message_type === "assistant"
+                      message.message_type === "assistant",
                   )[0]?.message_text as string
                 }
               />
@@ -418,7 +417,6 @@ const Composer: FC<{ chatConfig: ChatConfig | null; isLoading: boolean }> = ({
             placeholder="Send a message..."
             className="aui-composer-input flex font-inter items-center justify-center mb-1 h-16 w-full resize-none bg-transparent px-3.5 pt-1.5 pb-2 text-base outline-none placeholder:text-muted-foreground focus:outline-primary"
             rows={1}
-            autoFocus
             aria-label="Message input"
           />
           <ComposerAction />
@@ -435,12 +433,13 @@ const Composer: FC<{ chatConfig: ChatConfig | null; isLoading: boolean }> = ({
                 placeholder="Send a message..."
                 className="aui-composer-input flex font-inter items-center justify-center mb-1 h-16 w-full resize-none bg-transparent px-3.5 pt-1.5 pb-2 text-base outline-none placeholder:text-muted-foreground focus:outline-primary"
                 rows={1}
+                autoFocus
                 aria-label="Message input"
               />
               <ComposerAction />
             </ComposerPrimitive.Root>
           </div>,
-          document.body
+          document.body,
         )}
     </>
   );
@@ -639,7 +638,7 @@ const BranchPicker: FC<BranchPickerPrimitive.Root.Props> = ({
       hideWhenSingleBranch
       className={cn(
         "aui-branch-picker-root mr-2 -ml-2 inline-flex items-center text-xs text-muted-foreground font-inter",
-        className
+        className,
       )}
       {...rest}
     >
