@@ -21,7 +21,8 @@ import {
 import Autoplay from "embla-carousel-auto-scroll";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { ZoomableContent } from "@/components/shared/ZoomableContent";
-import { useNavigationStack } from "@/hooks/useNavigationStack";
+import { useSetAtom } from "jotai";
+import { pushNavigationCallbackAtom } from "@/atoms/atomStore";
 
 interface MediaItem {
   original: string;
@@ -33,16 +34,16 @@ interface MediaItem {
 
 const MediaDialog = ({ item, idx }: { item: MediaItem; idx: number }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { pushBack } = useNavigationStack();
+  const pushCallback = useSetAtom(pushNavigationCallbackAtom);
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
     if (open) {
       // Dialog opened - push callback to close it
-      pushBack(
-        () => setIsOpen(false),
-        `Close ${item.mediaType === "video" ? "video" : "image"} viewer`
-      );
+      pushCallback({
+        callback: () => setIsOpen(false),
+        label: `Close ${item.mediaType === "video" ? "video" : "image"} viewer`,
+      });
     }
   };
 

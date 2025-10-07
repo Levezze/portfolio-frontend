@@ -44,18 +44,20 @@ import { getChatConfig } from "@/lib/api/services/chatService";
 import { type WelcomeMessage, type ChatConfig } from "@/lib/api/schemas/chat";
 import useSWR from "swr";
 import { Separator } from "@/components/shared/ui/separator";
-import { useAtomValue } from "jotai";
-import { gimliChoiceAtom } from "@/atoms/atomStore";
+import { useAtomValue, useSetAtom } from "jotai";
+import {
+  gimliChoiceAtom,
+  pushNavigationCallbackAtom,
+} from "@/atoms/atomStore";
 import { ButtonFrame } from "@/components/shared/ButtonFrame";
 import { LinkButton } from "@/components/shared/LinkButton";
 import { FailedLoad } from "@/components/shared/alerts/FailedLoad";
 import { BackButton } from "@/components/shared/BackButton";
-import { useNavigationStack } from "@/hooks/useNavigationStack";
 
 const ChatBackButton: FC = () => {
   const runtime = useAssistantRuntime();
   const thread = useThread();
-  const { pushBack } = useNavigationStack();
+  const pushCallback = useSetAtom(pushNavigationCallbackAtom);
   const hasPushedCallbackRef = useRef(false);
 
   // Track when thread starts (first message sent) and push navigation callback
@@ -64,13 +66,16 @@ const ChatBackButton: FC = () => {
 
     if (hasMessages && !hasPushedCallbackRef.current) {
       // Thread has started - push callback to reset thread
-      pushBack(() => runtime.switchToNewThread(), "Start new chat");
+      pushCallback({
+        callback: () => runtime.switchToNewThread(),
+        label: "Start new chat",
+      });
       hasPushedCallbackRef.current = true;
     } else if (!hasMessages && hasPushedCallbackRef.current) {
       // Thread was reset - allow callback to be pushed again on next thread
       hasPushedCallbackRef.current = false;
     }
-  }, [thread.messages, runtime, pushBack]);
+  }, [thread.messages, runtime, pushCallback]);
 
   // Only show if thread has messages
   if (!thread.messages || thread.messages.length === 0) {

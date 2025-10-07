@@ -22,17 +22,11 @@ import ContactForm from "./contact/ContactForm";
 import Projects from "./projects/Projects";
 import Resume from "./resume/Resume";
 import SecretPage from "./secret/SecretPage";
-import { useNavigationStack } from "@/hooks/useNavigationStack";
-import type { PagesType } from "@/lib/api/schemas/tools";
-
 export const CubeWithFaces = () => {
   const activeFace = useAtomValue(activeFaceAtom);
-  const setActiveFace = useSetAtom(activeFaceAtom);
   const isFirstRender = useRef(true);
   const isMounted = useRef(false);
   const [, setIsRotating] = useState(false);
-  const { pushBack } = useNavigationStack();
-  const previousFaceRef = useRef<PagesType>(activeFace);
 
   // Track which faces have been activated (lazy rendering optimization)
   const [activatedFaces, setActivatedFaces] = useState<Set<string>>(
@@ -142,25 +136,6 @@ export const CubeWithFaces = () => {
       return newSet;
     });
   }, [activeFace]);
-
-  // Track face changes and push navigation callbacks
-  useEffect(() => {
-    // Skip on first render to avoid creating false history entry
-    if (isFirstRender.current) {
-      previousFaceRef.current = activeFace;
-      return;
-    }
-
-    // Face has changed - push callback to restore previous face
-    if (previousFaceRef.current !== activeFace) {
-      const previousFace = previousFaceRef.current;
-      pushBack(
-        () => setActiveFace(previousFace),
-        `Return to ${previousFace} page`
-      );
-      previousFaceRef.current = activeFace;
-    }
-  }, [activeFace, pushBack, setActiveFace]);
 
   useEffect(() => {
     if (!isMounted.current) {

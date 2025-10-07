@@ -4,8 +4,11 @@ import { getProjectsGallery } from "@/lib/api/services/projectsService";
 import { FailedLoad } from "@/components/shared/alerts/FailedLoad";
 import { Loading } from "@/components/shared/alerts/Loading";
 import Image from "next/image";
-import { useAtom } from "jotai";
-import { projectViewAtom } from "@/atoms/atomStore";
+import { useAtom, useSetAtom } from "jotai";
+import {
+  projectViewAtom,
+  pushNavigationCallbackAtom,
+} from "@/atoms/atomStore";
 import {
   Dialog,
   DialogTrigger,
@@ -14,18 +17,20 @@ import {
 } from "@/components/shared/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { ProjectView } from "./ProjectView";
-import { useNavigationStack } from "@/hooks/useNavigationStack";
 
 const ProjectDialog = ({ project, index }: { project: any; index: number }) => {
   const [projectView, setProjectView] = useAtom(projectViewAtom);
   const [isOpen, setIsOpen] = useState(false);
-  const { pushBack } = useNavigationStack();
+  const pushCallback = useSetAtom(pushNavigationCallbackAtom);
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
     if (open) {
       // Dialog opened - push callback to close it
-      pushBack(() => setIsOpen(false), `Close ${project.title}`);
+      pushCallback({
+        callback: () => setIsOpen(false),
+        label: `Close ${project.title}`,
+      });
       setProjectView("project");
     }
   };
