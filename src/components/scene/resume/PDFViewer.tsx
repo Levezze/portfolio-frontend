@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import { Button } from "@/components/shared/ui/button";
 import { Separator } from "@/components/shared/ui/separator";
@@ -18,6 +18,8 @@ import {
 } from "@/components/shared/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { ZoomableContent } from "@/components/shared/ZoomableContent";
+import { Loading } from "@/components/shared/alerts/Loading";
+import { FailedLoad } from "@/components/shared/alerts/FailedLoad";
 
 // Import PDF.js styles
 import "react-pdf/dist/Page/AnnotationLayer.css";
@@ -31,39 +33,57 @@ interface PDFViewerProps {
 }
 
 export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
+  const pdfContainerRef = useRef<HTMLDivElement>(null);
+  const [pdfWidth, setPdfWidth] = useState(400);
   const [numPages, setNumPages] = useState<number | null>(null);
   const [pageNumber, setPageNumber] = useState(1);
+
+  // Measure actual container width with ResizeObserver
+  useEffect(() => {
+    if (!pdfContainerRef.current) return;
+
+    const observer = new ResizeObserver((entries) => {
+      const width = entries[0].contentRect.width;
+      // Account for p-4 padding (16px each side = 32px total)
+      setPdfWidth(Math.max(200, width));
+    });
+
+    observer.observe(pdfContainerRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <Dialog>
       <div className="flex flex-col h-full w-full">
-        {/* Cube Face - PDF Preview with Download and Maximize buttons */}
+        {/* Cube Face - PDF Preview (click to open fullscreen) */}
         <DialogTrigger asChild>
-          <div className="flex-1 overflow-auto bg-background p-4 cursor-pointer">
-            <div className="flex justify-center">
-              <Document
-                file={url}
-                onLoadSuccess={({ numPages }) => setNumPages(numPages)}
-                loading={
-                  <div className="flex text-center h-full justify-center items-center p-4">
-                    Loading PDF...
-                  </div>
-                }
-                error={
-                  <div className="flex text-center h-full justify-center items-center p-4 text-red-500">
-                    Failed to load PDF. Please try downloading it instead.
-                  </div>
-                }
-              >
-                <Page
-                  pageNumber={pageNumber}
-                  scale={1.0}
-                  renderTextLayer={true}
-                  renderAnnotationLayer={true}
-                  className="shadow-lg pointer-events-none"
-                />
-              </Document>
-            </div>
+          <div
+            ref={pdfContainerRef}
+            className="flex items-start flex-1 overflow-auto bg-background p-4 cursor-pointer"
+          >
+            <Document
+              file={url}
+              onLoadSuccess={({ numPages }) => setNumPages(numPages)}
+              loading={
+                <div className="w-full h-full">
+                  <Loading />
+                </div>
+              }
+              error={
+                <div className="w-full h-full">
+                  <FailedLoad />
+                </div>
+              }
+            >
+              <Page
+                pageNumber={pageNumber}
+                width={pdfWidth}
+                devicePixelRatio={2}
+                renderTextLayer={true}
+                renderAnnotationLayer={true}
+                className="shadow-lg my-auto mx-auto"
+              />
+            </Document>
           </div>
         </DialogTrigger>
 
@@ -115,34 +135,40 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
 
       {/* Fullscreen Dialog with Draggable & Zoomable PDF */}
       <DialogContent
-        className="w-[95vw] h-[95vh] max-w-[1400px] max-h-[1400px] p-4 bg-black/95 flex flex-col gap-4"
+        fullscreen={true}
+        className="bg-black/95 flex flex-col gap-4 p-4"
         showCloseButton={true}
       >
         <VisuallyHidden>
           <DialogTitle>Resume PDF Viewer</DialogTitle>
         </VisuallyHidden>
-        <ZoomableContent alwaysDraggable className="flex-1 overflow-auto">
-          <Document
-            file={url}
-            loading={
-              <div className="flex text-center h-full justify-center items-center p-4 text-white">
-                Loading PDF...
-              </div>
-            }
-            error={
-              <div className="flex text-center h-full justify-center items-center p-4 text-red-500">
-                Failed to load PDF.
-              </div>
-            }
-          >
-            <Page
-              pageNumber={pageNumber}
-              scale={1.5}
-              renderTextLayer={true}
-              renderAnnotationLayer={true}
-              className="shadow-lg"
-            />
-          </Document>
+        <ZoomableContent
+          alwaysDraggable
+          className="flex-1 flex items-center justify-center"
+        >
+          <div className="max-w-full max-h-[90vh] flex items-center justify-center">
+            <Document
+              file={url}
+              loading={
+                <div className="flex text-center h-full justify-center items-center p-4 text-white">
+                  Loading PDF...
+                </div>
+              }
+              error={
+                <div className="flex text-center h-full justify-center items-center p-4 text-red-500">
+                  Failed to load PDF.
+                </div>
+              }
+            >
+              <Page
+                pageNumber={pageNumber}
+                devicePixelRatio={2.5}
+                renderTextLayer={true}
+                renderAnnotationLayer={true}
+                className="shadow-lg max-w-full max-h-full"
+              />
+            </Document>
+          </div>
         </ZoomableContent>
 
         {/* Page Navigation in Dialog */}
