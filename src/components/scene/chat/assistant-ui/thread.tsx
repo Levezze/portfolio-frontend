@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, useRef, type FC } from "react";
+import { createPortal } from "react-dom";
 import {
   ActionBarPrimitive,
   BranchPickerPrimitive,
@@ -45,7 +46,13 @@ import { type WelcomeMessage, type ChatConfig } from "@/lib/api/schemas/chat";
 import useSWR from "swr";
 import { Separator } from "@/components/shared/ui/separator";
 import { useAtomValue, useSetAtom } from "jotai";
-import { gimliChoiceAtom, pushNavigationCallbackAtom } from "@/atoms/atomStore";
+import {
+  gimliChoiceAtom,
+  pushNavigationCallbackAtom,
+  isMobileAtom,
+  keyboardVisibleAtom,
+  activeInputElementAtom,
+} from "@/atoms/atomStore";
 import { ButtonFrame } from "@/components/shared/ButtonFrame";
 import { LinkButton } from "@/components/shared/LinkButton";
 import { FailedLoad } from "@/components/shared/alerts/FailedLoad";
@@ -373,35 +380,69 @@ const Composer: FC<{ chatConfig: ChatConfig | null; isLoading: boolean }> = ({
   chatConfig,
   isLoading,
 }) => {
+  const isMobile = useAtomValue(isMobileAtom);
+  const keyboardVisible = useAtomValue(keyboardVisibleAtom);
+  const activeInput = useAtomValue(activeInputElementAtom);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Check if active input is the chat composer input
+  const isChatInput =
+    activeInput?.classList.contains("aui-composer-input") ?? false;
+  const showFloating = isMobile && keyboardVisible && isChatInput;
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   return (
-    <div className="aui-composer-wrapper sticky bottom-0 mx-auto flex w-full max-w-[var(--thread-max-width)] flex-col overflow-visible rounded-t-md bg-background pb-4 md:px-4 md:pb-6 mobile-landscape:p-0">
-      <ThreadScrollToBottom />
-      <ThreadPrimitive.Empty>
-        <div className="flex flex-col items-center justify-center mb-4 font-inter">
-          <Separator className="my-4 w-full mobile-landscape:hidden" />
-          {chatConfig && !isLoading && (
-            <FakeAssistantMessage
-              text={
-                chatConfig.welcome_messages.filter(
-                  (message: WelcomeMessage) =>
-                    message.message_type === "assistant"
-                )[0]?.message_text as string
-              }
-            />
-          )}
-        </div>
-      </ThreadPrimitive.Empty>
-      <ComposerPrimitive.Root className="aui-composer-root relative rounded-[25px] flex w-full flex-col bg-muted px-1 pt-2 dark:border-muted-foreground/15 shadow-inner shadow-muted-foreground/5">
-        <ComposerPrimitive.Input
-          placeholder="Send a message..."
-          className="aui-composer-input flex font-inter items-center justify-center mb-1 h-16 w-full resize-none bg-transparent px-3.5 pt-1.5 pb-2 text-base outline-none placeholder:text-muted-foreground focus:outline-primary"
-          rows={1}
-          autoFocus
-          aria-label="Message input"
-        />
-        <ComposerAction />
-      </ComposerPrimitive.Root>
-    </div>
+    <>
+      <div className="aui-composer-wrapper sticky bottom-0 mx-auto flex w-full max-w-[var(--thread-max-width)] flex-col overflow-visible rounded-t-md bg-background pb-4 md:px-4 md:pb-6 mobile-landscape:p-0">
+        <ThreadScrollToBottom />
+        <ThreadPrimitive.Empty>
+          <div className="flex flex-col items-center justify-center mb-4 font-inter">
+            <Separator className="my-4 w-full mobile-landscape:hidden" />
+            {chatConfig && !isLoading && (
+              <FakeAssistantMessage
+                text={
+                  chatConfig.welcome_messages.filter(
+                    (message: WelcomeMessage) =>
+                      message.message_type === "assistant"
+                  )[0]?.message_text as string
+                }
+              />
+            )}
+          </div>
+        </ThreadPrimitive.Empty>
+        <ComposerPrimitive.Root className="aui-composer-root relative rounded-[25px] flex w-full flex-col bg-muted px-1 pt-2 dark:border-muted-foreground/15 shadow-inner shadow-muted-foreground/5">
+          <ComposerPrimitive.Input
+            placeholder="Send a message..."
+            className="aui-composer-input flex font-inter items-center justify-center mb-1 h-16 w-full resize-none bg-transparent px-3.5 pt-1.5 pb-2 text-base outline-none placeholder:text-muted-foreground focus:outline-primary"
+            rows={1}
+            autoFocus
+            aria-label="Message input"
+          />
+          <ComposerAction />
+        </ComposerPrimitive.Root>
+      </div>
+
+      {/* Floating Input Portal for Mobile */}
+      {isMounted &&
+        showFloating &&
+        createPortal(
+          <div className="fixed left-0 right-0 bottom-0 z-[9999] py-2 px-2 bg-background/95">
+            <ComposerPrimitive.Root className="aui-composer-root relative rounded-[25px] flex w-full flex-col bg-muted px-1 pt-2 dark:border-muted-foreground/15 shadow-inner shadow-muted-foreground/5">
+              <ComposerPrimitive.Input
+                placeholder="Send a message..."
+                className="aui-composer-input flex font-inter items-center justify-center mb-1 h-16 w-full resize-none bg-transparent px-3.5 pt-1.5 pb-2 text-base outline-none placeholder:text-muted-foreground focus:outline-primary"
+                rows={1}
+                aria-label="Message input"
+              />
+              <ComposerAction />
+            </ComposerPrimitive.Root>
+          </div>,
+          document.body
+        )}
+    </>
   );
 };
 

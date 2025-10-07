@@ -1,12 +1,19 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import emailjs from "@emailjs/browser";
 import { LazyMotion, domAnimation } from "motion/react";
 import * as m from "motion/react-m";
+import { useAtomValue } from "jotai";
+import {
+  isMobileAtom,
+  keyboardVisibleAtom,
+  activeInputElementAtom,
+} from "@/atoms/atomStore";
 
 import { Button } from "@/components/shared/ui/button";
 import { Input } from "@/components/shared/ui/input";
@@ -46,6 +53,12 @@ const ContactForm = () => {
   const [submitStatus, setSubmitStatus] = useState<
     "idle" | "success" | "error"
   >("idle");
+  const [isMounted, setIsMounted] = useState(false);
+  const [activeFieldName, setActiveFieldName] = useState<string | null>(null);
+
+  const isMobile = useAtomValue(isMobileAtom);
+  const keyboardVisible = useAtomValue(keyboardVisibleAtom);
+  const activeInput = useAtomValue(activeInputElementAtom);
 
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactFormSchema),
@@ -56,6 +69,27 @@ const ContactForm = () => {
       message: "",
     },
   });
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Track which form field is active based on the focused input
+  useEffect(() => {
+    if (activeInput && activeInput.name) {
+      // Check if it's one of our contact form inputs
+      const validFields = ["name", "email", "subject", "message"];
+      if (validFields.includes(activeInput.name)) {
+        setActiveFieldName(activeInput.name);
+      } else {
+        setActiveFieldName(null);
+      }
+    } else {
+      setActiveFieldName(null);
+    }
+  }, [activeInput]);
+
+  const showFloating = isMobile && keyboardVisible && activeFieldName !== null;
 
   const onSubmit = async (data: ContactFormValues) => {
     setIsSubmitting(true);
@@ -100,30 +134,92 @@ const ContactForm = () => {
     }
   };
 
+  // Helper to render a floating field
+  const renderFloatingField = () => {
+    if (!activeFieldName) return null;
+
+    const fieldConfig = {
+      name: { label: "Name", placeholder: "Your name", type: "text" as const },
+      email: {
+        label: "Email",
+        placeholder: "your.email@example.com",
+        type: "email" as const,
+      },
+      subject: {
+        label: "Subject",
+        placeholder: "What's this about?",
+        type: "text" as const,
+      },
+      message: {
+        label: "Message",
+        placeholder: "Your message...",
+        type: "textarea" as const,
+      },
+    };
+
+    const config = fieldConfig[activeFieldName as keyof typeof fieldConfig];
+    if (!config) return null;
+
+    return (
+      <FormField
+        control={form.control}
+        name={activeFieldName as keyof ContactFormValues}
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel className="font-inter text-sm">{config.label}</FormLabel>
+            <FormControl>
+              {config.type === "textarea" ? (
+                <Textarea
+                  placeholder={config.placeholder}
+                  className="min-h-32 resize-none px-4 py-2"
+                  {...field}
+                  disabled={isSubmitting}
+                />
+              ) : (
+                <Input
+                  type={config.type}
+                  placeholder={config.placeholder}
+                  {...field}
+                  disabled={isSubmitting}
+                  className="px-4 py-2"
+                />
+              )}
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    );
+  };
+
   return (
-    <LazyMotion features={domAnimation}>
-      <div className="flex flex-col items-center justify-start h-full w-full px-2 pt-2 gap-2 overflow-y-auto">
-        <m.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="w-full"
-        >
-          <h1 className="w-full font-regular font-merriweather text-base text-center [@media(min-width:700px)_and_(min-height:700px)]:text-lg [@media(min-width:800px)_and_(min-height:800px)]:text-xl text-muted-foreground/90">
-            Get in Touch
-          </h1>
-        </m.div>
+    <>
+      <LazyMotion features={domAnimation}>
+        <div className="flex flex-col items-center justify-start h-full w-full px-2 pt-2 gap-2 overflow-y-auto">
+          <m.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="w-full"
+          >
+            <h1 className="w-full font-regular font-merriweather text-base text-center [@media(min-width:700px)_and_(min-height:700px)]:text-lg [@media(min-width:800px)_and_(min-height:800px)]:text-xl text-muted-foreground/90">
+              Get in Touch
+            </h1>
+          </m.div>
 
-        <Separator className="w-full" />
+          <Separator className="w-full" />
 
-        <m.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="w-full max-w-xl items-center justify-center my-auto"
-        >
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <m.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="w-full max-w-xl items-center justify-center my-auto"
+          >
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4"
+              >
               <FormField
                 control={form.control}
                 name="name"
@@ -244,6 +340,17 @@ const ContactForm = () => {
         </m.div>
       </div>
     </LazyMotion>
+
+    {/* Floating Input Portal for Mobile */}
+    {isMounted &&
+      showFloating &&
+      createPortal(
+        <div className="fixed left-0 right-0 bottom-0 z-[9999] py-2 bg-background/95 px-4">
+          <Form {...form}>{renderFloatingField()}</Form>
+        </div>,
+        document.body
+      )}
+  </>
   );
 };
 
