@@ -2,27 +2,13 @@
 
 import emailjs from "@emailjs/browser";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAtomValue } from "jotai";
 import { domAnimation, LazyMotion } from "motion/react";
 import * as m from "motion/react-m";
-import {
-  type ChangeEvent,
-  type KeyboardEvent as ReactKeyboardEvent,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import { createPortal } from "react-dom";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import * as z from "zod";
-import {
-  activeInputElementAtom,
-  isMobileAtom,
-  keyboardVisibleAtom,
-} from "@/atoms/atomStore";
 
 import { Button } from "@/components/shared/ui/button";
+import { CheckIcon } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -35,71 +21,16 @@ import { Input } from "@/components/shared/ui/input";
 import { Separator } from "@/components/shared/ui/separator";
 import { Spinner } from "@/components/shared/ui/spinner";
 import { Textarea } from "@/components/shared/ui/textarea";
-
-// Validation schema
-const contactFormSchema = z.object({
-  name: z
-    .string()
-    .min(2, { message: "Name must be at least 2 characters" })
-    .max(50, { message: "Name must be less than 50 characters" }),
-  email: z.string().email({ message: "Please enter a valid email address" }),
-  subject: z
-    .string()
-    .min(5, { message: "Subject must be at least 5 characters" })
-    .max(100, { message: "Subject must be less than 100 characters" }),
-  message: z
-    .string()
-    .min(10, { message: "Message must be at least 10 characters" })
-    .max(1000, { message: "Message must be less than 1000 characters" }),
-});
-
-type ContactFormValues = z.infer<typeof contactFormSchema>;
-
-type ContactFieldName = keyof ContactFormValues;
-
-type ContactFieldConfig = {
-  label: string;
-  placeholder: string;
-  type: "text" | "email" | "textarea";
-};
-
-const CONTACT_FIELD_ORDER: ContactFieldName[] = [
-  "name",
-  "email",
-  "subject",
-  "message",
-];
-
-const CONTACT_FIELD_CONFIG: Record<ContactFieldName, ContactFieldConfig> = {
-  name: { label: "Name", placeholder: "Your name", type: "text" },
-  email: {
-    label: "Email",
-    placeholder: "your.email@example.com",
-    type: "email",
-  },
-  subject: {
-    label: "Subject",
-    placeholder: "What's this about?",
-    type: "text",
-  },
-  message: {
-    label: "Message",
-    placeholder: "Your message...",
-    type: "textarea",
-  },
-};
+import {
+  contactFormSchema,
+  type ContactFormValues,
+} from "@/lib/api/schemas/contact";
 
 const ContactForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<
     "idle" | "success" | "error"
   >("idle");
-  const [isMounted, setIsMounted] = useState(false);
-  const [activeFieldName, setActiveFieldName] = useState<string | null>(null);
-
-  const isMobile = useAtomValue(isMobileAtom);
-  const keyboardVisible = useAtomValue(keyboardVisibleAtom);
-  const activeInput = useAtomValue(activeInputElementAtom);
 
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactFormSchema),
@@ -109,28 +40,10 @@ const ContactForm = () => {
       subject: "",
       message: "",
     },
+    mode: "onChange",
+    reValidateMode: "onChange",
+    delayError: 500,
   });
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  // Track which form field is active based on the focused input
-  useEffect(() => {
-    if (activeInput?.name) {
-      // Check if it's one of our contact form inputs
-      const validFields = ["name", "email", "subject", "message"];
-      if (validFields.includes(activeInput.name)) {
-        setActiveFieldName(activeInput.name);
-      } else {
-        setActiveFieldName(null);
-      }
-    } else {
-      setActiveFieldName(null);
-    }
-  }, [activeInput]);
-
-  const showFloating = isMobile && keyboardVisible && activeFieldName !== null;
 
   const onSubmit = async (data: ContactFormValues) => {
     setIsSubmitting(true);
@@ -155,7 +68,7 @@ const ContactForm = () => {
           subject: data.subject,
           message: data.message,
         },
-        publicKey,
+        publicKey
       );
 
       setSubmitStatus("success");
@@ -173,23 +86,6 @@ const ContactForm = () => {
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  // Helper to render a floating field
-  const renderFloatingField = () => {
-    if (!activeFieldName) return null;
-    const fieldName = activeFieldName as ContactFieldName;
-    const config = CONTACT_FIELD_CONFIG[fieldName];
-    if (!config) return null;
-
-    return (
-      <FloatingContactField
-        key={fieldName}
-        fieldName={fieldName}
-        config={config}
-        isSubmitting={isSubmitting}
-      />
-    );
   };
 
   return (
@@ -232,7 +128,6 @@ const ContactForm = () => {
                           {...field}
                           disabled={isSubmitting}
                           className="px-4 py-2"
-                          data-contact-input="name"
                         />
                       </FormControl>
                       <FormMessage />
@@ -255,7 +150,6 @@ const ContactForm = () => {
                           {...field}
                           disabled={isSubmitting}
                           className="px-4 py-2"
-                          data-contact-input="email"
                         />
                       </FormControl>
                       <FormMessage />
@@ -277,7 +171,6 @@ const ContactForm = () => {
                           {...field}
                           className="px-4 py-2"
                           disabled={isSubmitting}
-                          data-contact-input="subject"
                         />
                       </FormControl>
                       <FormMessage />
@@ -299,7 +192,6 @@ const ContactForm = () => {
                           className="min-h-32 resize-none px-4 py-2"
                           {...field}
                           disabled={isSubmitting}
-                          data-contact-input="message"
                         />
                       </FormControl>
                       <FormMessage />
@@ -315,14 +207,17 @@ const ContactForm = () => {
                     variant="default"
                     matchBgColor={true}
                   >
-                    {isSubmitting ? <Spinner /> : "Send Message"}
+                    {isSubmitting ? (
+                      <Spinner />
+                    ) : submitStatus === "success" ? (
+                      <>
+                        <CheckIcon className="w-4 h-4" />
+                        Message Sent
+                      </>
+                    ) : (
+                      "Send Message"
+                    )}
                   </Button>
-
-                  {submitStatus === "success" && (
-                    <p className="text-sm text-center text-muted-foreground font-inter">
-                      Message sent successfully!
-                    </p>
-                  )}
 
                   {submitStatus === "error" && (
                     <p className="text-sm text-center text-muted-foreground font-inter pt-2">
@@ -344,200 +239,7 @@ const ContactForm = () => {
           </m.div>
         </div>
       </LazyMotion>
-
-      {/* Floating Input Portal for Mobile */}
-      {isMounted &&
-        showFloating &&
-        createPortal(
-          <div className="fixed left-0 right-0 bottom-0 z-[9999] py-2 bg-background/95 px-4">
-            {renderFloatingField()}
-          </div>,
-          document.body,
-        )}
     </>
-  );
-};
-
-type FloatingContactFieldProps = {
-  fieldName: ContactFieldName;
-  config: ContactFieldConfig;
-  isSubmitting: boolean;
-};
-
-const FloatingContactField = ({
-  fieldName,
-  config,
-  isSubmitting,
-}: FloatingContactFieldProps) => {
-  const [value, setValue] = useState("");
-  const mirrorRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
-  const sourceRef = useRef<HTMLInputElement | HTMLTextAreaElement | null>(null);
-
-  const setMirrorRef = useCallback(
-    (node: HTMLInputElement | HTMLTextAreaElement | null) => {
-      mirrorRef.current = node;
-    },
-    [],
-  );
-
-  useEffect(() => {
-    const selector = `[data-contact-input='${fieldName}']`;
-    const source = document.querySelector<HTMLInputElement | HTMLTextAreaElement>(
-      selector,
-    );
-    sourceRef.current = source ?? null;
-
-    if (!source) {
-      setValue("");
-      return;
-    }
-
-    setValue(source.value);
-
-    const syncValue = () => setValue(source.value);
-    source.addEventListener("input", syncValue);
-
-    return () => {
-      source.removeEventListener("input", syncValue);
-    };
-  }, [fieldName]);
-
-  useEffect(() => {
-    const rafId = requestAnimationFrame(() => {
-      const mirror = mirrorRef.current;
-      if (!mirror) {
-        return;
-      }
-
-      mirror.focus({ preventScroll: true });
-      const length = mirror.value.length;
-      mirror.setSelectionRange(length, length);
-    });
-
-    return () => cancelAnimationFrame(rafId);
-  }, [fieldName]);
-
-  const adjustTextareaHeight = useCallback(() => {
-    const mirror = mirrorRef.current;
-    if (!mirror || mirror.tagName !== "TEXTAREA") {
-      return;
-    }
-
-    mirror.style.height = "auto";
-    mirror.style.height = `${mirror.scrollHeight}px`;
-  }, []);
-
-  useEffect(() => {
-    adjustTextareaHeight();
-  }, [adjustTextareaHeight, value]);
-
-  const handleChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      const nextValue = event.target.value;
-      setValue(nextValue);
-
-      const source = sourceRef.current;
-      if (!source) {
-        return;
-      }
-
-      const selectionStart = mirrorRef.current?.selectionStart ?? nextValue.length;
-      const selectionEnd = mirrorRef.current?.selectionEnd ?? nextValue.length;
-
-      source.value = nextValue;
-      source.dispatchEvent(new Event("input", { bubbles: true }));
-
-      try {
-        source.setSelectionRange(selectionStart, selectionEnd);
-      } catch (error) {
-        if (process.env.NODE_ENV === "development") {
-          console.debug("Unable to sync contact field selection", error);
-        }
-      }
-    },
-    []);
-
-  const handleBlur = useCallback(() => {
-    sourceRef.current?.blur();
-  }, []);
-
-  const handleKeyDown = useCallback(
-    (event: ReactKeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      if (event.key !== "Tab") {
-        return;
-      }
-
-      const source = sourceRef.current;
-      if (!source) {
-        return;
-      }
-
-      event.preventDefault();
-
-      const form = source.form ?? source.closest("form");
-      if (!form) {
-        return;
-      }
-
-      const fields = CONTACT_FIELD_ORDER.map((name) =>
-        form.querySelector<HTMLInputElement | HTMLTextAreaElement>(
-          `[data-contact-input='${name}']`,
-        ),
-      ).filter(Boolean) as Array<HTMLInputElement | HTMLTextAreaElement>;
-
-      if (!fields.length) {
-        return;
-      }
-
-      const currentIndex = fields.indexOf(source);
-      const direction = event.shiftKey ? -1 : 1;
-
-      const fallbackIndex = event.shiftKey ? fields.length - 1 : 0;
-      const nextIndex =
-        currentIndex === -1
-          ? fallbackIndex
-          : (currentIndex + direction + fields.length) % fields.length;
-
-      fields[nextIndex]?.focus();
-    },
-    []);
-
-  return (
-    <div className="grid gap-2">
-      <label className="font-inter text-sm" htmlFor={`floating-${fieldName}`}>
-        {config.label}
-      </label>
-      {config.type === "textarea" ? (
-        <textarea
-          ref={setMirrorRef}
-          id={`floating-${fieldName}`}
-          name={fieldName}
-          placeholder={config.placeholder}
-          disabled={isSubmitting}
-          value={value}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          onKeyDown={handleKeyDown}
-          data-keyboard-element="true"
-          className="min-h-32 resize-none px-4 py-2 font-inter rounded-[25px] bg-muted text-base outline-none placeholder:text-muted-foreground"
-        />
-      ) : (
-        <input
-          ref={setMirrorRef}
-          type={config.type}
-          id={`floating-${fieldName}`}
-          name={fieldName}
-          placeholder={config.placeholder}
-          disabled={isSubmitting}
-          value={value}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          onKeyDown={handleKeyDown}
-          data-keyboard-element="true"
-          className="px-4 py-2 font-inter rounded-[25px] bg-muted text-base outline-none placeholder:text-muted-foreground"
-        />
-      )}
-    </div>
   );
 };
 
