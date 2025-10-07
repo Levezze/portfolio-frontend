@@ -66,6 +66,10 @@ export const viewportOrientationAtom = atom<"portrait" | "landscape">(
   "portrait"
 );
 
+// Floating Input Mirror (Mobile Keyboard UX)
+export const activeInputElementAtom = atom<HTMLInputElement | HTMLTextAreaElement | null>(null);
+export const keyboardVisibleAtom = atom<boolean>(false);
+
 // Projects Gallery
 export const projectViewAtom = atom<"project" | "zoomed">("project");
 

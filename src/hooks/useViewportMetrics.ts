@@ -5,6 +5,8 @@ import {
   viewportHeightAtom,
   viewportOrientationAtom,
   viewportWidthAtom,
+  activeInputElementAtom,
+  keyboardVisibleAtom,
 } from "@/atoms/atomStore";
 import { isMobileDevice } from "@/lib/utils/deviceDetection";
 
@@ -62,6 +64,8 @@ export const useViewportMetrics = () => {
   const setViewportWidth = useSetAtom(viewportWidthAtom);
   const setOrientation = useSetAtom(viewportOrientationAtom);
   const setIsMobile = useSetAtom(isMobileAtom);
+  const setActiveInput = useSetAtom(activeInputElementAtom);
+  const setKeyboardVisible = useSetAtom(keyboardVisibleAtom);
 
   const maxHeightRef = useRef<{ portrait: number; landscape: number }>({
     portrait: 0,
@@ -162,12 +166,21 @@ export const useViewportMetrics = () => {
         return;
       }
       keyboardVisibleRef.current = visible;
+      setKeyboardVisible(visible);
       scheduleUpdate(true);
     };
 
     const handleFocusIn = (event: FocusEvent) => {
       const target = event.target as Element | null;
-      updateKeyboardVisibility(isKeyboardElement(target));
+      const isKeyboardEl = isKeyboardElement(target);
+      updateKeyboardVisibility(isKeyboardEl);
+
+      // Set active input element for FloatingInputMirror
+      if (isKeyboardEl && (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement)) {
+        setActiveInput(target);
+      } else {
+        setActiveInput(null);
+      }
     };
 
     const handleFocusOut = () => {

@@ -9,8 +9,12 @@ import {
 } from "lucide-react";
 import { TooltipButton } from "@/components/shared/TooltipButton";
 import { useAtomValue, useSetAtom } from "jotai";
-import { activeFaceAtom, drawerOpenAtom, navigateToFaceAtom } from "@/atoms/atomStore";
-import { useIsMobile } from "@/hooks/useIsMobile";
+import {
+  activeFaceAtom,
+  drawerOpenAtom,
+  isMobileAtom,
+  navigateToFaceAtom,
+} from "@/atoms/atomStore";
 import { Separator } from "@/components/shared/ui/separator";
 
 interface NavigationProps {
@@ -25,7 +29,7 @@ export const Navigation = ({
   const activeFace = useAtomValue(activeFaceAtom);
   const navigateToFace = useSetAtom(navigateToFaceAtom);
   const setDrawerOpen = useSetAtom(drawerOpenAtom);
-  const isMobile = useIsMobile();
+  const isMobile = useAtomValue(isMobileAtom);
 
   // Color scheme based on variant
   const iconColorClass =
