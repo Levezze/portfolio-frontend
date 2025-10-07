@@ -1,4 +1,4 @@
-import { activeFaceAtom } from "@/atoms/atomStore";
+import { navigateToFaceAtom } from "@/atoms/atomStore";
 import { makeAssistantToolUI, useThreadRuntime } from "@assistant-ui/react";
 import { useSetAtom } from "jotai";
 import { useEffect } from "react";
@@ -21,10 +21,11 @@ export const NavigationToolUI = makeAssistantToolUI<
         status,
       });
     }
-    const setActiveFace = useSetAtom(activeFaceAtom);
+    const navigateToFace = useSetAtom(navigateToFaceAtom);
     useEffect(() => {
-      setActiveFace(args.page);
-    }, [args.page]);
+      // AI-initiated navigation is considered "forward" navigation
+      navigateToFace({ face: args.page, direction: "forward" });
+    }, [args.page, navigateToFace]);
 
     return (
       <span>{`Taking you to the ${capitalFirstLetter(args.page)} page`}</span>

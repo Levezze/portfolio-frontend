@@ -22,7 +22,6 @@ import ContactForm from "./contact/ContactForm";
 import Projects from "./projects/Projects";
 import Resume from "./resume/Resume";
 import SecretPage from "./secret/SecretPage";
-
 export const CubeWithFaces = () => {
   const activeFace = useAtomValue(activeFaceAtom);
   const isFirstRender = useRef(true);

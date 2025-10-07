@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   VideoPlayer,
   VideoPlayerContent,
@@ -21,6 +21,8 @@ import {
 import Autoplay from "embla-carousel-auto-scroll";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { ZoomableContent } from "@/components/shared/ZoomableContent";
+import { useSetAtom } from "jotai";
+import { pushNavigationCallbackAtom } from "@/atoms/atomStore";
 
 interface MediaItem {
   original: string;
@@ -29,6 +31,96 @@ interface MediaItem {
   mediaWidth?: number;
   mediaHeight?: number;
 }
+
+const MediaDialog = ({ item, idx }: { item: MediaItem; idx: number }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const pushCallback = useSetAtom(pushNavigationCallbackAtom);
+
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    if (open) {
+      // Dialog opened - push callback to close it
+      pushCallback({
+        callback: () => setIsOpen(false),
+        label: `Close ${item.mediaType === "video" ? "video" : "image"} viewer`,
+      });
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+      <DialogTrigger asChild>
+        {item.mediaType === "video" ? (
+          <div className="cursor-pointer">
+            <VideoPlayer className="w-full aspect-video rounded-md overflow-hidden max-h-[40vh]">
+              <VideoPlayerContent
+                crossOrigin=""
+                muted
+                preload="metadata"
+                slot="media"
+                src={item.original}
+                className="w-full h-full pointer-events-none"
+                autoPlay
+                loop
+                playsInline
+              />
+            </VideoPlayer>
+          </div>
+        ) : (
+          <img
+            src={item.original}
+            alt={`Project media ${idx + 1}`}
+            draggable={false}
+            onDragStart={(e) => e.preventDefault()}
+            className="w-full aspect-video object-cover rounded-md cursor-pointer hover:opacity-90 transition-opacity max-h-[40vh]"
+          />
+        )}
+      </DialogTrigger>
+      <DialogContent
+        fullscreen={true}
+        className="bg-black/95 p-4"
+        showCloseButton={true}
+      >
+        <VisuallyHidden>
+          <DialogTitle>
+            {item.mediaType === "video" ? "Video Player" : "Image Viewer"}
+          </DialogTitle>
+        </VisuallyHidden>
+        <div className="w-full h-full flex items-center justify-center">
+          {item.mediaType === "video" ? (
+            <VideoPlayer className="w-full max-w-full max-h-full aspect-video">
+              <VideoPlayerContent
+                crossOrigin=""
+                preload="metadata"
+                slot="media"
+                src={item.original}
+                className="w-full h-full"
+                autoPlay
+                loop
+                playsInline
+              />
+              <VideoPlayerControlBar>
+                <VideoPlayerPlayButton />
+                <VideoPlayerTimeRange />
+                <VideoPlayerTimeDisplay />
+              </VideoPlayerControlBar>
+            </VideoPlayer>
+          ) : (
+            <ZoomableContent>
+              <img
+                src={item.original}
+                alt={`Project media ${idx + 1}`}
+                draggable={false}
+                onDragStart={(e) => e.preventDefault()}
+                className="max-w-full max-h-[85vh] object-contain"
+              />
+            </ZoomableContent>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
 
 export const MediaGallery = ({ items }: { items: MediaItem[] }) => {
   if (!items || items.length === 0) return null;
@@ -50,7 +142,7 @@ export const MediaGallery = ({ items }: { items: MediaItem[] }) => {
         plugins={[
           Autoplay({
             speed: 1,
-            startDelay: 15000,
+            startDelay: 5000,
             stopOnInteraction: false,
             playOnInit: true,
           }),
@@ -60,78 +152,7 @@ export const MediaGallery = ({ items }: { items: MediaItem[] }) => {
         <CarouselContent className="-ml-2">
           {sortedItems.map((item, idx) => (
             <CarouselItem key={item.original} className="pl-2 basis-[90%]">
-              <Dialog>
-                <DialogTrigger asChild>
-                  {item.mediaType === "video" ? (
-                    <div className="cursor-pointer">
-                      <VideoPlayer className="w-full aspect-video rounded-md overflow-hidden max-h-[40vh]">
-                        <VideoPlayerContent
-                          crossOrigin=""
-                          muted
-                          preload="metadata"
-                          slot="media"
-                          src={item.original}
-                          className="w-full h-full pointer-events-none"
-                          autoPlay
-                          loop
-                          playsInline
-                        />
-                      </VideoPlayer>
-                    </div>
-                  ) : (
-                    <img
-                      src={item.original}
-                      alt={`Project media ${idx + 1}`}
-                      draggable={false}
-                      onDragStart={(e) => e.preventDefault()}
-                      className="w-full aspect-video object-cover rounded-md cursor-pointer hover:opacity-90 transition-opacity max-h-[40vh]"
-                    />
-                  )}
-                </DialogTrigger>
-                <DialogContent
-                  className="w-[95vw] h-[95vh] max-w-[1400px] max-h-[1400px] p-4 bg-black/95"
-                  showCloseButton={true}
-                >
-                  <VisuallyHidden>
-                    <DialogTitle>
-                      {item.mediaType === "video"
-                        ? "Video Player"
-                        : "Image Viewer"}
-                    </DialogTitle>
-                  </VisuallyHidden>
-                  <div className="w-full h-full flex items-center justify-center">
-                    {item.mediaType === "video" ? (
-                      <VideoPlayer className="w-full max-w-full max-h-full aspect-video">
-                        <VideoPlayerContent
-                          crossOrigin=""
-                          preload="metadata"
-                          slot="media"
-                          src={item.original}
-                          className="w-full h-full"
-                          autoPlay
-                          loop
-                          playsInline
-                        />
-                        <VideoPlayerControlBar>
-                          <VideoPlayerPlayButton />
-                          <VideoPlayerTimeRange />
-                          <VideoPlayerTimeDisplay />
-                        </VideoPlayerControlBar>
-                      </VideoPlayer>
-                    ) : (
-                      <ZoomableContent>
-                        <img
-                          src={item.original}
-                          alt={`Project media ${idx + 1}`}
-                          draggable={false}
-                          onDragStart={(e) => e.preventDefault()}
-                          className="max-w-full max-h-[85vh] object-contain"
-                        />
-                      </ZoomableContent>
-                    )}
-                  </div>
-                </DialogContent>
-              </Dialog>
+              <MediaDialog item={item} idx={idx} />
             </CarouselItem>
           ))}
         </CarouselContent>

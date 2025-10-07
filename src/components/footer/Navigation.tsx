@@ -8,8 +8,8 @@ import {
   FileUserIcon,
 } from "lucide-react";
 import { TooltipButton } from "@/components/shared/TooltipButton";
-import { useAtom, useSetAtom } from "jotai";
-import { activeFaceAtom, drawerOpenAtom } from "@/atoms/atomStore";
+import { useAtomValue, useSetAtom } from "jotai";
+import { activeFaceAtom, drawerOpenAtom, navigateToFaceAtom } from "@/atoms/atomStore";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { Separator } from "@/components/shared/ui/separator";
 
@@ -22,7 +22,8 @@ export const Navigation = ({
   variant = "default",
   orientation = "horizontal",
 }: NavigationProps) => {
-  const [activeFace, setActiveFace] = useAtom(activeFaceAtom);
+  const activeFace = useAtomValue(activeFaceAtom);
+  const navigateToFace = useSetAtom(navigateToFaceAtom);
   const setDrawerOpen = useSetAtom(drawerOpenAtom);
   const isMobile = useIsMobile();
 
@@ -52,7 +53,7 @@ export const Navigation = ({
           inputText={isMobile ? "Chat & Homepage" : undefined}
           tooltipText={activeFace !== "chat" ? "Open Chat" : ""}
           handleClick={() => {
-            setActiveFace("chat");
+            navigateToFace({ face: "chat", direction: "forward" });
             if (isMobile) {
               setDrawerOpen(false);
             }
@@ -73,7 +74,7 @@ export const Navigation = ({
           inputText={isMobile ? "Blog" : undefined}
           tooltipText={"Blog"}
           handleClick={() => {
-            setActiveFace("blog");
+            navigateToFace({ face: "blog", direction: "forward" });
             if (isMobile) {
               setDrawerOpen(false);
             }
@@ -94,7 +95,7 @@ export const Navigation = ({
           inputText={isMobile ? "Projects Gallery" : undefined}
           tooltipText={"Projects"}
           handleClick={() => {
-            setActiveFace("projects");
+            navigateToFace({ face: "projects", direction: "forward" });
             if (isMobile) {
               setDrawerOpen(false);
             }
@@ -115,7 +116,7 @@ export const Navigation = ({
           inputText={isMobile ? "Contact" : undefined}
           tooltipText={"Contact"}
           handleClick={() => {
-            setActiveFace("contact");
+            navigateToFace({ face: "contact", direction: "forward" });
             if (isMobile) {
               setDrawerOpen(false);
             }
@@ -136,7 +137,7 @@ export const Navigation = ({
           inputText={isMobile ? "Resume" : undefined}
           tooltipText={"Resume"}
           handleClick={() => {
-            setActiveFace("resume");
+            navigateToFace({ face: "resume", direction: "forward" });
             if (isMobile) {
               setDrawerOpen(false);
             }
