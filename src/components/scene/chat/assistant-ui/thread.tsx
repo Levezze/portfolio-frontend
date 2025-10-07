@@ -45,10 +45,7 @@ import { type WelcomeMessage, type ChatConfig } from "@/lib/api/schemas/chat";
 import useSWR from "swr";
 import { Separator } from "@/components/shared/ui/separator";
 import { useAtomValue, useSetAtom } from "jotai";
-import {
-  gimliChoiceAtom,
-  pushNavigationCallbackAtom,
-} from "@/atoms/atomStore";
+import { gimliChoiceAtom, pushNavigationCallbackAtom } from "@/atoms/atomStore";
 import { ButtonFrame } from "@/components/shared/ButtonFrame";
 import { LinkButton } from "@/components/shared/LinkButton";
 import { FailedLoad } from "@/components/shared/alerts/FailedLoad";
@@ -147,7 +144,7 @@ const ThreadScrollToBottom: FC = () => {
       <TooltipIconButton
         tooltip="Scroll to bottom"
         variant="outline"
-        className="aui-thread-scroll-to-bottom absolute -top-12 z-10 self-center rounded-full p-4 disabled:invisible dark:bg-background dark:hover:bg-accent"
+        className="aui-thread-scroll-to-bottom absolute -top-12 z-10 self-center rounded-[25px] p-4 disabled:invisible dark:bg-background dark:hover:bg-accent"
       >
         <ArrowDownIcon />
       </TooltipIconButton>
@@ -394,7 +391,7 @@ const Composer: FC<{ chatConfig: ChatConfig | null; isLoading: boolean }> = ({
           )}
         </div>
       </ThreadPrimitive.Empty>
-      <ComposerPrimitive.Root className="aui-composer-root relative rounded-full flex w-full flex-col bg-muted px-1 pt-2 dark:border-muted-foreground/15 shadow-inner shadow-muted-foreground/5">
+      <ComposerPrimitive.Root className="aui-composer-root relative rounded-[25px] flex w-full flex-col bg-muted px-1 pt-2 dark:border-muted-foreground/15 shadow-inner shadow-muted-foreground/5">
         <ComposerPrimitive.Input
           placeholder="Send a message..."
           className="aui-composer-input flex font-inter items-center justify-center mb-1 h-16 w-full resize-none bg-transparent px-3.5 pt-1.5 pb-2 text-base outline-none placeholder:text-muted-foreground focus:outline-primary"
