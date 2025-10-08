@@ -54,20 +54,18 @@ const Resume = () => {
       )}
 
       {error && !isLoading && (
-        <div className="flex flex-col items-center justify-center h-full p-8">
-          <FailedLoad />
+        <div className="w-full h-full flex flex-col items-center justify-center p-8 gap-4">
+          <FailedLoad className="relative h-auto" />
+          <Button
+            className="w-full font-inter rounded-[25px] max-w-50 mx-auto cursor-pointer h-[45px]"
+            variant="default"
+            matchBgColor={true}
+          >
+            <a href="mailto:lev@levezze.com">Contact Me</a>
+          </Button>
           <p className="text-sm text-muted-foreground">
             Please try refreshing the page or contact me directly.
           </p>
-          <div className="flex flex-col pt-2">
-            <Button
-              className="w-full font-inter rounded-[25px] max-w-50 mx-auto cursor-pointer h-[45px]"
-              variant="default"
-              matchBgColor={true}
-            >
-              <a href="mailto:lev@levezze.com">Contact Me</a>
-            </Button>
-          </div>
         </div>
       )}
 
