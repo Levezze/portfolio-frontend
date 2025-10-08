@@ -55,21 +55,15 @@ const Resume = () => {
 
       {error && !isLoading && (
         <div className="flex flex-col items-center justify-center h-full p-8">
-          <div className="text-center space-y-4">
-            <div className="text-muted-foreground text-lg font-semibold">
-              Unable to Load Resume
-            </div>
-            <p className="text-muted-foreground">
-              {error.message || "Failed to fetch resume from server"}
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Please try refreshing the page or contact me directly.
-            </p>
+          <FailedLoad />
+          <p className="text-sm text-muted-foreground">
+            Please try refreshing the page or contact me directly.
+          </p>
+          <div className="flex flex-col pt-2">
             <Button
-              variant="ghost"
+              className="w-full font-inter rounded-[25px] max-w-50 mx-auto cursor-pointer h-[45px]"
+              variant="default"
               matchBgColor={true}
-              asChild
-              className="px-5 py-2 mt-4 cursor-pointer rounded-none rounded-tl-2xl rounded-br-2xl border border-border font-semibold text-background"
             >
               <a href="mailto:lev@levezze.com">Contact Me</a>
             </Button>
