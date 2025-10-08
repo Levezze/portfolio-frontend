@@ -1,7 +1,6 @@
 import { useSetAtom } from "jotai";
 import { useEffect, useRef } from "react";
 import {
-  activeInputElementAtom,
   isMobileAtom,
   keyboardVisibleAtom,
   viewportHeightAtom,
@@ -54,7 +53,6 @@ export const useViewportMetrics = () => {
   const setViewportWidth = useSetAtom(viewportWidthAtom);
   const setOrientation = useSetAtom(viewportOrientationAtom);
   const setIsMobile = useSetAtom(isMobileAtom);
-  const setActiveInput = useSetAtom(activeInputElementAtom);
   const setKeyboardVisible = useSetAtom(keyboardVisibleAtom);
 
   const maxHeightRef = useRef<{ portrait: number; landscape: number }>({
@@ -174,17 +172,6 @@ export const useViewportMetrics = () => {
       const isKeyboardEl = isKeyboardElement(target);
       updateKeyboardVisibility(isKeyboardEl);
 
-      // Set active input element for FloatingInputMirror
-      if (isKeyboardEl) {
-        if (
-          target instanceof HTMLInputElement ||
-          target instanceof HTMLTextAreaElement
-        ) {
-          setActiveInput(target);
-        }
-      } else {
-        setActiveInput(null);
-      }
     };
 
     const handleFocusOut = () => {
@@ -258,7 +245,6 @@ export const useViewportMetrics = () => {
     setViewportHeight,
     setViewportWidth,
     isKeyboardElement,
-    setActiveInput,
     setKeyboardVisible,
   ]);
 };

@@ -329,19 +329,7 @@
   display: none;
 }
 
-.keyboard-adjusted {
-  max-height: min(var(--viewport-height), 100%);
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-}
-
-.keyboard-adjusted::-webkit-scrollbar {
-  width: 0;
-  height: 0;
-}
-
-  .touch-pan-x {
+.touch-pan-x {
     touch-action: pan-x;
   }
 }
