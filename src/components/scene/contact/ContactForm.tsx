@@ -58,13 +58,25 @@ const ContactForm = () => {
     const handleFocus = (e: FocusEvent) => {
       const target = e.target as HTMLElement;
       if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") {
+        // Find the FormItem parent that contains both label and input
+        const formItem = target.closest('[data-slot="form-item"]');
+
         // Small delay to ensure keyboard is fully visible and padding is applied
         setTimeout(() => {
-          target.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-            inline: "nearest",
-          });
+          if (formItem) {
+            formItem.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+              inline: "nearest",
+            });
+          } else {
+            // Fallback to input if FormItem not found
+            target.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+              inline: "nearest",
+            });
+          }
         }, 350);
       }
     };
