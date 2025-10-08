@@ -1,6 +1,7 @@
-'use client';
+"use client";
 
-import React, { Component, ReactNode } from 'react';
+import type React from "react";
+import { Component, type ReactNode } from "react";
 
 interface Scene3DErrorBoundaryState {
   hasError: boolean;
@@ -30,37 +31,40 @@ export class Scene3DErrorBoundary extends Component<
       hasError: false,
       error: null,
       errorInfo: null,
-      retryCount: 0
+      retryCount: 0,
     };
   }
 
-  static getDerivedStateFromError(error: Error): Partial<Scene3DErrorBoundaryState> {
+  static getDerivedStateFromError(
+    error: Error,
+  ): Partial<Scene3DErrorBoundaryState> {
     // Update state so the next render will show the fallback UI
     return {
       hasError: true,
-      error
+      error,
     };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     // Log the error details
-    console.error('3D Scene Error Boundary caught an error:', error);
-    console.error('Error details:', errorInfo);
+    console.error("3D Scene Error Boundary caught an error:", error);
+    console.error("Error details:", errorInfo);
 
     // Check if it's a WebGL-related error
-    const isWebGLError = error.message.includes('WebGL') ||
-                        error.message.includes('canvas') ||
-                        error.message.includes('context') ||
-                        error.stack?.includes('three') ||
-                        error.stack?.includes('r3f');
+    const isWebGLError =
+      error.message.includes("WebGL") ||
+      error.message.includes("canvas") ||
+      error.message.includes("context") ||
+      error.stack?.includes("three") ||
+      error.stack?.includes("r3f");
 
     if (isWebGLError) {
-      console.warn('WebGL-related error detected in 3D scene');
+      console.warn("WebGL-related error detected in 3D scene");
     }
 
     this.setState({
       errorInfo: errorInfo.componentStack || null,
-      error
+      error,
     });
 
     // Auto-retry for certain recoverable errors
@@ -73,13 +77,15 @@ export class Scene3DErrorBoundary extends Component<
 
   handleRetry = () => {
     if (this.state.retryCount < this.maxRetries) {
-      console.log(`Retrying 3D scene (attempt ${this.state.retryCount + 1}/${this.maxRetries})`);
+      console.log(
+        `Retrying 3D scene (attempt ${this.state.retryCount + 1}/${this.maxRetries})`,
+      );
 
-      this.setState(prevState => ({
+      this.setState((prevState) => ({
         hasError: false,
         error: null,
         errorInfo: null,
-        retryCount: prevState.retryCount + 1
+        retryCount: prevState.retryCount + 1,
       }));
     }
   };
@@ -95,11 +101,12 @@ export class Scene3DErrorBoundary extends Component<
         return this.props.fallback;
       }
 
-      const canRetry = this.state.retryCount < this.maxRetries;
-      const isWebGLError = this.state.error?.message.includes('WebGL') ||
-                          this.state.error?.message.includes('canvas') ||
-                          this.state.error?.message.includes('context') ||
-                          this.state.error?.stack?.includes('three');
+      const _canRetry = this.state.retryCount < this.maxRetries;
+      const _isWebGLError =
+        this.state.error?.message.includes("WebGL") ||
+        this.state.error?.message.includes("canvas") ||
+        this.state.error?.message.includes("context") ||
+        this.state.error?.stack?.includes("three");
 
       return (
         <div className="w-full h-full flex items-center justify-center bg-background">

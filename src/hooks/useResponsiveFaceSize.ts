@@ -1,5 +1,5 @@
-import { useEffect } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
+import { useEffect } from "react";
 import {
   cubeSizeAtom,
   faceSizeAtom,
@@ -43,14 +43,15 @@ export const useResponsiveFaceSize = () => {
 
       if (isMobile) {
         const margin = RESPONSIVE_CONFIG.mobile.marginPercentage ?? 0.15;
-        const dimension = (() => {
-          if (orientation === "landscape") {
-            return viewportWidth || viewportHeight;
-          }
-          return viewportHeight || viewportWidth;
-        })();
+        const fallbackWidth = typeof window !== "undefined" ? window.innerWidth : 0;
+        const fallbackHeight =
+          typeof window !== "undefined" ? window.innerHeight : 0;
+        const availableWidth = viewportWidth || fallbackWidth;
+        const availableHeight = viewportHeight || fallbackHeight;
+        const isPortrait = availableHeight >= availableWidth;
+        const dimension = isPortrait ? availableHeight : availableWidth;
 
-        if (dimension && dimension > 0) {
+        if (dimension > 0) {
           faceSize = dimension * (1 - margin);
           root.style.setProperty("--face-size", `${faceSize}px`);
         } else {
@@ -69,9 +70,9 @@ export const useResponsiveFaceSize = () => {
         faceSize = parseInt(cssValue, 10);
 
         // Fallback to DEFAULT CSS value if parsing fails
-        if (isNaN(faceSize)) {
+        if (Number.isNaN(faceSize)) {
           console.warn(
-            "Failed to read --face-size from CSS, using default 400px"
+            "Failed to read --face-size from CSS, using default 400px",
           );
           faceSize = 400;
         }

@@ -1,17 +1,16 @@
 "use client";
 
-import React, { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import emailjs from "@emailjs/browser";
-import { LazyMotion, domAnimation } from "motion/react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useAtomValue } from "jotai";
+import { domAnimation, LazyMotion } from "motion/react";
 import * as m from "motion/react-m";
+import { useEffect, useRef, useState } from "react";
+import { useForm } from "react-hook-form";
 
+import { isMobileAtom, keyboardVisibleAtom } from "@/atoms/atomStore";
 import { Button } from "@/components/shared/ui/button";
-import { Input } from "@/components/shared/ui/input";
-import { Textarea } from "@/components/shared/ui/textarea";
-import { Separator } from "@/components/shared/ui/separator";
+import { CheckIcon } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -20,33 +19,25 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/shared/ui/form";
+import { Input } from "@/components/shared/ui/input";
+import { Separator } from "@/components/shared/ui/separator";
 import { Spinner } from "@/components/shared/ui/spinner";
-
-// Validation schema
-const contactFormSchema = z.object({
-  name: z
-    .string()
-    .min(2, { message: "Name must be at least 2 characters" })
-    .max(50, { message: "Name must be less than 50 characters" }),
-  email: z.string().email({ message: "Please enter a valid email address" }),
-  subject: z
-    .string()
-    .min(5, { message: "Subject must be at least 5 characters" })
-    .max(100, { message: "Subject must be less than 100 characters" }),
-  message: z
-    .string()
-    .min(10, { message: "Message must be at least 10 characters" })
-    .max(1000, { message: "Message must be less than 1000 characters" }),
-});
-
-type ContactFormValues = z.infer<typeof contactFormSchema>;
+import { Textarea } from "@/components/shared/ui/textarea";
+import {
+  contactFormSchema,
+  type ContactFormValues,
+} from "@/lib/api/schemas/contact";
+import { cn } from "@/lib/utils/general";
 
 const ContactForm = () => {
+  const isMobile = useAtomValue(isMobileAtom);
+  const keyboardVisible = useAtomValue(keyboardVisibleAtom);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<
     "idle" | "success" | "error"
   >("idle");
-
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactFormSchema),
     defaultValues: {
@@ -55,7 +46,47 @@ const ContactForm = () => {
       subject: "",
       message: "",
     },
+    mode: "onChange",
+    reValidateMode: "onChange",
+    delayError: 1000,
   });
+
+  // Scroll focused input into view when keyboard appears on mobile
+  useEffect(() => {
+    if (!isMobile) return;
+
+    const handleFocus = (e: FocusEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") {
+        // Find the FormItem parent that contains both label and input
+        const formItem = target.closest('[data-slot="form-item"]');
+
+        // Small delay to ensure keyboard is fully visible and padding is applied
+        setTimeout(() => {
+          if (formItem) {
+            formItem.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+              inline: "nearest",
+            });
+          } else {
+            // Fallback to input if FormItem not found
+            target.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+              inline: "nearest",
+            });
+          }
+        }, 350);
+      }
+    };
+
+    const wrapper = wrapperRef.current;
+    if (wrapper) {
+      wrapper.addEventListener("focusin", handleFocus);
+      return () => wrapper.removeEventListener("focusin", handleFocus);
+    }
+  }, [isMobile]);
 
   const onSubmit = async (data: ContactFormValues) => {
     setIsSubmitting(true);
@@ -101,126 +132,143 @@ const ContactForm = () => {
   };
 
   return (
-    <LazyMotion features={domAnimation}>
-      <div className="flex flex-col items-center justify-start h-full w-full px-2 pt-2 gap-2 overflow-y-auto">
-        <m.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="w-full"
+    <>
+      <LazyMotion features={domAnimation}>
+        <div
+          ref={wrapperRef}
+          className={cn(
+            "flex flex-col items-center justify-start h-full w-full px-2 pt-2 gap-2 overflow-y-auto",
+            isMobile && keyboardVisible && "pb-[60dvh]"
+          )}
         >
-          <h1 className="w-full font-regular font-merriweather text-base text-center [@media(min-width:700px)_and_(min-height:700px)]:text-lg [@media(min-width:800px)_and_(min-height:800px)]:text-xl text-muted-foreground/90">
-            Get in Touch
-          </h1>
-        </m.div>
+          <m.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="w-full"
+          >
+            <h1 className="w-full font-regular font-merriweather text-base text-center [@media(min-width:700px)_and_(min-height:700px)]:text-lg [@media(min-width:800px)_and_(min-height:800px)]:text-xl text-muted-foreground/90">
+              Get in Touch
+            </h1>
+          </m.div>
 
-        <Separator className="w-full" />
+          <Separator className="w-full" />
 
-        <m.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="w-full max-w-xl items-center justify-center my-auto"
-        >
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="font-inter text-sm">Name</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Your name"
-                        {...field}
-                        disabled={isSubmitting}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+          <m.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="w-full max-w-xl items-center justify-center my-auto"
+          >
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4"
+              >
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="font-inter text-sm">Name</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Your name"
+                          {...field}
+                          disabled={isSubmitting}
+                          className="px-4 py-2"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="font-inter text-sm">Email</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="your.email@example.com"
-                        {...field}
-                        disabled={isSubmitting}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="font-inter text-sm">
+                        Email
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="email"
+                          placeholder="your.email@example.com"
+                          {...field}
+                          disabled={isSubmitting}
+                          className="px-4 py-2"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="subject"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="font-inter text-sm">
-                      Subject
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="What's this about?"
-                        {...field}
-                        disabled={isSubmitting}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="subject"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="font-inter text-sm">
+                        Subject
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="What's this about?"
+                          {...field}
+                          className="px-4 py-2"
+                          disabled={isSubmitting}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="message"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="font-inter text-sm">
-                      Message
-                    </FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Your message..."
-                        className="min-h-32 resize-none"
-                        {...field}
-                        disabled={isSubmitting}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="message"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="font-inter text-sm">
+                        Message
+                      </FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Your message..."
+                          className="min-h-32 resize-none px-4 py-2"
+                          {...field}
+                          disabled={isSubmitting}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <div className="flex flex-col pt-2">
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full font-inter rounded-[25px] max-w-50 mx-auto cursor-pointer"
-                  variant="default"
-                  matchBgColor={true}
-                >
-                  {isSubmitting ? <Spinner /> : "Send Message"}
-                </Button>
+                <div className="flex flex-col pt-2">
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full font-inter rounded-[25px] max-w-50 mx-auto cursor-pointer h-[45px]"
+                    variant="default"
+                    matchBgColor={true}
+                  >
+                    {isSubmitting ? (
+                      <Spinner />
+                    ) : submitStatus === "success" ? (
+                      <>
+                        <CheckIcon className="w-4 h-4" />
+                        Message Sent
+                      </>
+                    ) : (
+                      "Send Message"
+                    )}
+                  </Button>
 
-                {submitStatus === "success" && (
-                  <p className="text-sm text-center text-green-600 dark:text-green-400 font-inter">
-                    Message sent successfully! I'll get back to you soon.
-                  </p>
-                )}
-
-                {submitStatus === "error" && (
-                  <>
+                  {submitStatus === "error" && (
                     <p className="text-sm text-center text-muted-foreground font-inter pt-2">
                       Failed to send message. Please try again or email me
                       directly at{" "}
@@ -233,14 +281,14 @@ const ContactForm = () => {
                         </a>
                       </span>
                     </p>
-                  </>
-                )}
-              </div>
-            </form>
-          </Form>
-        </m.div>
-      </div>
-    </LazyMotion>
+                  )}
+                </div>
+              </form>
+            </Form>
+          </m.div>
+        </div>
+      </LazyMotion>
+    </>
   );
 };
 

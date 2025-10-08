@@ -13,8 +13,8 @@ import {
   pageTransitionManagerAtom,
   transitionDurationAtom,
 } from "@/atoms/atomStore";
-import type { CubeFace } from "@/types/cubeTypes";
 import { Face } from "@/components/shared/Face";
+import type { CubeFace } from "@/types/cubeTypes";
 import Blog from "./blog/Blog";
 import ChatUI from "./chat/ChatUI";
 import { MyRuntimeProvider } from "./chat/MyRuntimeProvider";
@@ -30,7 +30,7 @@ export const CubeWithFaces = () => {
 
   // Track which faces have been activated (lazy rendering optimization)
   const [activatedFaces, setActivatedFaces] = useState<Set<string>>(
-    new Set([activeFace]) // Start with the initial active face
+    new Set([activeFace]), // Start with the initial active face
   );
 
   const faceSize = useAtomValue(faceSizeAtom);
@@ -42,7 +42,7 @@ export const CubeWithFaces = () => {
   const isColorChanging = useRef(false);
   const targetColorRef = useRef<THREE.Color>(new THREE.Color());
 
-  const distanceFactor = useMemo(() => {
+  const _distanceFactor = useMemo(() => {
     if (!faceSize) {
       return 400;
     }
@@ -54,7 +54,7 @@ export const CubeWithFaces = () => {
 
   const boxArgs = useMemo<[number, number, number]>(
     () => [cubeSize, cubeSize, cubeSize],
-    [cubeSize]
+    [cubeSize],
   );
 
   const cubeFaces: Record<string, CubeFace> = useMemo(
@@ -122,7 +122,7 @@ export const CubeWithFaces = () => {
         ),
       },
     }),
-    [cubeHtmlSize]
+    [cubeHtmlSize],
   );
 
   const activeFaceData = cubeFaces[activeFace];
@@ -179,7 +179,7 @@ export const CubeWithFaces = () => {
   useEffect(() => {
     if (!isMounted.current) return;
     triggerTransition(null);
-  }, [activeFace, triggerTransition]);
+  }, [triggerTransition]);
 
   const targetColor = useAtomValue(cubeColorAtom);
 
@@ -202,19 +202,19 @@ export const CubeWithFaces = () => {
       material.color.r,
       target.r,
       1.6,
-      delta
+      delta,
     );
     material.color.g = THREE.MathUtils.damp(
       material.color.g,
       target.g,
       1.6,
-      delta
+      delta,
     );
     material.color.b = THREE.MathUtils.damp(
       material.color.b,
       target.b,
       1.6,
-      delta
+      delta,
     );
 
     // Stop when close enough (threshold check)

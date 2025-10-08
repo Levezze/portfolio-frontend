@@ -1,4 +1,4 @@
-import { IconName } from "@/components/shared/Icon";
+import type { IconName } from "@/components/shared/Icon";
 
 export interface ButtonFrameProps {
   children: React.ReactNode;

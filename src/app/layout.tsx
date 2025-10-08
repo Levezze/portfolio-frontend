@@ -1,16 +1,7 @@
 import type { Metadata, Viewport } from "next";
-import {
-  Geist,
-  Geist_Mono,
-  Inter,
-  Merriweather,
-  Saira,
-  Saira_Stencil_One,
-  Titillium_Web,
-  Exo_2,
-} from "next/font/google";
-import { ThemeWrapper } from "@/components/ThemeWrapper";
+import { Saira } from "next/font/google";
 import { GlobalNavigationManager } from "@/components/GlobalNavigationManager";
+import { ThemeWrapper } from "@/components/ThemeWrapper";
 import "./globals.css";
 
 const inter = Saira({

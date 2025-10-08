@@ -1,12 +1,12 @@
 "use client";
 
-import { cn } from "@/lib/utils/general";
 import type { ComponentProps } from "react";
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/shared/ui/hover-card";
+import { cn } from "@/lib/utils/general";
 
 export type GlimpseProps = ComponentProps<typeof HoverCard>;
 
@@ -60,7 +60,7 @@ export const GlimpseImage = ({
     alt={alt ?? ""}
     className={cn(
       "mb-4 aspect-[120/63] w-full rounded-md border object-cover",
-      className
+      className,
     )}
     {...props}
   />

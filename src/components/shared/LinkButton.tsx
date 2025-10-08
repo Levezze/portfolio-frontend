@@ -1,8 +1,8 @@
-import { TooltipButton } from "@/components/shared/TooltipButton";
+import { useAtomValue } from "jotai";
+import { isMobileAtom } from "@/atoms/atomStore";
 import { Icon } from "@/components/shared/Icon";
-import { useIsMobile } from "@/hooks/useIsMobile";
-import React from "react";
-import { LinkButtonProps } from "@/types/buttonTypes";
+import { TooltipButton } from "@/components/shared/TooltipButton";
+import type { LinkButtonProps } from "@/types/buttonTypes";
 
 export const LinkButton = ({
   className,
@@ -11,7 +11,8 @@ export const LinkButton = ({
   tooltipText,
   buttonSize = 6,
 }: LinkButtonProps) => {
-  const isMobile = useIsMobile();
+  const isMobile = useAtomValue(isMobileAtom);
+
   return (
     <TooltipButton
       tooltip={!isMobile}

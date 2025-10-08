@@ -1,28 +1,28 @@
-import React, { useState } from "react";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import Autoplay from "embla-carousel-auto-scroll";
+import { useSetAtom } from "jotai";
+import { useState } from "react";
+import { pushNavigationCallbackAtom } from "@/atoms/atomStore";
 import {
   VideoPlayer,
   VideoPlayerContent,
   VideoPlayerControlBar,
-  VideoPlayerTimeRange,
-  VideoPlayerTimeDisplay,
   VideoPlayerPlayButton,
+  VideoPlayerTimeDisplay,
+  VideoPlayerTimeRange,
 } from "@/components/shared/kibo-ui/video-player";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from "@/components/shared/ui/carousel";
 import {
   Dialog,
   DialogContent,
   DialogTitle,
   DialogTrigger,
 } from "@/components/shared/ui/dialog";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-} from "@/components/shared/ui/carousel";
-import Autoplay from "embla-carousel-auto-scroll";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { ZoomableContent } from "@/components/shared/ZoomableContent";
-import { useSetAtom } from "jotai";
-import { pushNavigationCallbackAtom } from "@/atoms/atomStore";
 
 interface MediaItem {
   original: string;
@@ -31,6 +31,45 @@ interface MediaItem {
   mediaWidth?: number;
   mediaHeight?: number;
 }
+
+export const MediaGallery = ({ items }: { items: MediaItem[] }) => {
+  if (!items || items.length === 0) return null;
+
+  const sortedItems = [...items].sort((a, b) => {
+    if (a.mediaType === "video" && b.mediaType !== "video") return -1;
+    if (a.mediaType !== "video" && b.mediaType === "video") return 1;
+    return 0;
+  });
+
+  return (
+    <div className="w-full mb-6 pt-4">
+      <Carousel
+        opts={{
+          align: "start",
+          loop: true,
+          watchDrag: true,
+        }}
+        plugins={[
+          Autoplay({
+            speed: 1,
+            startDelay: 5000,
+            stopOnInteraction: false,
+            playOnInit: true,
+          }),
+        ]}
+        className="w-full cursor-grab active:cursor-grabbing"
+      >
+        <CarouselContent className="-ml-2">
+          {sortedItems.map((item, idx) => (
+            <CarouselItem key={item.original} className="pl-2 basis-[90%]">
+              <MediaDialog item={item} idx={idx} />
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+      </Carousel>
+    </div>
+  );
+};
 
 const MediaDialog = ({ item, idx }: { item: MediaItem; idx: number }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -119,44 +158,5 @@ const MediaDialog = ({ item, idx }: { item: MediaItem; idx: number }) => {
         </div>
       </DialogContent>
     </Dialog>
-  );
-};
-
-export const MediaGallery = ({ items }: { items: MediaItem[] }) => {
-  if (!items || items.length === 0) return null;
-
-  const sortedItems = [...items].sort((a, b) => {
-    if (a.mediaType === "video" && b.mediaType !== "video") return -1;
-    if (a.mediaType !== "video" && b.mediaType === "video") return 1;
-    return 0;
-  });
-
-  return (
-    <div className="w-full mb-6 pt-4">
-      <Carousel
-        opts={{
-          align: "start",
-          loop: true,
-          watchDrag: true,
-        }}
-        plugins={[
-          Autoplay({
-            speed: 1,
-            startDelay: 5000,
-            stopOnInteraction: false,
-            playOnInit: true,
-          }),
-        ]}
-        className="w-full cursor-grab active:cursor-grabbing"
-      >
-        <CarouselContent className="-ml-2">
-          {sortedItems.map((item, idx) => (
-            <CarouselItem key={item.original} className="pl-2 basis-[90%]">
-              <MediaDialog item={item} idx={idx} />
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-      </Carousel>
-    </div>
   );
 };

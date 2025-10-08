@@ -1,25 +1,28 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { useSetAtom } from "jotai";
+import { DownloadIcon, MaximizeIcon } from "lucide-react";
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
+import { pushNavigationCallbackAtom } from "@/atoms/atomStore";
+import { FailedLoad } from "@/components/shared/alerts/FailedLoad";
+import { Loading } from "@/components/shared/alerts/Loading";
 import { Button } from "@/components/shared/ui/button";
-import { Separator } from "@/components/shared/ui/separator";
-import { MaximizeIcon, DownloadIcon } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/shared/ui/tooltip";
 import {
   Dialog,
   DialogContent,
   DialogTitle,
   DialogTrigger,
 } from "@/components/shared/ui/dialog";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { Separator } from "@/components/shared/ui/separator";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/shared/ui/tooltip";
 import { ZoomableContent } from "@/components/shared/ZoomableContent";
-import { Loading } from "@/components/shared/alerts/Loading";
-import { FailedLoad } from "@/components/shared/alerts/FailedLoad";
 
 // Import PDF.js styles
 import "react-pdf/dist/Page/AnnotationLayer.css";
@@ -37,6 +40,18 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
   const [pdfWidth, setPdfWidth] = useState(400);
   const [numPages, setNumPages] = useState<number | null>(null);
   const [pageNumber, setPageNumber] = useState(1);
+  const [isOpen, setIsOpen] = useState(false);
+  const pushCallback = useSetAtom(pushNavigationCallbackAtom);
+
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    if (open) {
+      pushCallback({
+        callback: () => setIsOpen(false),
+        label: "Close PDF viewer",
+      });
+    }
+  };
 
   // Measure actual container width with ResizeObserver
   useEffect(() => {
@@ -53,7 +68,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
   }, []);
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <div className="flex flex-col h-full w-full">
         {/* Cube Face - PDF Preview (click to open fullscreen) */}
         <DialogTrigger asChild>
@@ -95,11 +110,12 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
             <TooltipTrigger asChild>
               <DialogTrigger asChild>
                 <Button
-                  variant="ghost"
+                  variant="default"
                   matchBgColor={true}
-                  className="w-10 h-10 cursor-pointer rounded-full border-none font-normal text-sm text-background shadow-sm shadow-muted-foreground/10"
+                  className="w-36 font-inter rounded-[25px] cursor-pointer h-[45px]"
                 >
                   <MaximizeIcon />
+                  Fullscreen
                 </Button>
               </DialogTrigger>
             </TooltipTrigger>
@@ -111,10 +127,10 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                variant="ghost"
+                variant="default"
                 matchBgColor={true}
                 asChild
-                className="w-10 h-10 cursor-pointer rounded-full border-none font-normal text-sm text-background shadow-sm shadow-muted-foreground/10"
+                className="w-36 font-inter rounded-[25px] cursor-pointer h-[45px]"
               >
                 <a
                   href={url}
@@ -122,6 +138,7 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
+                  Download
                   <DownloadIcon />
                 </a>
               </Button>
@@ -136,26 +153,23 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
       {/* Fullscreen Dialog with Draggable & Zoomable PDF */}
       <DialogContent
         fullscreen={true}
-        className="bg-black/95 flex flex-col gap-4 p-4"
+        className="bg-black/95 p-4"
         showCloseButton={true}
       >
         <VisuallyHidden>
           <DialogTitle>Resume PDF Viewer</DialogTitle>
         </VisuallyHidden>
-        <ZoomableContent
-          alwaysDraggable
-          className="flex-1 flex items-center justify-center"
-        >
-          <div className="max-w-full max-h-[90vh] flex items-center justify-center">
+        <div className="w-full h-full flex items-center justify-center overflow-hidden">
+          <ZoomableContent alwaysDraggable>
             <Document
               file={url}
               loading={
-                <div className="flex text-center h-full justify-center items-center p-4 text-white">
+                <div className="flex text-center h-full justify-center items-center p-4 text-muted-foreground">
                   Loading PDF...
                 </div>
               }
               error={
-                <div className="flex text-center h-full justify-center items-center p-4 text-red-500">
+                <div className="flex text-center h-full justify-center items-center p-4 text-muted-foreground">
                   Failed to load PDF.
                 </div>
               }
@@ -165,36 +179,11 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
                 devicePixelRatio={2.5}
                 renderTextLayer={true}
                 renderAnnotationLayer={true}
-                className="shadow-lg max-w-full max-h-full"
+                className="max-w-full max-h-[85vh] object-contain"
               />
             </Document>
-          </div>
-        </ZoomableContent>
-
-        {/* Page Navigation in Dialog */}
-        {numPages && numPages > 1 && (
-          <div className="flex justify-center items-center gap-4">
-            <Button
-              variant="ghost"
-              disabled={pageNumber <= 1}
-              onClick={() => setPageNumber(pageNumber - 1)}
-              className="px-4 py-2 cursor-pointer rounded-full border-none disabled:opacity-50 disabled:cursor-not-allowed font-normal text-white bg-white/10 hover:bg-white/20"
-            >
-              Previous
-            </Button>
-            <span className="text-white font-medium">
-              Page {pageNumber} of {numPages}
-            </span>
-            <Button
-              variant="ghost"
-              disabled={pageNumber >= numPages}
-              onClick={() => setPageNumber(pageNumber + 1)}
-              className="px-4 py-2 cursor-pointer rounded-full border-none disabled:opacity-50 disabled:cursor-not-allowed font-normal text-white bg-white/10 hover:bg-white/20"
-            >
-              Next
-            </Button>
-          </div>
-        )}
+          </ZoomableContent>
+        </div>
       </DialogContent>
     </Dialog>
   );

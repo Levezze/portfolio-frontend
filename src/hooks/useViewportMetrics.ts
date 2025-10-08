@@ -1,7 +1,8 @@
-import { useEffect, useRef } from "react";
 import { useSetAtom } from "jotai";
+import { useEffect, useRef } from "react";
 import {
   isMobileAtom,
+  keyboardVisibleAtom,
   viewportHeightAtom,
   viewportOrientationAtom,
   viewportWidthAtom,
@@ -39,29 +40,11 @@ const detectOrientation = (
   width: number,
   height: number,
   previous: Orientation,
-  portraitMax: number
+  portraitMax: number,
 ): Orientation => {
-  if (typeof window !== "undefined") {
-    const screenOrientation = window.screen?.orientation?.type;
-    if (typeof screenOrientation === "string") {
-      return screenOrientation.startsWith("portrait")
-        ? "portrait"
-        : "landscape";
-    }
-
-    if (typeof window.matchMedia === "function") {
-      return window.matchMedia("(orientation: portrait)").matches
-        ? "portrait"
-        : "landscape";
-    }
-  }
-
-  if (previous === "portrait" && portraitMax > 0) {
-    if (height < portraitMax * 0.9 && width > height) {
-      return "portrait";
-    }
-  }
-
+  // Primary detection: viewport dimensions
+  // This works correctly in both real devices and DevTools simulation
+  // (screen.orientation APIs report physical screen, breaking DevTools)
   return width >= height ? "landscape" : "portrait";
 };
 
@@ -70,6 +53,7 @@ export const useViewportMetrics = () => {
   const setViewportWidth = useSetAtom(viewportWidthAtom);
   const setOrientation = useSetAtom(viewportOrientationAtom);
   const setIsMobile = useSetAtom(isMobileAtom);
+  const setKeyboardVisible = useSetAtom(keyboardVisibleAtom);
 
   const maxHeightRef = useRef<{ portrait: number; landscape: number }>({
     portrait: 0,
@@ -107,6 +91,15 @@ export const useViewportMetrics = () => {
       return true;
     }
 
+    if (node instanceof HTMLElement) {
+      if (
+        node.dataset.keyboardElement === "true" ||
+        node.closest("[data-keyboard-element='true']")
+      ) {
+        return true;
+      }
+    }
+
     return false;
   };
 
@@ -124,7 +117,7 @@ export const useViewportMetrics = () => {
         width,
         height,
         orientationRef.current,
-        maxHeightRef.current.portrait
+        maxHeightRef.current.portrait,
       );
       orientationRef.current = orientation;
 
@@ -170,12 +163,15 @@ export const useViewportMetrics = () => {
         return;
       }
       keyboardVisibleRef.current = visible;
+      setKeyboardVisible(visible);
       scheduleUpdate(true);
     };
 
     const handleFocusIn = (event: FocusEvent) => {
       const target = event.target as Element | null;
-      updateKeyboardVisibility(isKeyboardElement(target));
+      const isKeyboardEl = isKeyboardElement(target);
+      updateKeyboardVisibility(isKeyboardEl);
+
     };
 
     const handleFocusOut = () => {
@@ -223,12 +219,12 @@ export const useViewportMetrics = () => {
         window.removeEventListener("resize", handleResize);
         window.removeEventListener(
           "orientationchange",
-          handleOrientationChange
+          handleOrientationChange,
         );
         window.visualViewport?.removeEventListener("resize", handleResize);
         virtualKeyboard.removeEventListener(
           "geometrychange",
-          handleGeometryChange
+          handleGeometryChange,
         );
       };
     }
@@ -243,5 +239,12 @@ export const useViewportMetrics = () => {
       window.removeEventListener("orientationchange", handleOrientationChange);
       window.visualViewport?.removeEventListener("resize", handleResize);
     };
-  }, [setIsMobile, setOrientation, setViewportHeight, setViewportWidth]);
+  }, [
+    setIsMobile,
+    setOrientation,
+    setViewportHeight,
+    setViewportWidth,
+    isKeyboardElement,
+    setKeyboardVisible,
+  ]);
 };

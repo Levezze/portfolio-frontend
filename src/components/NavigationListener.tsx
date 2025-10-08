@@ -19,7 +19,7 @@ export const NavigationListener = () => {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const handlePopState = (event: PopStateEvent) => {
+    const handlePopState = (_event: PopStateEvent) => {
       const stackSize = getStackSize();
 
       if (stackSize > 0) {
@@ -31,19 +31,19 @@ export const NavigationListener = () => {
         window.history.pushState(
           { navId: `nav-${Date.now()}` },
           "",
-          window.location.href
+          window.location.href,
         );
       } else {
         // Stack is empty - prevent exit by pushing a new dummy state
         window.history.pushState(
           { navId: `nav-${Date.now()}` },
           "",
-          window.location.href
+          window.location.href,
         );
 
         if (process.env.NODE_ENV === "development") {
           console.log(
-            "[Navigation] Back pressed with empty stack - prevented exit"
+            "[Navigation] Back pressed with empty stack - prevented exit",
           );
         }
       }

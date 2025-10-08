@@ -1,9 +1,9 @@
-import React, { useRef, useState, useEffect, useMemo } from "react";
 import { GradientTexture } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useAtomValue } from "jotai";
-import { pageColorAtom } from "@/atoms/atomStore";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
+import { pageColorAtom } from "@/atoms/atomStore";
 
 export const BowlGroundPlane = ({
   position,
@@ -18,7 +18,9 @@ export const BowlGroundPlane = ({
   const targetColorRef = useRef(new THREE.Color("#a8dadc"));
   const isColorChanging = useRef(false);
 
-  const sphereArgs = useMemo<[number, number, number, number, number, number, number]>(
+  const sphereArgs = useMemo<
+    [number, number, number, number, number, number, number]
+  >(
     () => [
       200, // radius
       32, // widthSegments
@@ -28,7 +30,7 @@ export const BowlGroundPlane = ({
       Math.PI - Math.PI / 6, // thetaStart
       Math.PI / 6, // thetaLength
     ],
-    []
+    [],
   );
 
   useEffect(() => {
@@ -46,19 +48,19 @@ export const BowlGroundPlane = ({
       colorRef.current.r,
       targetColorRef.current.r,
       0.8,
-      delta
+      delta,
     );
     colorRef.current.g = THREE.MathUtils.damp(
       colorRef.current.g,
       targetColorRef.current.g,
       0.8,
-      delta
+      delta,
     );
     colorRef.current.b = THREE.MathUtils.damp(
       colorRef.current.b,
       targetColorRef.current.b,
       0.8,
-      delta
+      delta,
     );
 
     // Check if color is close enough (threshold check)
@@ -71,12 +73,12 @@ export const BowlGroundPlane = ({
       // Close enough - snap to final color and stop
       colorRef.current.copy(targetColorRef.current);
       isColorChanging.current = false;
-      setCurrentColor("#" + colorRef.current.getHexString());
+      setCurrentColor(`#${colorRef.current.getHexString()}`);
       return;
     }
 
     // Update current color for gradient texture
-    const hexColor = "#" + colorRef.current.getHexString();
+    const hexColor = `#${colorRef.current.getHexString()}`;
     if (hexColor !== currentColor) {
       setCurrentColor(hexColor);
     }

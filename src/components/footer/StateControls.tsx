@@ -1,9 +1,8 @@
-import React from "react";
-import { TooltipButton } from "@/components/shared/TooltipButton";
-import { WallpaperIcon, SunIcon, MoonIcon } from "lucide-react";
 import { useAtom } from "jotai";
-import { lightThemeAtom, bgMotionAtom } from "@/atoms/atomStore";
+import { MoonIcon, SunIcon, WallpaperIcon } from "lucide-react";
+import { bgMotionAtom, lightThemeAtom } from "@/atoms/atomStore";
 import { ButtonFrame } from "@/components/shared/ButtonFrame";
+import { TooltipButton } from "@/components/shared/TooltipButton";
 
 interface StateControlsProps {
   variant?: "default" | "inverse";

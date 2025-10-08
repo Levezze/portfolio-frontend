@@ -1,5 +1,4 @@
 "use client";
-import { useEffect, useState, useRef, type FC } from "react";
 import {
   ActionBarPrimitive,
   BranchPickerPrimitive,
@@ -10,6 +9,7 @@ import {
   useAssistantRuntime,
   useThread,
 } from "@assistant-ui/react";
+import { useAtomValue, useSetAtom } from "jotai";
 import {
   ArrowDownIcon,
   ArrowUpIcon,
@@ -21,38 +21,39 @@ import {
   RefreshCwIcon,
   Square,
 } from "lucide-react";
+import { domAnimation, LazyMotion, MotionConfig } from "motion/react";
+import * as m from "motion/react-m";
+import { type FC, useEffect, useRef, useState } from "react";
+import useSWR from "swr";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/shared/ui/tooltip";
-
+	gimliChoiceAtom,
+	isMobileAtom,
+	keyboardVisibleAtom,
+	pushNavigationCallbackAtom,
+} from "@/atoms/atomStore";
 import { UserMessageAttachments } from "@/components/scene/chat/assistant-ui/attachment";
 import { MarkdownText } from "@/components/scene/chat/assistant-ui/markdown-text";
 import { ToolFallback } from "@/components/scene/chat/assistant-ui/tool-fallback";
 import { TooltipIconButton } from "@/components/scene/chat/assistant-ui/tooltip-icon-button";
-import { Button } from "@/components/shared/ui/button";
+import { FailedLoad } from "@/components/shared/alerts/FailedLoad";
+import { BackButton } from "@/components/shared/BackButton";
+import { ButtonFrame } from "@/components/shared/ButtonFrame";
+import { LinkButton } from "@/components/shared/LinkButton";
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
 } from "@/components/shared/ui/avatar";
-import { cn } from "@/lib/utils/general";
-import { LazyMotion, MotionConfig, domAnimation } from "motion/react";
-import * as m from "motion/react-m";
-import { getChatConfig } from "@/lib/api/services/chatService";
-import { type WelcomeMessage, type ChatConfig } from "@/lib/api/schemas/chat";
-import useSWR from "swr";
+import { Button } from "@/components/shared/ui/button";
 import { Separator } from "@/components/shared/ui/separator";
-import { useAtomValue, useSetAtom } from "jotai";
 import {
-  gimliChoiceAtom,
-  pushNavigationCallbackAtom,
-} from "@/atoms/atomStore";
-import { ButtonFrame } from "@/components/shared/ButtonFrame";
-import { LinkButton } from "@/components/shared/LinkButton";
-import { FailedLoad } from "@/components/shared/alerts/FailedLoad";
-import { BackButton } from "@/components/shared/BackButton";
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/shared/ui/tooltip";
+import type { ChatConfig, WelcomeMessage } from "@/lib/api/schemas/chat";
+import { getChatConfig } from "@/lib/api/services/chatService";
+import { cn } from "@/lib/utils/general";
 
 const ChatBackButton: FC = () => {
   const runtime = useAssistantRuntime();
@@ -90,6 +91,9 @@ const ChatBackButton: FC = () => {
 };
 
 export const Thread: FC = () => {
+  const isMobile = useAtomValue(isMobileAtom);
+  const keyboardVisible = useAtomValue(keyboardVisibleAtom);
+
   const {
     data: chatConfig,
     isLoading,
@@ -115,7 +119,10 @@ export const Thread: FC = () => {
         <LazyMotion features={domAnimation}>
           <MotionConfig reducedMotion="user">
             <ThreadPrimitive.Root className="aui-root aui-thread-root @container flex h-full flex-col bg-background">
-              <ThreadPrimitive.Viewport className="aui-thread-viewport relative flex flex-1 flex-col overflow-x-auto overflow-y-auto">
+              <ThreadPrimitive.Viewport className={cn(
+                "aui-thread-viewport relative flex flex-1 flex-col overflow-x-auto overflow-y-auto",
+                isMobile && keyboardVisible && "pb-[60dvh]"
+              )}>
                 {chatConfig && <ThreadWelcome config={chatConfig} />}
 
                 <ThreadPrimitive.Messages
@@ -147,7 +154,7 @@ const ThreadScrollToBottom: FC = () => {
       <TooltipIconButton
         tooltip="Scroll to bottom"
         variant="outline"
-        className="aui-thread-scroll-to-bottom absolute -top-12 z-10 self-center rounded-full p-4 disabled:invisible dark:bg-background dark:hover:bg-accent"
+        className="aui-thread-scroll-to-bottom absolute -top-12 z-10 self-center rounded-[25px] p-4 disabled:invisible dark:bg-background dark:hover:bg-accent"
       >
         <ArrowDownIcon />
       </TooltipIconButton>
@@ -244,7 +251,7 @@ const ThreadWelcome: FC<{ config: ChatConfig }> = ({ config }) => {
               {
                 welcome_messages.filter(
                   (message: WelcomeMessage) =>
-                    message.message_type === "primary"
+                    message.message_type === "primary",
                 )[0]?.message_text
               }
             </m.div>
@@ -258,7 +265,7 @@ const ThreadWelcome: FC<{ config: ChatConfig }> = ({ config }) => {
               {
                 welcome_messages.filter(
                   (message: WelcomeMessage) =>
-                    message.message_type === "secondary"
+                    message.message_type === "secondary",
                 )[0]?.message_text
               }
             </m.div>
@@ -377,34 +384,36 @@ const Composer: FC<{ chatConfig: ChatConfig | null; isLoading: boolean }> = ({
   isLoading,
 }) => {
   return (
-    <div className="aui-composer-wrapper sticky bottom-0 mx-auto flex w-full max-w-[var(--thread-max-width)] flex-col overflow-visible rounded-t-md bg-background pb-4 md:px-4 md:pb-6 mobile-landscape:p-0">
-      <ThreadScrollToBottom />
-      <ThreadPrimitive.Empty>
-        <div className="flex flex-col items-center justify-center mb-4 font-inter">
-          <Separator className="my-4 w-full mobile-landscape:hidden" />
-          {chatConfig && !isLoading && (
-            <FakeAssistantMessage
-              text={
-                chatConfig.welcome_messages.filter(
-                  (message: WelcomeMessage) =>
-                    message.message_type === "assistant"
-                )[0]?.message_text as string
-              }
-            />
-          )}
-        </div>
-      </ThreadPrimitive.Empty>
-      <ComposerPrimitive.Root className="aui-composer-root relative rounded-full flex w-full flex-col bg-muted px-1 pt-2 dark:border-muted-foreground/15 shadow-inner shadow-muted-foreground/5">
-        <ComposerPrimitive.Input
-          placeholder="Send a message..."
-          className="aui-composer-input flex font-inter items-center justify-center mb-1 h-16 w-full resize-none bg-transparent px-3.5 pt-1.5 pb-2 text-base outline-none placeholder:text-muted-foreground focus:outline-primary"
-          rows={1}
-          autoFocus
-          aria-label="Message input"
-        />
-        <ComposerAction />
-      </ComposerPrimitive.Root>
-    </div>
+    <>
+      <div className="aui-composer-wrapper sticky bottom-0 mx-auto flex w-full max-w-[var(--thread-max-width)] flex-col overflow-visible rounded-t-md bg-background pb-4 md:px-4 md:pb-6 mobile-landscape:p-0">
+        <ThreadScrollToBottom />
+        <ThreadPrimitive.Empty>
+          <div className="flex flex-col items-center justify-center mb-4 font-inter">
+            <Separator className="my-4 w-full mobile-landscape:hidden" />
+            {chatConfig && !isLoading && (
+              <FakeAssistantMessage
+                text={
+                  chatConfig.welcome_messages.filter(
+                    (message: WelcomeMessage) =>
+                      message.message_type === "assistant",
+                  )[0]?.message_text as string
+                }
+              />
+            )}
+          </div>
+        </ThreadPrimitive.Empty>
+        <ComposerPrimitive.Root className="aui-composer-root relative rounded-[25px] flex w-full flex-col bg-muted px-1 pt-2 dark:border-muted-foreground/15 shadow-inner shadow-muted-foreground/5">
+          <ComposerPrimitive.Input
+            placeholder="Send a message..."
+            className="aui-composer-input flex font-inter items-center justify-center mb-1 h-16 w-full resize-none bg-transparent px-3.5 pt-1.5 pb-2 text-base outline-none placeholder:text-muted-foreground focus:outline-primary"
+            rows={1}
+            aria-label="Message input"
+          />
+          <ComposerAction />
+        </ComposerPrimitive.Root>
+      </div>
+
+    </>
   );
 };
 
@@ -601,7 +610,7 @@ const BranchPicker: FC<BranchPickerPrimitive.Root.Props> = ({
       hideWhenSingleBranch
       className={cn(
         "aui-branch-picker-root mr-2 -ml-2 inline-flex items-center text-xs text-muted-foreground font-inter",
-        className
+        className,
       )}
       {...rest}
     >

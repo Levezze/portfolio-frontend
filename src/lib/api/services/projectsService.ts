@@ -1,10 +1,10 @@
 import { apiClient } from "../core/client";
 import {
   ProjectGalleryArraySchema,
-  ProjectMediaType,
-  ProjectGalleryType,
+  type ProjectGalleryType,
+  type ProjectMediaType,
   ProjectPageSchema,
-  ProjectPageType,
+  type ProjectPageType,
 } from "../schemas/projects";
 
 export const getProjectsGallery = async () => {

@@ -1,6 +1,6 @@
 import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
-import { type PagesType } from "@/lib/api/schemas/tools";
+import type { PagesType } from "@/lib/api/schemas/tools";
 
 // Visitor
 export const visitorIdAtom = atomWithStorage("visitorId", "");
@@ -47,7 +47,7 @@ export const pageTransitionManagerAtom = atom(
     currentTimeout = setTimeout(() => {
       set(transitionDurationAtom, SHORT_TRANSITION);
     }, LONG_TRANSITION);
-  }
+  },
 );
 
 // Sizing
@@ -63,8 +63,11 @@ export const isMobileAtom = atom<boolean>(false);
 export const viewportHeightAtom = atom<number>(0);
 export const viewportWidthAtom = atom<number>(0);
 export const viewportOrientationAtom = atom<"portrait" | "landscape">(
-  "portrait"
+  "portrait",
 );
+
+// Mobile Keyboard UX
+export const keyboardVisibleAtom = atom<boolean>(false);
 
 // Projects Gallery
 export const projectViewAtom = atom<"project" | "zoomed">("project");
@@ -83,7 +86,11 @@ export const navigationStackAtom = atom<NavigationStackItem[]>([]);
 // NOTE: Does NOT manipulate browser history - that's handled by GlobalNavigationManager
 export const navigateToFaceAtom = atom(
   null,
-  (get, set, update: { face: PagesType; direction: "forward" | "backward" }) => {
+  (
+    get,
+    set,
+    update: { face: PagesType; direction: "forward" | "backward" },
+  ) => {
     const previousFace = get(activeFaceAtom);
 
     // Always update the face
@@ -104,7 +111,7 @@ export const navigateToFaceAtom = atom(
 
       if (process.env.NODE_ENV === "development") {
         console.log(
-          `[Navigation] Forward: ${previousFace} → ${update.face} (stack size: ${get(navigationStackAtom).length + 1})`
+          `[Navigation] Forward: ${previousFace} → ${update.face} (stack size: ${get(navigationStackAtom).length + 1})`,
         );
       }
     } else if (update.direction === "backward") {
@@ -112,7 +119,7 @@ export const navigateToFaceAtom = atom(
         console.log(`[Navigation] Backward: → ${update.face} (no stack push)`);
       }
     }
-  }
+  },
 );
 
 // Helper atom to push navigation callbacks (write-only)
@@ -133,14 +140,14 @@ export const pushNavigationCallbackAtom = atom(
       window.history.pushState(
         { navId: `action-${Date.now()}`, managed: true },
         "",
-        window.location.href
+        window.location.href,
       );
     }
 
     if (process.env.NODE_ENV === "development") {
       console.log(
-        `[Navigation] Pushed: ${update.label || "unnamed"} (stack size: ${get(navigationStackAtom).length + 1})`
+        `[Navigation] Pushed: ${update.label || "unnamed"} (stack size: ${get(navigationStackAtom).length + 1})`,
       );
     }
-  }
+  },
 );
