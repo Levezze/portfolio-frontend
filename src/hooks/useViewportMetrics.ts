@@ -141,6 +141,7 @@ export const useViewportMetrics = () => {
       }
 
       root.style.setProperty("--viewport-height", `${stableHeight}px`);
+      root.style.setProperty("--viewport-current-height", `${height}px`);
 
       setViewportHeight(stableHeight);
       setViewportWidth(width);

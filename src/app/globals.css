@@ -330,7 +330,10 @@
 }
 
 .keyboard-adjusted {
-  max-height: min(var(--viewport-height), 100%);
+  max-height: min(
+    var(--viewport-current-height, var(--viewport-height)),
+    100%
+  );
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
