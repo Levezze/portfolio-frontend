@@ -97,13 +97,7 @@ const ContactForm = () => {
             transition={{ delay: 0.1 }}
             className="w-full"
           >
-            <h1
-              className="
-              w-full font-regular font-merriweather text-base text-center 
-              [@media(min-width:700px)_and_(min-height:700px)]:text-lg 
-              [@media(min-width:800px)_and_(min-height:800px)]:text-xl 
-              text-muted-foreground/90"
-            >
+            <h1 className="w-full font-regular font-merriweather text-base text-center [@media(min-width:700px)_and_(min-height:700px)]:text-lg [@media(min-width:800px)_and_(min-height:800px)]:text-xl text-muted-foreground/90">
               Get in Touch
             </h1>
           </m.div>
