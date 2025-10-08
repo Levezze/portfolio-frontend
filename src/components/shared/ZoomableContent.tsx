@@ -4,7 +4,6 @@ import type React from "react";
 import { type ReactNode, useRef, useState } from "react";
 import { viewportHeightAtom } from "@/atoms/atomStore";
 import { cn } from "@/lib/utils/general";
-import { useAtomValue } from "jotai";
 
 interface ZoomableContentProps {
   children: ReactNode;
@@ -17,7 +16,6 @@ export const ZoomableContent = ({
   className,
   alwaysDraggable = false,
 }: ZoomableContentProps) => {
-  const viewportHeight = useAtomValue(viewportHeightAtom);
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -133,13 +131,10 @@ export const ZoomableContent = ({
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       className={cn(
-        "w-full flex items-center justify-center overflow-hidden select-none",
+        "w-full h-full flex items-center justify-center overflow-hidden select-none",
         getCursor(),
         className
       )}
-      style={{
-        height: viewportHeight ? `${viewportHeight}px` : "95dvh",
-      }}
     >
       <div
         style={{
