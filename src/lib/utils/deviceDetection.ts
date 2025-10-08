@@ -54,9 +54,11 @@ export function isMobileDevice(dimensions?: Partial<Dimensions>): boolean {
   const isMobileUA = MOBILE_USER_AGENT_PATTERN.test(userAgent);
   const isTabletUA = TABLET_USER_AGENT_PATTERN.test(userAgent);
 
+  const shortestSide = Math.min(width || Infinity, height || Infinity);
+
   return (
     (isMobileUA && !isTabletUA) ||
-    (width > 0 && height > 0 && width < 600 && height < 600)
+    (shortestSide > 0 && shortestSide < 600)
   );
 }
 
