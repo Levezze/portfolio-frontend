@@ -6,8 +6,8 @@ import { cn } from "@/lib/utils/general";
 export const Face = ({ children }: { children: React.ReactNode }) => {
   const isMobile = useAtomValue(isMobileAtom);
   const keyboardVisible = useAtomValue(keyboardVisibleAtom);
-  // const keyboardActive = isMobile && keyboardVisible;
-  const keyboardActive = true;
+  const keyboardActive = isMobile && keyboardVisible;
+  // const keyboardActive = true;
 
   return (
     <div
