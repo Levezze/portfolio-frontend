@@ -2,13 +2,11 @@
 
 import emailjs from "@emailjs/browser";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAtomValue } from "jotai";
 import { domAnimation, LazyMotion } from "motion/react";
 import * as m from "motion/react-m";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
-import { isMobileAtom, keyboardVisibleAtom } from "@/atoms/atomStore";
 import { Button } from "@/components/shared/ui/button";
 import { CheckIcon } from "lucide-react";
 import {
@@ -23,7 +21,6 @@ import { Input } from "@/components/shared/ui/input";
 import { Separator } from "@/components/shared/ui/separator";
 import { Spinner } from "@/components/shared/ui/spinner";
 import { Textarea } from "@/components/shared/ui/textarea";
-import { cn } from "@/lib/utils/general";
 import {
   contactFormSchema,
   type ContactFormValues,
@@ -34,10 +31,6 @@ const ContactForm = () => {
   const [submitStatus, setSubmitStatus] = useState<
     "idle" | "success" | "error"
   >("idle");
-  const isMobile = useAtomValue(isMobileAtom);
-  const keyboardVisible = useAtomValue(keyboardVisibleAtom);
-  const keyboardActive = isMobile && keyboardVisible;
-
   const form = useForm<ContactFormValues>({
     resolver: zodResolver(contactFormSchema),
     defaultValues: {
@@ -97,12 +90,7 @@ const ContactForm = () => {
   return (
     <>
       <LazyMotion features={domAnimation}>
-        <div
-          className={cn(
-            "flex flex-col items-center justify-start h-full w-full px-2 pt-2 gap-2 overflow-y-auto",
-            keyboardActive && "keyboard-adjusted",
-          )}
-        >
+        <div className="flex flex-col items-center justify-start h-full w-full px-2 pt-2 gap-2 overflow-y-auto">
           <m.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}

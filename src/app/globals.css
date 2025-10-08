@@ -313,6 +313,13 @@
 }
 
 @layer utilities {
+.face-content {
+  max-height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
 .scrollbar-hide {
   scrollbar-width: none;
   -ms-overflow-style: none;
