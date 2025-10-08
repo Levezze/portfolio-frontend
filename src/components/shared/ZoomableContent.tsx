@@ -2,6 +2,7 @@
 
 import type React from "react";
 import { type ReactNode, useRef, useState } from "react";
+import { viewportHeightAtom } from "@/atoms/atomStore";
 import { cn } from "@/lib/utils/general";
 
 interface ZoomableContentProps {
@@ -132,12 +133,14 @@ export const ZoomableContent = ({
       className={cn(
         "w-full h-full flex items-center justify-center overflow-hidden select-none",
         getCursor(),
-        className,
+        className
       )}
     >
       <div
         style={{
-          transform: `scale(${scale}) translate(${position.x / scale}px, ${position.y / scale}px)`,
+          transform: `scale(${scale}) translate(${position.x / scale}px, ${
+            position.y / scale
+          }px)`,
           transition: isDragging ? "none" : "transform 0.3s ease-out",
         }}
         className="flex items-center justify-center"

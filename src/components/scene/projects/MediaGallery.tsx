@@ -74,7 +74,6 @@ export const MediaGallery = ({ items }: { items: MediaItem[] }) => {
 const MediaDialog = ({ item, idx }: { item: MediaItem; idx: number }) => {
   const [isOpen, setIsOpen] = useState(false);
   const pushCallback = useSetAtom(pushNavigationCallbackAtom);
-
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
     if (open) {
@@ -125,7 +124,7 @@ const MediaDialog = ({ item, idx }: { item: MediaItem; idx: number }) => {
             {item.mediaType === "video" ? "Video Player" : "Image Viewer"}
           </DialogTitle>
         </VisuallyHidden>
-        <div className="w-full h-full flex items-center justify-center">
+        <div className="w-full h-[100dvh] flex items-center justify-center">
           {item.mediaType === "video" ? (
             <VideoPlayer className="w-full max-w-full max-h-full aspect-video">
               <VideoPlayerContent
@@ -151,7 +150,7 @@ const MediaDialog = ({ item, idx }: { item: MediaItem; idx: number }) => {
                 alt={`Project media ${idx + 1}`}
                 draggable={false}
                 onDragStart={(e) => e.preventDefault()}
-                className="max-w-full max-h-[85vh] object-contain"
+                className="max-w-full max-h-[85dvh] object-contain"
               />
             </ZoomableContent>
           )}
