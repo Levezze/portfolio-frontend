@@ -159,32 +159,30 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
         <VisuallyHidden>
           <DialogTitle>Resume PDF Viewer</DialogTitle>
         </VisuallyHidden>
-        <div className="w-full h-full flex items-center justify-center">
-          <div className="flex flex-col items-center gap-4 max-h-full">
-            <ZoomableContent alwaysDraggable>
-              <Document
-                file={url}
-                loading={
-                  <div className="flex text-center h-full justify-center items-center p-4 text-muted-foreground">
-                    Loading PDF...
-                  </div>
-                }
-                error={
-                  <div className="flex text-center h-full justify-center items-center p-4 text-muted-foreground">
-                    Failed to load PDF.
-                  </div>
-                }
-              >
-                <Page
-                  pageNumber={pageNumber}
-                  devicePixelRatio={2.5}
-                  renderTextLayer={true}
-                  renderAnnotationLayer={true}
-                  className="max-w-full max-h-[85vh] object-contain"
-                />
-              </Document>
-            </ZoomableContent>
-          </div>
+        <div className="w-full h-full flex items-center justify-center overflow-hidden">
+          <ZoomableContent alwaysDraggable>
+            <Document
+              file={url}
+              loading={
+                <div className="flex text-center h-full justify-center items-center p-4 text-muted-foreground">
+                  Loading PDF...
+                </div>
+              }
+              error={
+                <div className="flex text-center h-full justify-center items-center p-4 text-muted-foreground">
+                  Failed to load PDF.
+                </div>
+              }
+            >
+              <Page
+                pageNumber={pageNumber}
+                devicePixelRatio={2.5}
+                renderTextLayer={true}
+                renderAnnotationLayer={true}
+                className="max-w-full max-h-[85vh] object-contain"
+              />
+            </Document>
+          </ZoomableContent>
         </div>
       </DialogContent>
     </Dialog>
