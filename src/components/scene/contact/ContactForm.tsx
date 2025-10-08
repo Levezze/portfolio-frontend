@@ -2,11 +2,13 @@
 
 import emailjs from "@emailjs/browser";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useAtomValue } from "jotai";
 import { domAnimation, LazyMotion } from "motion/react";
 import * as m from "motion/react-m";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 
+import { isMobileAtom, keyboardVisibleAtom } from "@/atoms/atomStore";
 import { Button } from "@/components/shared/ui/button";
 import { CheckIcon } from "lucide-react";
 import {
@@ -25,8 +27,13 @@ import {
   contactFormSchema,
   type ContactFormValues,
 } from "@/lib/api/schemas/contact";
+import { cn } from "@/lib/utils/general";
 
 const ContactForm = () => {
+  const isMobile = useAtomValue(isMobileAtom);
+  const keyboardVisible = useAtomValue(keyboardVisibleAtom);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<
     "idle" | "success" | "error"
@@ -43,6 +50,31 @@ const ContactForm = () => {
     reValidateMode: "onChange",
     delayError: 1000,
   });
+
+  // Scroll focused input into view when keyboard appears on mobile
+  useEffect(() => {
+    if (!isMobile) return;
+
+    const handleFocus = (e: FocusEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") {
+        // Small delay to ensure keyboard is fully visible and padding is applied
+        setTimeout(() => {
+          target.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+            inline: "nearest",
+          });
+        }, 350);
+      }
+    };
+
+    const wrapper = wrapperRef.current;
+    if (wrapper) {
+      wrapper.addEventListener("focusin", handleFocus);
+      return () => wrapper.removeEventListener("focusin", handleFocus);
+    }
+  }, [isMobile]);
 
   const onSubmit = async (data: ContactFormValues) => {
     setIsSubmitting(true);
@@ -90,7 +122,13 @@ const ContactForm = () => {
   return (
     <>
       <LazyMotion features={domAnimation}>
-        <div className="flex flex-col items-center justify-start h-full w-full px-2 pt-2 gap-2 overflow-y-auto">
+        <div
+          ref={wrapperRef}
+          className={cn(
+            "flex flex-col items-center justify-start h-full w-full px-2 pt-2 gap-2 overflow-y-auto",
+            isMobile && keyboardVisible && "pb-[60dvh]"
+          )}
+        >
           <m.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
