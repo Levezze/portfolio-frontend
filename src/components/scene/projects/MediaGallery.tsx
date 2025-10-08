@@ -151,7 +151,7 @@ const MediaDialog = ({ item, idx }: { item: MediaItem; idx: number }) => {
                 alt={`Project media ${idx + 1}`}
                 draggable={false}
                 onDragStart={(e) => e.preventDefault()}
-                className="max-w-full max-h-[85vh] object-contain"
+                className="max-w-full max-h-[85dvh] object-contain"
               />
             </ZoomableContent>
           )}

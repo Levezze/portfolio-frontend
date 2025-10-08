@@ -130,14 +130,16 @@ export const ZoomableContent = ({
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       className={cn(
-        "w-full h-full flex items-center justify-center overflow-hidden select-none",
+        "w-full h-[100dvh] flex items-center justify-center overflow-hidden select-none",
         getCursor(),
-        className,
+        className
       )}
     >
       <div
         style={{
-          transform: `scale(${scale}) translate(${position.x / scale}px, ${position.y / scale}px)`,
+          transform: `scale(${scale}) translate(${position.x / scale}px, ${
+            position.y / scale
+          }px)`,
           transition: isDragging ? "none" : "transform 0.3s ease-out",
         }}
         className="flex items-center justify-center"
