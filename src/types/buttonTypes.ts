@@ -5,6 +5,7 @@ export interface ButtonFrameProps {
   variant?: "default" | "inverse";
   classNameAdditional?: string;
   orientation?: "horizontal" | "vertical";
+  border?: boolean;
 }
 
 export interface LinkButtonProps {
