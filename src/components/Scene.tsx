@@ -25,14 +25,27 @@ export const Scene = () => {
   const [contextLost, setContextLost] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const hasSuccessfullyLoaded = useRef(false);
   const maxRetries = 3;
 
-  // WebGL context event handlers
+  // Mark scene as successfully loaded after initial render
+  useEffect(() => {
+    if (isLoaded && !hasSuccessfullyLoaded.current) {
+      hasSuccessfullyLoaded.current = true;
+    }
+  }, [isLoaded]);
+
+  // WebGL context event handlers - attach after Canvas is created
   useEffect(() => {
     const handleContextLost = (event: Event) => {
       event.preventDefault();
-      console.warn("WebGL context lost, attempting recovery...");
-      setContextLost(true);
+      // Only show recovery UI if context is lost AFTER successful initial load
+      if (hasSuccessfullyLoaded.current) {
+        console.warn("WebGL context lost event fired, attempting recovery...");
+        setContextLost(true);
+      } else {
+        console.log("WebGL context lost during initialization (ignoring)");
+      }
     };
 
     const handleContextRestored = () => {
@@ -41,39 +54,48 @@ export const Scene = () => {
       setRetryCount(0);
     };
 
-    // Find canvas element and attach listeners
-    const canvas = document.querySelector("canvas");
-    if (canvas) {
-      canvasRef.current = canvas;
-      canvas.addEventListener("webglcontextlost", handleContextLost);
-      canvas.addEventListener("webglcontextrestored", handleContextRestored);
+    // Wait for canvas to be available in the DOM
+    const attachListeners = () => {
+      const canvas = document.querySelector("canvas");
+      if (canvas && !canvasRef.current) {
+        canvasRef.current = canvas;
+        canvas.addEventListener("webglcontextlost", handleContextLost);
+        canvas.addEventListener("webglcontextrestored", handleContextRestored);
+      }
+    };
 
-      return () => {
-        canvas.removeEventListener("webglcontextlost", handleContextLost);
-        canvas.removeEventListener(
-          "webglcontextrestored",
-          handleContextRestored,
+    // Try immediately and with a small delay to ensure Canvas is mounted
+    attachListeners();
+    const timeout = setTimeout(attachListeners, 100);
+
+    return () => {
+      clearTimeout(timeout);
+      if (canvasRef.current) {
+        canvasRef.current.removeEventListener(
+          "webglcontextlost",
+          handleContextLost
         );
-      };
-    }
+        canvasRef.current.removeEventListener(
+          "webglcontextrestored",
+          handleContextRestored
+        );
+      }
+    };
   }, []);
 
   // Auto-retry context recovery
   useEffect(() => {
     if (contextLost && retryCount < maxRetries) {
-      const timeout = setTimeout(
-        () => {
-          console.log(
-            `Retrying WebGL context recovery (attempt ${
-              retryCount + 1
-            }/${maxRetries})`,
-          );
-          setRetryCount((prev) => prev + 1);
-          // Force re-render to attempt context recreation
-          setContextLost(false);
-        },
-        1000 * (retryCount + 1),
-      ); // Exponential backoff
+      const timeout = setTimeout(() => {
+        console.log(
+          `Retrying WebGL context recovery (attempt ${
+            retryCount + 1
+          }/${maxRetries})`
+        );
+        setRetryCount((prev) => prev + 1);
+        // Force re-render to attempt context recreation
+        setContextLost(false);
+      }, 1000 * (retryCount + 1)); // Exponential backoff
 
       return () => clearTimeout(timeout);
     }

@@ -19,7 +19,32 @@ const merriweather = Saira({
 export const metadata: Metadata = {
   title: "Levezze | Portfolio",
   description:
-    "Lev Zhitnik | Full Stack & AI Engineer, Coffee Enthusiast, Former Computational Designer and Architect",
+    "Lev Zhitnik | Full Stack & AI Engineer | Former Computational Designer & Architect",
+  metadataBase: new URL("https://levezze.com"),
+  openGraph: {
+    title: "Levezze | Portfolio",
+    description:
+      "Lev Zhitnik | Full Stack & AI Engineer | Former Computational Designer & Architect",
+    url: "https://levezze.com",
+    siteName: "Levezze Portfolio",
+    type: "website",
+    locale: "en_US",
+    images: [
+      {
+        url: "/levezze-og.png",
+        width: 1200,
+        height: 630,
+        alt: "Levezze Portfolio",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Levezze | Portfolio",
+    description:
+      "Lev Zhitnik | Full Stack & AI Engineer | Former Computational Designer & Architect",
+    images: ["/levezze-og.png"],
+  },
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
@@ -43,7 +68,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${inter.variable} ${merriweather.variable} antialiased bg-background font-inter-regular`}
       >
