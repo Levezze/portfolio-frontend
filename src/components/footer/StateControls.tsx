@@ -7,32 +7,35 @@ import { TooltipButton } from "@/components/shared/TooltipButton";
 interface StateControlsProps {
   variant?: "default" | "inverse";
   orientation?: "horizontal" | "vertical";
+  isMobile?: boolean;
 }
 
 export const StateControls = ({
   variant = "default",
+  isMobile = false,
   orientation = "horizontal",
 }: StateControlsProps) => {
   const [theme, setTheme] = useAtom(lightThemeAtom);
   const [bgMotion, setBgMotion] = useAtom(bgMotionAtom);
 
-  const isMobile = variant === "inverse";
   const iconColorClass = isMobile
     ? "text-foreground"
-    : "text-white dark:text-muted";
+    : "text-secondary-foreground";
+
+  const style = { width: "16px", height: "16px" };
 
   return isMobile ? (
     <div className="flex gap-4 justify-center">
-      <ButtonFrame variant={variant} orientation={orientation}>
+      <ButtonFrame
+        variant={variant}
+        orientation={orientation}
+        border={isMobile ? true : false}
+      >
         <TooltipButton
           tooltip={!isMobile}
           inputIcon={
             <div className={iconColorClass}>
-              {theme ? (
-                <SunIcon style={{ width: "18px", height: "18px" }} />
-              ) : (
-                <MoonIcon style={{ width: "18px", height: "18px" }} />
-              )}
+              {theme ? <SunIcon style={style} /> : <MoonIcon style={style} />}
             </div>
           }
           inputText={isMobile ? (theme ? "Light" : "Dark") : undefined}
@@ -43,12 +46,16 @@ export const StateControls = ({
           size={10}
         />
       </ButtonFrame>
-      <ButtonFrame variant={variant} orientation={orientation}>
+      <ButtonFrame
+        variant={variant}
+        orientation={orientation}
+        border={isMobile ? true : false}
+      >
         <TooltipButton
           tooltip={!isMobile}
           inputIcon={
             <div className={iconColorClass}>
-              <WallpaperIcon style={{ width: "18px", height: "18px" }} />
+              <WallpaperIcon style={style} />
             </div>
           }
           inputText={isMobile ? "Animation" : undefined}
@@ -65,16 +72,16 @@ export const StateControls = ({
       </ButtonFrame>
     </div>
   ) : (
-    <ButtonFrame variant={variant} orientation={orientation}>
+    <ButtonFrame
+      variant={variant}
+      orientation={orientation}
+      border={isMobile ? true : false}
+    >
       <TooltipButton
         tooltip={!isMobile}
         inputIcon={
           <div className={iconColorClass}>
-            {theme ? (
-              <SunIcon style={{ width: "18px", height: "18px" }} />
-            ) : (
-              <MoonIcon style={{ width: "18px", height: "18px" }} />
-            )}
+            {theme ? <SunIcon style={style} /> : <MoonIcon style={style} />}
           </div>
         }
         inputText={isMobile ? (theme ? "Light" : "Dark") : undefined}
@@ -88,7 +95,7 @@ export const StateControls = ({
         tooltip={!isMobile}
         inputIcon={
           <div className={iconColorClass}>
-            <WallpaperIcon style={{ width: "18px", height: "18px" }} />
+            <WallpaperIcon style={style} />
           </div>
         }
         inputText={isMobile ? "Animation" : undefined}

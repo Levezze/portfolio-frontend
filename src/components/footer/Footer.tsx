@@ -52,13 +52,15 @@ export const Footer = () => {
   // mobile:
   const marginPercent = RESPONSIVE_CONFIG.mobile.marginPercentage || 0.15;
   const containerFraction = marginPercent / 2;
-  const drawerButtonColorClass = "text-white dark:text-muted";
+  const drawerButtonColorClass = "text-secondary-foreground dark:text-white";
   const portraitHeight = viewportHeight
     ? `${viewportHeight * containerFraction}px`
     : undefined;
   const landscapeWidth = viewportWidth
     ? `${viewportWidth * containerFraction}px`
     : undefined;
+
+  const style = { width: "16px", height: "16px" };
 
   return (
     <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
@@ -73,12 +75,12 @@ export const Footer = () => {
         >
           <DrawerTrigger asChild>
             <div className="flex justify-center">
-              <ButtonFrame variant="default">
+              <ButtonFrame variant="default" border={false}>
                 <TooltipButton
                   tooltip={false}
                   inputIcon={
                     <div className={drawerButtonColorClass}>
-                      <MenuIcon style={{ width: "18px", height: "18px" }} />
+                      <MenuIcon style={style} />
                     </div>
                   }
                   tooltipText=""
@@ -91,15 +93,13 @@ export const Footer = () => {
             </div>
           </DrawerTrigger>
           <div className="flex justify-center">
-            <ButtonFrame variant="default">
+            <ButtonFrame variant="default" border={false}>
               <TooltipButton
                 tooltip={false}
                 disabled={activeFace === "chat"}
                 inputIcon={
                   <div className={drawerButtonColorClass}>
-                    <MessageSquareTextIcon
-                      style={{ width: "18px", height: "18px" }}
-                    />
+                    <MessageSquareTextIcon style={style} />
                   </div>
                 }
                 tooltipText=""
@@ -120,12 +120,12 @@ export const Footer = () => {
         >
           <DrawerTrigger asChild>
             <div className="flex justify-center w-full">
-              <ButtonFrame variant="default">
+              <ButtonFrame variant="default" border={false}>
                 <TooltipButton
                   tooltip={false}
                   inputIcon={
                     <div className={drawerButtonColorClass}>
-                      <MenuIcon style={{ width: "18px", height: "18px" }} />
+                      <MenuIcon style={style} />
                     </div>
                   }
                   tooltipText=""
@@ -138,15 +138,13 @@ export const Footer = () => {
             </div>
           </DrawerTrigger>
           <div className="flex justify-center w-full">
-            <ButtonFrame variant="default">
+            <ButtonFrame variant="default" border={false}>
               <TooltipButton
                 tooltip={false}
                 disabled={activeFace === "chat"}
                 inputIcon={
                   <div className={drawerButtonColorClass}>
-                    <MessageSquareTextIcon
-                      style={{ width: "18px", height: "18px" }}
-                    />
+                    <MessageSquareTextIcon style={style} />
                   </div>
                 }
                 tooltipText=""
@@ -162,10 +160,10 @@ export const Footer = () => {
       <DrawerContent
         aria-describedby={undefined}
         style={{
-          backgroundColor: cubeColor || "#A8DADC",
+          // backgroundColor: cubeColor || "#A8DADC",
           transition: "background-color 300ms ease-in-out",
         }}
-        className="z-200"
+        className="bg-background z-999"
       >
         <DrawerHeader>
           <DrawerTitle className="text-foreground">
@@ -174,12 +172,13 @@ export const Footer = () => {
         </DrawerHeader>
         <div className="flex flex-col gap-4 p-6 pt-0 overflow-y-auto">
           <Navigation
-            variant="inverse"
+            variant="default"
             orientation={!isMobile ? "horizontal" : "vertical"}
           />
           <StateControls
-            variant="inverse"
+            variant="default"
             orientation={!isMobile ? "horizontal" : "vertical"}
+            isMobile={isMobile}
           />
         </div>
       </DrawerContent>

@@ -26,10 +26,10 @@ import * as m from "motion/react-m";
 import { type FC, useEffect, useRef, useState } from "react";
 import useSWR from "swr";
 import {
-	gimliChoiceAtom,
-	isMobileAtom,
-	keyboardVisibleAtom,
-	pushNavigationCallbackAtom,
+  gimliChoiceAtom,
+  isMobileAtom,
+  keyboardVisibleAtom,
+  pushNavigationCallbackAtom,
 } from "@/atoms/atomStore";
 import { UserMessageAttachments } from "@/components/scene/chat/assistant-ui/attachment";
 import { MarkdownText } from "@/components/scene/chat/assistant-ui/markdown-text";
@@ -119,10 +119,12 @@ export const Thread: FC = () => {
         <LazyMotion features={domAnimation}>
           <MotionConfig reducedMotion="user">
             <ThreadPrimitive.Root className="aui-root aui-thread-root @container flex h-full flex-col bg-background">
-              <ThreadPrimitive.Viewport className={cn(
-                "aui-thread-viewport relative flex flex-1 flex-col overflow-x-auto overflow-y-auto",
-                isMobile && keyboardVisible && "pb-[60dvh]"
-              )}>
+              <ThreadPrimitive.Viewport
+                className={cn(
+                  "aui-thread-viewport relative flex flex-1 flex-col overflow-x-auto overflow-y-auto",
+                  isMobile && keyboardVisible && "pb-[60dvh]"
+                )}
+              >
                 {chatConfig && <ThreadWelcome config={chatConfig} />}
 
                 <ThreadPrimitive.Messages
@@ -251,7 +253,7 @@ const ThreadWelcome: FC<{ config: ChatConfig }> = ({ config }) => {
               {
                 welcome_messages.filter(
                   (message: WelcomeMessage) =>
-                    message.message_type === "primary",
+                    message.message_type === "primary"
                 )[0]?.message_text
               }
             </m.div>
@@ -265,7 +267,7 @@ const ThreadWelcome: FC<{ config: ChatConfig }> = ({ config }) => {
               {
                 welcome_messages.filter(
                   (message: WelcomeMessage) =>
-                    message.message_type === "secondary",
+                    message.message_type === "secondary"
                 )[0]?.message_text
               }
             </m.div>
@@ -275,21 +277,25 @@ const ThreadWelcome: FC<{ config: ChatConfig }> = ({ config }) => {
               exit={{ opacity: 0, y: 10 }}
               transition={{ delay: 0.2 }}
             >
-              <ButtonFrame variant="inverse" classNameAdditional="px-2">
+              <ButtonFrame
+                variant="default"
+                classNameAdditional="px-2 bg-foreground border-muted-foreground"
+                border={false}
+              >
                 <LinkButton
-                  className="text-foreground color-foreground size-4"
+                  className="text-background color-foreground size-4"
                   icon="linkedin"
                   linkUrl="https://www.linkedin.com/in/lev-zhitnik/"
                   tooltipText="LinkedIn profile"
                 />
                 <LinkButton
-                  className="text-foreground color-foreground size-4"
+                  className="text-background color-foreground size-4"
                   icon="github"
                   linkUrl="https://github.com/Levezze"
                   tooltipText="GitHub profile"
                 />
                 <LinkButton
-                  className="text-foreground color-foreground size-5"
+                  className="text-background color-foreground size-5"
                   icon="email"
                   linkUrl="mailto:contact@levezze.com"
                   tooltipText="Email me"
@@ -395,7 +401,7 @@ const Composer: FC<{ chatConfig: ChatConfig | null; isLoading: boolean }> = ({
                 text={
                   chatConfig.welcome_messages.filter(
                     (message: WelcomeMessage) =>
-                      message.message_type === "assistant",
+                      message.message_type === "assistant"
                   )[0]?.message_text as string
                 }
               />
@@ -412,7 +418,6 @@ const Composer: FC<{ chatConfig: ChatConfig | null; isLoading: boolean }> = ({
           <ComposerAction />
         </ComposerPrimitive.Root>
       </div>
-
     </>
   );
 };
@@ -610,7 +615,7 @@ const BranchPicker: FC<BranchPickerPrimitive.Root.Props> = ({
       hideWhenSingleBranch
       className={cn(
         "aui-branch-picker-root mr-2 -ml-2 inline-flex items-center text-xs text-muted-foreground font-inter",
-        className,
+        className
       )}
       {...rest}
     >

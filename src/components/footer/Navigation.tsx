@@ -32,10 +32,18 @@ export const Navigation = ({
 
   // Color scheme based on variant
   const iconColorClass =
-    variant === "inverse" ? "text-foreground" : "text-white dark:text-muted";
+    variant === "inverse"
+      ? "text-white dark:text-muted"
+      : "text-secondary-foreground";
+
+  const style = { width: "16px", height: "16px" };
 
   return (
-    <ButtonFrame variant={variant} orientation={orientation}>
+    <ButtonFrame
+      variant={variant}
+      orientation={orientation}
+      border={isMobile ? true : false}
+    >
       <div
         className={`${
           isMobile
@@ -48,9 +56,7 @@ export const Navigation = ({
           disabled={activeFace === "chat"}
           inputIcon={
             <div className={iconColorClass}>
-              <MessageSquareTextIcon
-                style={{ width: "18px", height: "18px" }}
-              />
+              <MessageSquareTextIcon style={style} />
             </div>
           }
           inputText={isMobile ? "Chat & Homepage" : undefined}
@@ -71,7 +77,7 @@ export const Navigation = ({
           disabled={activeFace === "blog"}
           inputIcon={
             <div className={iconColorClass}>
-              <CircleUserIcon style={{ width: "18px", height: "18px" }} />
+              <CircleUserIcon style={style} />
             </div>
           }
           inputText={isMobile ? "Blog" : undefined}
@@ -92,7 +98,7 @@ export const Navigation = ({
           disabled={activeFace === "projects"}
           inputIcon={
             <div className={iconColorClass}>
-              <FolderGit2Icon style={{ width: "18px", height: "18px" }} />
+              <FolderGit2Icon style={style} />
             </div>
           }
           inputText={isMobile ? "Projects Gallery" : undefined}
@@ -113,7 +119,7 @@ export const Navigation = ({
           disabled={activeFace === "contact"}
           inputIcon={
             <div className={iconColorClass}>
-              <MailIcon style={{ width: "18px", height: "18px" }} />
+              <MailIcon style={style} />
             </div>
           }
           inputText={isMobile ? "Contact" : undefined}
@@ -134,7 +140,7 @@ export const Navigation = ({
           disabled={activeFace === "resume"}
           inputIcon={
             <div className={iconColorClass}>
-              <FileUserIcon style={{ width: "18px", height: "18px" }} />
+              <FileUserIcon style={style} />
             </div>
           }
           inputText={isMobile ? "Resume" : undefined}
