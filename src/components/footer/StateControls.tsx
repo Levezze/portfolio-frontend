@@ -16,7 +16,7 @@ export const StateControls = ({
   orientation = "horizontal",
 }: StateControlsProps) => {
   const [theme, setTheme] = useAtom(lightThemeAtom);
-  const [bgMotion, setBgMotion] = useAtom(bgMotionAtom);
+  // const [bgMotion, setBgMotion] = useAtom(bgMotionAtom);
 
   const iconColorClass = isMobile
     ? "text-foreground"
@@ -34,11 +34,15 @@ export const StateControls = ({
         <TooltipButton
           tooltip={!isMobile}
           inputIcon={
-            <div className={iconColorClass}>
+            <div
+              className={"flex items-center justify-center" + iconColorClass}
+            >
               {theme ? <SunIcon style={style} /> : <MoonIcon style={style} />}
             </div>
           }
-          inputText={isMobile ? (theme ? "Light" : "Dark") : undefined}
+          inputText={
+            isMobile ? (theme ? "Dark Theme" : "Light Theme") : undefined
+          }
           tooltipText={theme ? "Dark Theme" : "Light Theme"}
           handleClick={() => setTheme(!theme)}
           state={theme}
@@ -46,7 +50,7 @@ export const StateControls = ({
           size={10}
         />
       </ButtonFrame>
-      <ButtonFrame
+      {/* <ButtonFrame
         variant={variant}
         orientation={orientation}
         border={isMobile ? true : false}
@@ -54,7 +58,7 @@ export const StateControls = ({
         <TooltipButton
           tooltip={!isMobile}
           inputIcon={
-            <div className={iconColorClass}>
+            <div className={"flex items-center justify-center" + iconColorClass}>
               <WallpaperIcon style={style} />
             </div>
           }
@@ -69,7 +73,7 @@ export const StateControls = ({
           round={!isMobile}
           size={10}
         />
-      </ButtonFrame>
+      </ButtonFrame> */}
     </div>
   ) : (
     <ButtonFrame
@@ -80,21 +84,23 @@ export const StateControls = ({
       <TooltipButton
         tooltip={!isMobile}
         inputIcon={
-          <div className={iconColorClass}>
+          <div className={"flex items-center justify-center" + iconColorClass}>
             {theme ? <SunIcon style={style} /> : <MoonIcon style={style} />}
           </div>
         }
-        inputText={isMobile ? (theme ? "Light" : "Dark") : undefined}
+        inputText={
+          isMobile ? (theme ? "Dark Theme" : "Light Theme") : undefined
+        }
         tooltipText={theme ? "Dark Theme" : "Light Theme"}
         handleClick={() => setTheme(!theme)}
         state={theme}
         round={!isMobile}
         size={10}
       />
-      <TooltipButton
+      {/* <TooltipButton
         tooltip={!isMobile}
         inputIcon={
-          <div className={iconColorClass}>
+          <div className={"flex items-center justify-center" + iconColorClass}>
             <WallpaperIcon style={style} />
           </div>
         }
@@ -106,7 +112,7 @@ export const StateControls = ({
         state={bgMotion}
         round={!isMobile}
         size={10}
-      />
+      /> */}
     </ButtonFrame>
   );
 };
