@@ -122,7 +122,7 @@ export const Thread: FC = () => {
               <ThreadPrimitive.Viewport
                 className={cn(
                   "aui-thread-viewport relative flex flex-1 flex-col overflow-x-auto overflow-y-auto",
-                  isMobile && keyboardVisible && "pb-[60dvh]"
+                  isMobile && keyboardVisible && "pb-[40dvh]"
                 )}
               >
                 {chatConfig && <ThreadWelcome config={chatConfig} />}
@@ -367,11 +367,10 @@ const ThreadWelcomeSuggestions: FC<{ suggestions: any[] }> = ({
             <Button
               variant="ghost"
               className="aui-thread-welcome-suggestion w-full h-auto hover:bg-accent/90 flex flex-col items-start justify-around gap-0.5 px-6 rounded-full cursor-pointer [@media(max-width:600px)_or_(max-height:600px)]:gap-0"
-              // className="aui-thread-welcome-suggestion rounded-none h-auto w-full flex-1 flex-wrap items-start justify-start gap-0 border-none px-5 py-3 text-left text-sm @md:flex-col dark:hover:bg-accent/60 dark:text-background cursor-pointer"
               aria-label={suggestedAction.action}
               matchBgColor={true}
             >
-              <span className="aui-thread-welcome-suggestion-text-1 text-base font-inter font-normal text-background [@media(max-width:600px)_or_(max-height:600px)]:text-sm m-0 p-0">
+              <span className="aui-thread-welcome-suggestion-text-1 text-base font-inter font-normal text-foreground dark:text-background [@media(max-width:600px)_or_(max-height:600px)]:text-sm m-0 p-0">
                 {suggestedAction.title}
               </span>
               <span className="aui-thread-welcome-suggestion-text-2 text-md font-inter font-light text-muted-foreground dark:text-muted">
@@ -389,6 +388,22 @@ const Composer: FC<{ chatConfig: ChatConfig | null; isLoading: boolean }> = ({
   chatConfig,
   isLoading,
 }) => {
+  const isMobile = useAtomValue(isMobileAtom);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (!isMobile) return;
+
+    // If Enter pressed without Shift, blur after send
+    if (e.key === "Enter" && !e.shiftKey) {
+      setTimeout(() => {
+        const input = document.querySelector('.aui-composer-input') as HTMLElement;
+        if (input) {
+          input.blur();
+        }
+      }, 0);
+    }
+  };
+
   return (
     <>
       <div className="aui-composer-wrapper sticky bottom-0 mx-auto flex w-full max-w-[var(--thread-max-width)] flex-col overflow-visible rounded-t-md bg-background pb-4 md:px-4 md:pb-6 mobile-landscape:p-0">
@@ -414,6 +429,7 @@ const Composer: FC<{ chatConfig: ChatConfig | null; isLoading: boolean }> = ({
             className="aui-composer-input flex font-inter items-center justify-center mb-1 h-16 w-full resize-none bg-transparent px-3.5 pt-1.5 pb-2 text-base outline-none placeholder:text-muted-foreground focus:outline-primary"
             rows={1}
             aria-label="Message input"
+            onKeyDown={handleKeyDown}
           />
           <ComposerAction />
         </ComposerPrimitive.Root>
@@ -423,6 +439,29 @@ const Composer: FC<{ chatConfig: ChatConfig | null; isLoading: boolean }> = ({
 };
 
 const ComposerAction: FC = () => {
+  const isMobile = useAtomValue(isMobileAtom);
+
+  const handlePreventBlur = (e: React.PointerEvent) => {
+    if (!isMobile) return;
+
+    // Prevent input from blurring when button is tapped
+    // This prevents layout shift from padding removal during tap
+    e.preventDefault();
+  };
+
+  const handleSendClick = () => {
+    if (!isMobile) return;
+
+    // Blur the input after the send action is triggered
+    // Use setTimeout(0) to ensure the send happens first
+    setTimeout(() => {
+      const input = document.querySelector('.aui-composer-input') as HTMLElement;
+      if (input) {
+        input.blur();
+      }
+    }, 0);
+  };
+
   return (
     <div className="aui-composer-action-wrapper absolute bottom-1 right-2 mb-1 flex items-center ml-auto">
       <ThreadPrimitive.If running={false}>
@@ -434,6 +473,8 @@ const ComposerAction: FC = () => {
             variant="default"
             size="icon"
             className="aui-composer-send size-[34px] rounded-full p-1"
+            onPointerDown={handlePreventBlur}
+            onClick={handleSendClick}
             aria-label="Send message"
           >
             <ArrowUpIcon className="aui-composer-send-icon size-5" />
