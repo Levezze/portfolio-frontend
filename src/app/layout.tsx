@@ -3,6 +3,7 @@ import { Saira } from "next/font/google";
 import { GlobalNavigationManager } from "@/components/GlobalNavigationManager";
 import { ThemeWrapper } from "@/components/ThemeWrapper";
 import "./globals.css";
+import Script from "next/script";
 
 const inter = Saira({
   variable: "--font-inter",
@@ -69,6 +70,20 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-K4FR2L92KD"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-K4FR2L92KD');
+          `}
+        </Script>
+      </head>
       <body
         className={`${inter.variable} ${merriweather.variable} antialiased bg-background font-inter-regular`}
       >
