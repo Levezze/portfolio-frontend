@@ -2,7 +2,7 @@
 import { AssistantRuntimeProvider, useLocalRuntime } from "@assistant-ui/react";
 import type { ReactNode } from "react";
 import { createWebSocketAdapter } from "@/lib/api/adapters/webSocketAdapter";
-import { NavigationToolUI } from "./ToolExecutor";
+import { DownloadToolUI, NavigationToolUI } from "./ToolExecutor";
 
 interface MyRuntimeProviderProps {
   children: ReactNode;
@@ -18,6 +18,7 @@ export function MyRuntimeProvider({ children }: MyRuntimeProviderProps) {
   return (
     <AssistantRuntimeProvider runtime={runtime}>
       <NavigationToolUI />
+      <DownloadToolUI />
       {children}
     </AssistantRuntimeProvider>
   );
