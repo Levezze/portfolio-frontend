@@ -402,7 +402,7 @@ const Composer: FC<{ chatConfig: ChatConfig | null; isLoading: boolean }> = ({
   const isMobile = useAtomValue(isMobileAtom);
 
   // Security hooks
-  const MAX_LENGTH = 2000;
+  const MAX_LENGTH = 1000;
   const { canSend, remainingTime, consumeToken } = useRateLimiter(5, 60000); // 5 messages per minute
   const { sanitizePaste, getErrors } = useInputValidation(MAX_LENGTH);
 

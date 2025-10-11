@@ -19,11 +19,11 @@ const ALLOWED_CHARS_REGEX = /^[a-zA-Z0-9\s.,!?;:'"()\-@#$%&*+=/_\n\t]*$/;
 
 // Dangerous pattern detection
 const DANGEROUS_PATTERNS = [
-  /<script[\s\S]*?>[\s\S]*?<\/script>/gi, // Script tags
-  /<iframe[\s\S]*?>/gi, // Iframes
-  /javascript:/gi, // JavaScript protocol
-  /on\w+\s*=/gi, // Event handlers (onclick, onerror, etc.)
-  /<\/?\w+[^>]*>/g, // Any HTML tags
+  /<script[\s\S]*?>[\s\S]*?<\/script>/i, // Script tags
+  /<iframe[\s\S]*?>/i, // Iframes
+  /javascript:/i, // JavaScript protocol
+  /on\w+\s*=/i, // Event handlers (onclick, onerror, etc.)
+  /<\/?\w+[^>]*>/, // Any HTML tags
 ];
 
 /**
@@ -36,7 +36,7 @@ const DANGEROUS_PATTERNS = [
  *
  * @example
  * const { isValid, validateCharacters, sanitizePaste } =
- *   useInputValidation(2000);
+ *   useInputValidation(1000);
  */
 export function useInputValidation(maxLength: number): InputValidationHook {
   /**
@@ -65,7 +65,9 @@ export function useInputValidation(maxLength: number): InputValidationHook {
 
       // Check length
       if (text.length > maxLength) {
-        errors.push(`Message too long. Maximum ${maxLength} characters allowed.`);
+        errors.push(
+          `Message too long. Maximum ${maxLength} characters allowed.`
+        );
       }
 
       return {

@@ -4,6 +4,12 @@ A 3D interactive portfolio application featuring a rotating cube with HTML faces
 
 ---
 
+## Agent Workflow
+
+- Use `sequential-thinking` MCP for important, difficult or large tasks
+- Use `claude-context` for gathering context & file searches
+- Always use the /add-commit action via the `git-master` subagent for anything commit related
+
 ## Tech Stack
 
 ### pnpm!
