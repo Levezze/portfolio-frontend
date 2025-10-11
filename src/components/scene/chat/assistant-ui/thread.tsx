@@ -7,6 +7,7 @@ import {
   MessagePrimitive,
   ThreadPrimitive,
   useAssistantRuntime,
+  useComposer,
   useThread,
 } from "@assistant-ui/react";
 import { useAtomValue, useSetAtom } from "jotai";
@@ -55,6 +56,11 @@ import type { ChatConfig, WelcomeMessage } from "@/lib/api/schemas/chat";
 import { getChatConfig } from "@/lib/api/services/chatService";
 import { cn } from "@/lib/utils/general";
 import { useAnalytics } from "@/hooks/useAnalytics";
+import { useRateLimiter } from "@/hooks/useRateLimiter";
+import { useInputValidation } from "@/hooks/useInputValidation";
+import { CharacterCounter } from "./CharacterCounter";
+import { RateLimitWarning } from "./RateLimitWarning";
+import { ValidationError } from "./ValidationError";
 
 const ChatBackButton: FC = () => {
   const runtime = useAssistantRuntime();
@@ -395,19 +401,65 @@ const Composer: FC<{ chatConfig: ChatConfig | null; isLoading: boolean }> = ({
 }) => {
   const isMobile = useAtomValue(isMobileAtom);
 
+  // Security hooks
+  const MAX_LENGTH = 2000;
+  const { canSend, remainingTime, consumeToken } = useRateLimiter(5, 60000); // 5 messages per minute
+  const { sanitizePaste, getErrors } = useInputValidation(MAX_LENGTH);
+
+  // State for validation feedback
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (!isMobile) return;
 
     // If Enter pressed without Shift, blur after send
     if (e.key === "Enter" && !e.shiftKey) {
       setTimeout(() => {
-        const input = document.querySelector('.aui-composer-input') as HTMLElement;
+        const input = document.querySelector(
+          ".aui-composer-input"
+        ) as HTMLElement;
         if (input) {
           input.blur();
         }
       }, 0);
     }
   };
+
+  // Handle paste events - sanitize HTML
+  const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const pastedText = e.clipboardData?.getData("text/plain");
+    if (!pastedText) return;
+
+    const cleaned = sanitizePaste(pastedText);
+
+    // If cleaned text differs from original, prevent default and insert cleaned
+    if (cleaned !== pastedText) {
+      e.preventDefault();
+      const target = e.target as HTMLTextAreaElement;
+      const start = target.selectionStart || 0;
+      const end = target.selectionEnd || 0;
+      const currentValue = target.value;
+      const newValue =
+        currentValue.substring(0, start) +
+        cleaned +
+        currentValue.substring(end);
+
+      // Manually update the input value
+      target.value = newValue;
+      target.setSelectionRange(start + cleaned.length, start + cleaned.length);
+
+      // Trigger input event to update @assistant-ui state
+      target.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+  };
+
+  // Validate input on change
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const errors = getErrors(e.target.value);
+    setValidationErrors(errors);
+  };
+
+  const text = useComposer((state) => state.text) || "";
 
   return (
     <>
@@ -428,22 +480,49 @@ const Composer: FC<{ chatConfig: ChatConfig | null; isLoading: boolean }> = ({
             )}
           </div>
         </ThreadPrimitive.Empty>
+
+        {/* Security warnings - show above composer */}
+        <div className="flex flex-col gap-2 mb-2">
+          {!canSend && <RateLimitWarning remainingTime={remainingTime} />}
+          {validationErrors.length > 0 && (
+            <ValidationError errors={validationErrors} />
+          )}
+        </div>
+
         <ComposerPrimitive.Root className="aui-composer-root relative rounded-[25px] flex w-full flex-col bg-muted px-1 pt-2 dark:border-muted-foreground/15 shadow-inner shadow-muted-foreground/5">
           <ComposerPrimitive.Input
             placeholder="Send a message..."
             className="aui-composer-input flex font-inter items-center justify-center mb-1 h-16 w-full resize-none bg-transparent px-3.5 pt-1.5 pb-2 text-base outline-none placeholder:text-muted-foreground focus:outline-primary"
             rows={1}
+            maxLength={MAX_LENGTH}
             aria-label="Message input"
             onKeyDown={handleKeyDown}
+            onPaste={handlePaste}
+            onChange={handleChange}
           />
-          <ComposerAction />
+          <CharacterCounter value={text} maxLength={MAX_LENGTH} />
+          <ComposerAction
+            canSend={canSend}
+            hasValidationErrors={validationErrors.length > 0}
+            consumeToken={consumeToken}
+          />
         </ComposerPrimitive.Root>
       </div>
     </>
   );
 };
 
-const ComposerAction: FC = () => {
+interface ComposerActionProps {
+  canSend: boolean;
+  hasValidationErrors: boolean;
+  consumeToken: () => boolean;
+}
+
+const ComposerAction: FC<ComposerActionProps> = ({
+  canSend,
+  hasValidationErrors,
+  consumeToken,
+}) => {
   const isMobile = useAtomValue(isMobileAtom);
   const trackEvent = useAnalytics();
 
@@ -456,6 +535,31 @@ const ComposerAction: FC = () => {
   };
 
   const handleSendClick = () => {
+    // Check rate limit before sending
+    if (!canSend) {
+      if (process.env.NODE_ENV === "development") {
+        console.log("[Security] Rate limit exceeded - message blocked");
+      }
+      return;
+    }
+
+    // Check validation before sending
+    if (hasValidationErrors) {
+      if (process.env.NODE_ENV === "development") {
+        console.log("[Security] Validation errors - message blocked");
+      }
+      return;
+    }
+
+    // Consume rate limit token
+    const consumed = consumeToken();
+    if (!consumed) {
+      if (process.env.NODE_ENV === "development") {
+        console.log("[Security] Failed to consume token - message blocked");
+      }
+      return;
+    }
+
     // Track message sent
     trackEvent("chat_message_sent");
 
@@ -464,24 +568,36 @@ const ComposerAction: FC = () => {
     // Blur the input after the send action is triggered
     // Use setTimeout(0) to ensure the send happens first
     setTimeout(() => {
-      const input = document.querySelector('.aui-composer-input') as HTMLElement;
+      const input = document.querySelector(
+        ".aui-composer-input"
+      ) as HTMLElement;
       if (input) {
         input.blur();
       }
     }, 0);
   };
 
+  // Disable send button when rate limited or has validation errors
+  const isDisabled = !canSend || hasValidationErrors;
+
   return (
     <div className="aui-composer-action-wrapper absolute bottom-1 right-2 mb-1 flex items-center ml-auto">
       <ThreadPrimitive.If running={false}>
-        <ComposerPrimitive.Send asChild>
+        <ComposerPrimitive.Send asChild disabled={isDisabled}>
           <TooltipIconButton
-            tooltip="Send message"
+            tooltip={
+              isDisabled
+                ? canSend
+                  ? "Fix validation errors"
+                  : "Rate limit reached"
+                : "Send message"
+            }
             side="bottom"
             type="submit"
             variant="default"
             size="icon"
-            className="aui-composer-send size-[34px] rounded-full p-1"
+            disabled={isDisabled}
+            className="aui-composer-send size-[34px] rounded-full p-1 disabled:opacity-50 disabled:cursor-not-allowed"
             onPointerDown={handlePreventBlur}
             onClick={handleSendClick}
             aria-label="Send message"
