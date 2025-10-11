@@ -2,17 +2,6 @@ import { atom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 import type { PagesType } from "@/lib/api/schemas/tools";
 
-// Declare gtag on window for TypeScript
-declare global {
-  interface Window {
-    gtag?: (
-      command: "event",
-      eventName: string,
-      eventParams?: Record<string, any>
-    ) => void;
-  }
-}
-
 // Visitor
 export const visitorIdAtom = atomWithStorage("visitorId", "");
 
@@ -106,31 +95,6 @@ export const navigateToFaceAtom = atom(
 
     // Always update the face
     set(activeFaceAtom, update.face);
-
-    // Track navigation in Google Analytics (only when face actually changes)
-    if (previousFace !== update.face) {
-      if (
-        typeof window !== "undefined" &&
-        typeof window.gtag === "function"
-      ) {
-        const eventName =
-          update.direction === "forward"
-            ? "face_navigation"
-            : "face_navigation_ai";
-
-        window.gtag("event", eventName, {
-          face_name: update.face,
-          from_face: previousFace,
-        });
-
-        if (process.env.NODE_ENV === "development") {
-          console.log(`[Analytics] ${eventName}:`, {
-            face_name: update.face,
-            from_face: previousFace,
-          });
-        }
-      }
-    }
 
     // Only push to navigation stack on forward navigation (user-initiated)
     if (update.direction === "forward" && previousFace !== update.face) {

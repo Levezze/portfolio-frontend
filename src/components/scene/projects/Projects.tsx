@@ -13,24 +13,16 @@ import {
   DialogTrigger,
 } from "@/components/shared/ui/dialog";
 import { getProjectsGallery } from "@/lib/api/services/projectsService";
-import { useAnalytics } from "@/hooks/useAnalytics";
 import { ProjectView } from "./ProjectView";
 
 const ProjectDialog = ({ project, index }: { project: any; index: number }) => {
   const [_projectView, setProjectView] = useAtom(projectViewAtom);
   const [isOpen, setIsOpen] = useState(false);
   const pushCallback = useSetAtom(pushNavigationCallbackAtom);
-  const trackEvent = useAnalytics();
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
     if (open) {
-      // Track project opened
-      trackEvent("project_opened", {
-        project_title: project.title,
-        project_slug: project.slug,
-      });
-
       // Dialog opened - push callback to close it
       pushCallback({
         callback: () => setIsOpen(false),

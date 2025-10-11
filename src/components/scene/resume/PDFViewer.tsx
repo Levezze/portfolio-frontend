@@ -23,7 +23,6 @@ import {
   TooltipTrigger,
 } from "@/components/shared/ui/tooltip";
 import { ZoomableContent } from "@/components/shared/ZoomableContent";
-import { useAnalytics } from "@/hooks/useAnalytics";
 
 // Import PDF.js styles
 import "react-pdf/dist/Page/AnnotationLayer.css";
@@ -43,24 +42,15 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
   const [pageNumber, setPageNumber] = useState(1);
   const [isOpen, setIsOpen] = useState(false);
   const pushCallback = useSetAtom(pushNavigationCallbackAtom);
-  const trackEvent = useAnalytics();
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
     if (open) {
-      // Track fullscreen opened
-      trackEvent("resume_fullscreen_opened");
-
       pushCallback({
         callback: () => setIsOpen(false),
         label: "Close PDF viewer",
       });
     }
-  };
-
-  const handleDownloadClick = () => {
-    // Track manual download
-    trackEvent("resume_downloaded", { source: "manual" });
   };
 
   // Measure actual container width with ResizeObserver
@@ -147,7 +137,6 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
                   download="Lev_Zhitnik_Resume.pdf"
                   target="_blank"
                   rel="noopener noreferrer"
-                  onClick={handleDownloadClick}
                 >
                   Download
                   <DownloadIcon />

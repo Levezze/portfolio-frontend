@@ -28,13 +28,11 @@ import {
   type ContactFormValues,
 } from "@/lib/api/schemas/contact";
 import { cn } from "@/lib/utils/general";
-import { useAnalytics } from "@/hooks/useAnalytics";
 
 const ContactForm = () => {
   const isMobile = useAtomValue(isMobileAtom);
   const keyboardVisible = useAtomValue(keyboardVisibleAtom);
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const trackEvent = useAnalytics();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<
@@ -115,11 +113,6 @@ const ContactForm = () => {
         },
         publicKey
       );
-
-      // Track successful form submission
-      trackEvent("contact_form_submitted", {
-        has_subject: !!data.subject,
-      });
 
       setSubmitStatus("success");
       form.reset();
