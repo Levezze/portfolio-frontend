@@ -266,7 +266,7 @@ const limiter = useRateLimiter(
 
 ```typescript
 // Change max length
-const validator = useInputValidation(3000); // 3000 characters
+const validator = useInputValidation(1000); // 1000 characters
 ```
 
 ### Modify Character Whitelist
