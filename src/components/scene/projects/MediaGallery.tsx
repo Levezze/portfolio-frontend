@@ -23,6 +23,7 @@ import {
   DialogTrigger,
 } from "@/components/shared/ui/dialog";
 import { ZoomableContent } from "@/components/shared/ZoomableContent";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 interface MediaItem {
   original: string;
@@ -74,9 +75,17 @@ export const MediaGallery = ({ items }: { items: MediaItem[] }) => {
 const MediaDialog = ({ item, idx }: { item: MediaItem; idx: number }) => {
   const [isOpen, setIsOpen] = useState(false);
   const pushCallback = useSetAtom(pushNavigationCallbackAtom);
+  const trackEvent = useAnalytics();
+
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
     if (open) {
+      // Track media viewed
+      trackEvent("project_media_viewed", {
+        media_type: item.mediaType,
+        media_index: idx,
+      });
+
       // Dialog opened - push callback to close it
       pushCallback({
         callback: () => setIsOpen(false),

@@ -54,19 +54,24 @@ import {
 import type { ChatConfig, WelcomeMessage } from "@/lib/api/schemas/chat";
 import { getChatConfig } from "@/lib/api/services/chatService";
 import { cn } from "@/lib/utils/general";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 const ChatBackButton: FC = () => {
   const runtime = useAssistantRuntime();
   const thread = useThread();
   const pushCallback = useSetAtom(pushNavigationCallbackAtom);
   const hasPushedCallbackRef = useRef(false);
+  const trackEvent = useAnalytics();
 
   // Track when thread starts (first message sent) and push navigation callback
   useEffect(() => {
     const hasMessages = thread.messages && thread.messages.length > 0;
 
     if (hasMessages && !hasPushedCallbackRef.current) {
-      // Thread has started - push callback to reset thread
+      // Thread has started - track conversation start
+      trackEvent("chat_conversation_started");
+
+      // Push callback to reset thread
       pushCallback({
         callback: () => runtime.switchToNewThread(),
         label: "Start new chat",
@@ -76,7 +81,7 @@ const ChatBackButton: FC = () => {
       // Thread was reset - allow callback to be pushed again on next thread
       hasPushedCallbackRef.current = false;
     }
-  }, [thread.messages, runtime, pushCallback]);
+  }, [thread.messages, runtime, pushCallback, trackEvent]);
 
   // Only show if thread has messages
   if (!thread.messages || thread.messages.length === 0) {
@@ -440,6 +445,7 @@ const Composer: FC<{ chatConfig: ChatConfig | null; isLoading: boolean }> = ({
 
 const ComposerAction: FC = () => {
   const isMobile = useAtomValue(isMobileAtom);
+  const trackEvent = useAnalytics();
 
   const handlePreventBlur = (e: React.PointerEvent) => {
     if (!isMobile) return;
@@ -450,6 +456,9 @@ const ComposerAction: FC = () => {
   };
 
   const handleSendClick = () => {
+    // Track message sent
+    trackEvent("chat_message_sent");
+
     if (!isMobile) return;
 
     // Blur the input after the send action is triggered
