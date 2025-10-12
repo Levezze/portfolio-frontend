@@ -8,7 +8,7 @@ import {
 import { Canvas } from "@react-three/fiber";
 import { useAtomValue } from "jotai";
 import { useEffect, useRef, useState } from "react";
-import { bgMotionAtom, isLoadedAtom } from "@/atoms/atomStore";
+import { isLoadedAtom } from "@/atoms/atomStore";
 import { useResponsiveFaceSize } from "@/hooks/useResponsiveFaceSize";
 import { BowlGroundPlane } from "./scene/BowlGroundPlane";
 import { CameraController } from "./scene/CameraController";
@@ -19,7 +19,6 @@ export const Scene = () => {
   useResponsiveFaceSize();
 
   const isLoaded = useAtomValue(isLoadedAtom);
-  const bgMotion = useAtomValue(bgMotionAtom);
 
   // WebGL context recovery state
   const [contextLost, setContextLost] = useState(false);
@@ -176,19 +175,14 @@ export const Scene = () => {
         <OrthographicCamera makeDefault position={[0, 0, 100]} zoom={100} />
         <CameraController />
 
-        {bgMotion ? (
-          <Float
-            speed={1}
-            rotationIntensity={1.2}
-            floatIntensity={0.1}
-            floatingRange={[0.1, 1.5]}
-          >
-            <BowlGroundPlane position={bowlPosition} color={"#1c1c1c"} />
-          </Float>
-        ) : (
+        <Float
+          speed={1}
+          rotationIntensity={1.2}
+          floatIntensity={0.1}
+          floatingRange={[0.1, 1.5]}
+        >
           <BowlGroundPlane position={bowlPosition} color={"#1c1c1c"} />
-        )}
-
+        </Float>
         <CubeWithFaces />
 
         <OrbitControls enabled={false} />

@@ -17,20 +17,24 @@ declare global {
 export const visitorIdAtom = atomWithStorage("visitorId", "");
 
 // Gimli-AI
-export const gimliChoiceAtom = atom<number>(() => {
-  const result = Math.ceil(Math.random() * 3);
-  switch (result) {
+export const gimliChoiceAtom = atom<{ choice: number; mood: string }>(() => {
+  const choice = Math.ceil(Math.random() * 3);
+  let mood = "";
+  switch (choice) {
     case 1:
       console.log("Gimli-AI state: Drunk");
+      mood = "Drunk";
       break;
     case 2:
-      console.log("Gimli-AI state: Serious");
+      console.log("Gimli-AI state: Heroic");
+      mood = "Heroic";
       break;
     case 3:
-      console.log("Gimli-AI state: Heroic");
+      console.log("Gimli-AI state: Stoic");
+      mood = "Stoic";
       break;
   }
-  return result;
+  return { choice, mood };
 });
 
 // 3D Scene
@@ -58,7 +62,7 @@ export const pageTransitionManagerAtom = atom(
     currentTimeout = setTimeout(() => {
       set(transitionDurationAtom, SHORT_TRANSITION);
     }, LONG_TRANSITION);
-  },
+  }
 );
 
 // Sizing
@@ -74,7 +78,7 @@ export const isMobileAtom = atom<boolean>(false);
 export const viewportHeightAtom = atom<number>(0);
 export const viewportWidthAtom = atom<number>(0);
 export const viewportOrientationAtom = atom<"portrait" | "landscape">(
-  "portrait",
+  "portrait"
 );
 
 // Mobile Keyboard UX
@@ -100,7 +104,7 @@ export const navigateToFaceAtom = atom(
   (
     get,
     set,
-    update: { face: PagesType; direction: "forward" | "backward" },
+    update: { face: PagesType; direction: "forward" | "backward" }
   ) => {
     const previousFace = get(activeFaceAtom);
 
@@ -109,10 +113,7 @@ export const navigateToFaceAtom = atom(
 
     // Track navigation in Google Analytics (only when face actually changes)
     if (previousFace !== update.face) {
-      if (
-        typeof window !== "undefined" &&
-        typeof window.gtag === "function"
-      ) {
+      if (typeof window !== "undefined" && typeof window.gtag === "function") {
         const eventName =
           update.direction === "forward"
             ? "face_navigation"
@@ -147,7 +148,9 @@ export const navigateToFaceAtom = atom(
 
       if (process.env.NODE_ENV === "development") {
         console.log(
-          `[Navigation] Forward: ${previousFace} → ${update.face} (stack size: ${get(navigationStackAtom).length + 1})`,
+          `[Navigation] Forward: ${previousFace} → ${
+            update.face
+          } (stack size: ${get(navigationStackAtom).length + 1})`
         );
       }
     } else if (update.direction === "backward") {
@@ -155,7 +158,7 @@ export const navigateToFaceAtom = atom(
         console.log(`[Navigation] Backward: → ${update.face} (no stack push)`);
       }
     }
-  },
+  }
 );
 
 // Helper atom to push navigation callbacks (write-only)
@@ -176,14 +179,16 @@ export const pushNavigationCallbackAtom = atom(
       window.history.pushState(
         { navId: `action-${Date.now()}`, managed: true },
         "",
-        window.location.href,
+        window.location.href
       );
     }
 
     if (process.env.NODE_ENV === "development") {
       console.log(
-        `[Navigation] Pushed: ${update.label || "unnamed"} (stack size: ${get(navigationStackAtom).length + 1})`,
+        `[Navigation] Pushed: ${update.label || "unnamed"} (stack size: ${
+          get(navigationStackAtom).length + 1
+        })`
       );
     }
-  },
+  }
 );
