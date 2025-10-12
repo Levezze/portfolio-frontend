@@ -47,7 +47,7 @@ export const Navigation = ({
       <div
         className={`${
           isMobile
-            ? "flex flex-col items-start w-full px-4"
+            ? "flex flex-col items-start w-full"
             : "flex flex-row gap-2 w-fit"
         }`}
       >
@@ -67,32 +67,32 @@ export const Navigation = ({
               setDrawerOpen(false);
             }
           }}
-          state={true}
-          round={true}
+          state={!(activeFace === "chat")}
+          round={isMobile ? false : true}
           size={10}
         />
-        {isMobile && <Separator />}
+        {isMobile && <Separator className="my-1" />}
         <TooltipButton
           tooltip={activeFace !== "blog"}
-          disabled={activeFace === "blog"}
+          disabled={true}
           inputIcon={
             <div className={iconColorClass}>
               <CircleUserIcon style={style} />
             </div>
           }
-          inputText={isMobile ? "Blog" : undefined}
-          tooltipText={"Blog"}
+          inputText={isMobile ? "Blog (Coming Soon)" : undefined}
+          tooltipText={"Blog (Coming Soon)"}
           handleClick={() => {
-            navigateToFace({ face: "blog", direction: "forward" });
-            if (isMobile) {
-              setDrawerOpen(false);
-            }
+            // navigateToFace({ face: "blog", direction: "forward" });
+            // if (isMobile) {
+            //   setDrawerOpen(false);
+            // }
           }}
-          state={true}
-          round={true}
+          state={!(activeFace === "blog")}
+          round={isMobile ? false : true}
           size={10}
         />
-        {isMobile && <Separator />}
+        {isMobile && <Separator className="my-1" />}
         <TooltipButton
           tooltip={activeFace !== "projects"}
           disabled={activeFace === "projects"}
@@ -109,11 +109,11 @@ export const Navigation = ({
               setDrawerOpen(false);
             }
           }}
-          state={true}
-          round={true}
+          state={!(activeFace === "projects")}
+          round={isMobile ? false : true}
           size={10}
         />
-        {isMobile && <Separator />}
+        {isMobile && <Separator className="my-1" />}
         <TooltipButton
           tooltip={activeFace !== "contact"}
           disabled={activeFace === "contact"}
@@ -130,11 +130,11 @@ export const Navigation = ({
               setDrawerOpen(false);
             }
           }}
-          state={true}
-          round={true}
+          state={!(activeFace === "contact")}
+          round={isMobile ? false : true}
           size={10}
         />
-        {isMobile && <Separator />}
+        {isMobile && <Separator className="my-1" />}
         <TooltipButton
           tooltip={activeFace !== "resume"}
           disabled={activeFace === "resume"}
@@ -151,8 +151,8 @@ export const Navigation = ({
               setDrawerOpen(false);
             }
           }}
-          state={true}
-          round={true}
+          state={!(activeFace === "resume")}
+          round={isMobile ? false : true}
           size={10}
         />
       </div>
