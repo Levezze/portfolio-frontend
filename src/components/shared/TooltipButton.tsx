@@ -33,7 +33,7 @@ export const TooltipButton = ({
   state,
 }: TooltipButtonProps) => {
   const style = {
-    width: inputText ? "auto" : `${width || size / 4}rem`,
+    width: inputText ? "100%" : `${width || size / 4}rem`,
     height: `${height || size / 4}rem`,
     borderRadius: `${round ? "50%" : "25px"}`,
     cursor: "pointer",
@@ -50,7 +50,11 @@ export const TooltipButton = ({
           onClick={handleClick}
           disabled={disabled}
         >
-          <div className="flex flex-row gap-2">
+          <div
+            className={`flex flex-row gap-2 ${
+              inputText ? "w-full pl-4 justify-start items-center" : ""
+            }`}
+          >
             {inputIcon ? inputIcon : <></>}
             {inputText ? (
               <span className="text-sm my-auto !text-foreground dark:text-muted pl-2">
