@@ -103,10 +103,10 @@ export const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
               <Page
                 pageNumber={pageNumber}
                 width={pdfWidth}
-                devicePixelRatio={2}
+                devicePixelRatio={3}
                 renderTextLayer={true}
                 renderAnnotationLayer={true}
-                className="shadow-lg my-auto mx-auto"
+                className="shadow-none my-auto mx-auto"
               />
             </Document>
           </div>

@@ -42,7 +42,7 @@ export const MediaGallery = ({ items }: { items: MediaItem[] }) => {
     return 0;
   });
 
-  return (
+  return sortedItems && sortedItems.length > 1 ? (
     <div className="w-full mb-6 pt-4">
       <Carousel
         opts={{
@@ -62,12 +62,16 @@ export const MediaGallery = ({ items }: { items: MediaItem[] }) => {
       >
         <CarouselContent className="-ml-2">
           {sortedItems.map((item, idx) => (
-            <CarouselItem key={item.original} className="pl-2 basis-[90%]">
+            <CarouselItem key={item.original} className="pl-2 basis-[85%]">
               <MediaDialog item={item} idx={idx} />
             </CarouselItem>
           ))}
         </CarouselContent>
       </Carousel>
+    </div>
+  ) : (
+    <div className="w-full mb-6 pt-4">
+      <MediaDialog item={sortedItems[0]} idx={0} />
     </div>
   );
 };

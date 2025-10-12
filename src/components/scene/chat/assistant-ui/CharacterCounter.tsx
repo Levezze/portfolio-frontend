@@ -24,7 +24,7 @@ export function CharacterCounter({ value, maxLength }: CharacterCounterProps) {
   return (
     <div
       className={cn(
-        "absolute bottom-1 right-14 text-xs transition-colors duration-200",
+        "absolute bottom-1 right-14 text-xs transition-colors duration-300 opacity-65",
         colorClass
       )}
       aria-live="polite"

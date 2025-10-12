@@ -229,7 +229,7 @@ const FakeAssistantMessage: FC<{ text: string }> = ({ text }) => {
           <Avatar className="mr-3 mt-1 h-12 w-12 shadow-sm shadow-muted-foreground/10">
             <TooltipTrigger>
               <AvatarImage
-                src={`/gimli-ai/gimli-ai-avatar-${gimliChoice}.webp`}
+                src={`/gimli-ai/gimli-ai-avatar-${gimliChoice.choice}.webp`}
                 alt="GimlAI, Lev's dwarf sidekick"
                 className="object-cover"
               />
@@ -237,7 +237,7 @@ const FakeAssistantMessage: FC<{ text: string }> = ({ text }) => {
             </TooltipTrigger>
           </Avatar>
           <TooltipContent>
-            <p>Gimli-AI, Lev's sidekick</p>
+            <p>{gimliChoice.mood} Gimli-AI</p>
           </TooltipContent>
         </Tooltip>
         <div className="aui-assistant-message-content mx-2 leading-7 break-words text-foreground">
@@ -377,7 +377,7 @@ const ThreadWelcomeSuggestions: FC<{ suggestions: any[] }> = ({
           >
             <Button
               variant="ghost"
-              className="aui-thread-welcome-suggestion w-full h-auto hover:bg-accent/90 flex flex-col items-start justify-around gap-0.5 px-6 rounded-full cursor-pointer [@media(max-width:600px)_or_(max-height:600px)]:gap-0"
+              className="aui-thread-welcome-suggestion w-full h-auto hover:opacity-90 flex flex-col items-start justify-around gap-0.5 px-6 rounded-full cursor-pointer [@media(max-width:600px)_or_(max-height:600px)]:gap-0"
               aria-label={suggestedAction.action}
               matchBgColor={true}
             >
@@ -489,7 +489,7 @@ const Composer: FC<{ chatConfig: ChatConfig | null; isLoading: boolean }> = ({
           )}
         </div>
 
-        <ComposerPrimitive.Root className="aui-composer-root relative rounded-[25px] flex w-full flex-col bg-muted px-1 pt-2 dark:border-muted-foreground/15 shadow-inner shadow-muted-foreground/5">
+        <ComposerPrimitive.Root className="aui-composer-root relative rounded-[25px] flex w-full flex-col bg-muted px-1 py-1 dark:border-muted-foreground/15 shadow-inner shadow-muted-foreground/5">
           <ComposerPrimitive.Input
             placeholder="Send a message..."
             className="aui-composer-input flex font-inter items-center justify-center mb-1 h-16 w-full resize-none bg-transparent px-3.5 pt-1.5 pb-2 text-base outline-none placeholder:text-muted-foreground focus:outline-primary"
@@ -640,7 +640,7 @@ const AssistantMessage: FC = () => {
   return (
     <MessagePrimitive.Root asChild>
       <div
-        className="aui-assistant-message-root relative mx-auto w-full max-w-[var(--thread-max-width)] animate-in py-4 duration-200 fade-in slide-in-from-bottom-1 last:mb-24 font-inter"
+        className="aui-assistant-message-root relative mx-auto w-full max-w-[var(--thread-max-width)] animate-in py-4 md:px-4 duration-200 fade-in slide-in-from-bottom-1 last:mb-24 font-inter"
         data-role="assistant"
       >
         <div className="flex">
@@ -648,7 +648,7 @@ const AssistantMessage: FC = () => {
             <Avatar className="mr-3 mt-1 h-10 w-10 shadow-sm shadow-muted-foreground/10">
               <TooltipTrigger className="flex align-top justify-start">
                 <AvatarImage
-                  src={`/gimli-ai/gimli-ai-avatar-${gimliChoice}.webp`}
+                  src={`/gimli-ai/gimli-ai-avatar-${gimliChoice.choice}.webp`}
                   alt="GimlAI, Lev's dwarf sidekick"
                   className="object-cover"
                 />
@@ -656,7 +656,7 @@ const AssistantMessage: FC = () => {
               </TooltipTrigger>
             </Avatar>
             <TooltipContent>
-              <p>Gimli-AI, Lev's sidekick</p>
+              <p>{gimliChoice.mood} Gimli-AI</p>
             </TooltipContent>
           </Tooltip>
           <div className="aui-assistant-message-content mx-2 leading-7 break-words text-foreground">
@@ -710,7 +710,7 @@ const UserMessage: FC = () => {
   return (
     <MessagePrimitive.Root asChild>
       <div
-        className="aui-user-message-root font-inter mx-auto grid w-full max-w-[var(--thread-max-width)] animate-in auto-rows-auto grid-cols-[minmax(72px,1fr)_auto] gap-y-2 px-2 py-4 duration-200 fade-in slide-in-from-bottom-1 first:mt-3 last:mb-5 [&:where(>*)]:col-start-2"
+        className="aui-user-message-root font-inter mx-auto grid w-full max-w-[var(--thread-max-width)] animate-in auto-rows-auto grid-cols-[minmax(72px,1fr)_auto] gap-y-2 md:px-4 py-4 duration-200 fade-in slide-in-from-bottom-1 first:mt-3 last:mb-5 [&:where(>*)]:col-start-2"
         data-role="user"
       >
         <UserMessageAttachments />

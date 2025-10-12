@@ -1,5 +1,5 @@
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { useAtom, useSetAtom } from "jotai";
+import { useSetAtom } from "jotai";
 import Image from "next/image";
 import { useState } from "react";
 import useSWR from "swr";
@@ -17,7 +17,7 @@ import { useAnalytics } from "@/hooks/useAnalytics";
 import { ProjectView } from "./ProjectView";
 
 const ProjectDialog = ({ project, index }: { project: any; index: number }) => {
-  const [_projectView, setProjectView] = useAtom(projectViewAtom);
+  const setProjectView = useSetAtom(projectViewAtom);
   const [isOpen, setIsOpen] = useState(false);
   const pushCallback = useSetAtom(pushNavigationCallbackAtom);
   const trackEvent = useAnalytics();
@@ -51,19 +51,21 @@ const ProjectDialog = ({ project, index }: { project: any; index: number }) => {
             src={project.thumbnailUrl}
             alt={project.title}
             fill
+            quality={100}
+            sizes="(max-width: 768px) 100vw, 1600px"
             className={`object-cover group-hover:scale-105 transition-transform duration-300`}
           />
           <div
             className={`absolute inset-0 bg-black/0 group-hover:bg-white/20 dark:group-hover:bg-black/20 transition-colors duration-300 pointer-events-none`}
           />
           <div className="absolute inset-0 shadow-[inset_0px_-10px_10px_-10px_rgba(0,0,0,0.05)] pointer-events-none" />
-          <div className="relative w-fit h-full z-10 flex flex-col items-start justify-between p-4 md:p-4">
+          <div className="relative h-full z-10 flex flex-col items-start justify-between p-4 md:p-4">
             <div className="bg-background/80 px-2 py-1 break-words shadow-sm shadow-muted-foreground/5">
               <h1 className="font-merriweather font-medium text-xs lg:text-sm">
                 {project.title}
               </h1>
             </div>
-            <div className="bg-background/80 px-2 py-1 break-words group-hover:opacity-100 opacity-0 transition-all duration-300 shadow-sm shadow-muted-foreground/5">
+            <div className="bg-background/80 px-2 py-1 mx-auto break-words group-hover:opacity-100 opacity-0 transition-all duration-300 shadow-sm shadow-muted-foreground/5">
               <h2 className="font-regular font-inter text-center text-xs lg:text-sm">
                 {project.shortDescription}
               </h2>
@@ -91,7 +93,7 @@ const Projects = () => {
       onError: (err) => {
         console.error("Failed to load projects:", err);
       },
-    },
+    }
   );
 
   if (isLoading) return <Loading />;
