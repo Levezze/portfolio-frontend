@@ -146,7 +146,7 @@ const ContactForm = () => {
           ref={wrapperRef}
           className="flex flex-col items-center justify-start h-full w-full px-2 pt-2 gap-2 overflow-y-auto"
           style={{
-            paddingBottom: isMobile && keyboardVisible ? `${keyboardHeight}px` : '0',
+            paddingBottom: isMobile && keyboardVisible ? `${keyboardHeight}px` : undefined,
           }}
         >
           <m.div

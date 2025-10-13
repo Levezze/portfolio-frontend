@@ -136,7 +136,7 @@ export const Thread: FC = () => {
               <ThreadPrimitive.Viewport
                 className="aui-thread-viewport relative flex flex-1 flex-col overflow-x-auto overflow-y-auto"
                 style={{
-                  paddingBottom: isMobile && keyboardVisible ? `${keyboardHeight}px` : '0',
+                  paddingBottom: isMobile && keyboardVisible ? `${keyboardHeight}px` : undefined,
                 }}
               >
                 {chatConfig && <ThreadWelcome config={chatConfig} />}
