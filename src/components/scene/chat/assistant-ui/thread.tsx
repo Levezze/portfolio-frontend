@@ -229,7 +229,7 @@ const FakeAssistantMessage: FC<{ text: string }> = ({ text }) => {
     >
       <div className="flex">
         <Tooltip>
-          <Avatar className="mr-3 mt-1 h-12 w-12 border shadow-sm shadow-muted-foreground/10">
+          <Avatar className="mr-3 mt-1 h-12 w-12 ">
             <TooltipTrigger>
               <AvatarImage
                 src={`/gimli-ai/gimli-ai-avatar-${gimliChoice.choice}.webp`}
@@ -275,7 +275,7 @@ const ThreadWelcome: FC<{ config: ChatConfig }> = ({ config }) => {
                   <Image
                     src="/images/photo-lev.jpg"
                     alt="Lev Zhitnik"
-                    className="rounded-[25px] object-cover h-full w-full grayscale-15 border shadow-lg shadow-muted-foreground/10 dark:shadow-muted-foreground/2 hover:scale-102 transition-all duration-300 hover:shadow-md hover:animate-jiggle hover:grayscale-0"
+                    className="rounded-[25px] object-cover h-full w-full hover:scale-102 transition-all duration-300 hover:shadow-xl shadow-muted-foreground/30 dark:shadow-none hover:animate-jiggle"
                     unoptimized={true}
                     loading="lazy"
                     fill={true}
@@ -679,7 +679,7 @@ const AssistantMessage: FC = () => {
       >
         <div className="flex">
           <Tooltip>
-            <Avatar className="mr-3 mt-1 h-10 w-10 border shadow-sm shadow-muted-foreground/10">
+            <Avatar className="mr-3 mt-1 h-10 w-10">
               <TooltipTrigger className="flex align-top justify-start">
                 <AvatarImage
                   src={`/gimli-ai/gimli-ai-avatar-${gimliChoice.choice}.webp`}
