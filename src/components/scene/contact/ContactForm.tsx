@@ -145,7 +145,7 @@ const ContactForm = () => {
           ref={wrapperRef}
           className={cn(
             "flex flex-col items-center justify-start h-full w-full px-2 pt-2 gap-2 overflow-y-auto",
-            isMobile && keyboardVisible && "kb-pad kb-extra-contact"
+            isMobile && keyboardVisible && "pb-[60dvh]"
           )}
         >
           <m.div

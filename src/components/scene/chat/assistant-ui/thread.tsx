@@ -26,7 +26,14 @@ import { domAnimation, LazyMotion, MotionConfig } from "motion/react";
 import * as m from "motion/react-m";
 import { type FC, useEffect, useRef, useState } from "react";
 import useSWR from "swr";
-import { gimliChoiceAtom, isMobileAtom, keyboardVisibleAtom, pushNavigationCallbackAtom } from "@/atoms/atomStore";
+import {
+  gimliChoiceAtom,
+  isMobileAtom,
+  keyboardVisibleAtom,
+  viewportHeightAtom,
+  viewportOrientationAtom,
+  pushNavigationCallbackAtom,
+} from "@/atoms/atomStore";
 import { UserMessageAttachments } from "@/components/scene/chat/assistant-ui/attachment";
 import { MarkdownText } from "@/components/scene/chat/assistant-ui/markdown-text";
 import { ToolFallback } from "@/components/scene/chat/assistant-ui/tool-fallback";
@@ -100,6 +107,20 @@ const ChatBackButton: FC = () => {
 export const Thread: FC = () => {
   const isMobile = useAtomValue(isMobileAtom);
   const keyboardVisible = useAtomValue(keyboardVisibleAtom);
+  const baselineHeight = useAtomValue(viewportHeightAtom);
+  const orientation = useAtomValue(viewportOrientationAtom);
+  const [vvh, setVvh] = useState<number>(0);
+
+  useEffect(() => {
+    const update = () => {
+      setVvh(
+        typeof window !== "undefined" ? window.visualViewport?.height ?? 0 : 0
+      );
+    };
+    update();
+    window.visualViewport?.addEventListener("resize", update);
+    return () => window.visualViewport?.removeEventListener("resize", update);
+  }, []);
 
   const {
     data: chatConfig,
@@ -128,9 +149,29 @@ export const Thread: FC = () => {
             <ThreadPrimitive.Root className="aui-root aui-thread-root @container flex h-full flex-col bg-background">
               <ThreadPrimitive.Viewport
                 className={cn(
-                  "aui-thread-viewport relative flex flex-1 flex-col overflow-x-auto overflow-y-auto",
-                  isMobile && keyboardVisible && "kb-pad kb-extra-chat"
+                  "aui-thread-viewport relative flex flex-1 flex-col overflow-x-auto overflow-y-auto"
+                  // isMobile && keyboardVisible && "pb-[40dvh]"
                 )}
+                style={
+                  isMobile && keyboardVisible
+                    ? (() => {
+                        const dvh =
+                          baselineHeight ||
+                          (typeof window !== "undefined"
+                            ? window.innerHeight
+                            : 0);
+                        const vv =
+                          vvh ||
+                          (typeof window !== "undefined"
+                            ? window.visualViewport?.height ?? 0
+                            : 0);
+                        const margin =
+                          orientation === "portrait" ? 0.075 * dvh : 0;
+                        const pad = Math.max(0, dvh - vv - margin);
+                        return { paddingBottom: `${pad}px` };
+                      })()
+                    : undefined
+                }
               >
                 {chatConfig && <ThreadWelcome config={chatConfig} />}
 
