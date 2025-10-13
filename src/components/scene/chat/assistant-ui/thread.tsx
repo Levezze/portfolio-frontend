@@ -122,6 +122,25 @@ export const Thread: FC = () => {
     return () => window.visualViewport?.removeEventListener("resize", update);
   }, []);
 
+  // Scroll composer into view above the keyboard when it opens
+  useEffect(() => {
+    if (!isMobile || !keyboardVisible) return;
+    const scroll = () => {
+      const el = document.querySelector(
+        ".aui-composer-wrapper"
+      ) as HTMLElement | null;
+      if (el) {
+        el.scrollIntoView({
+          behavior: "smooth",
+          block: "end",
+          inline: "nearest",
+        });
+      }
+    };
+    const t = setTimeout(scroll, 120);
+    return () => clearTimeout(t);
+  }, [isMobile, keyboardVisible, vvh]);
+
   const {
     data: chatConfig,
     isLoading,
@@ -166,8 +185,9 @@ export const Thread: FC = () => {
                             ? window.visualViewport?.height ?? 0
                             : 0);
                         const margin =
-                          orientation === "portrait" ? 0.075 * dvh : 0;
-                        const pad = Math.max(0, dvh - vv - margin);
+                          orientation === "portrait" ? 0.15 * dvh : 0;
+                        const GAP = 32; // 2rem breathing room
+                        const pad = Math.max(0, dvh - vv - margin - GAP);
                         return { paddingBottom: `${pad}px` };
                       })()
                     : undefined
