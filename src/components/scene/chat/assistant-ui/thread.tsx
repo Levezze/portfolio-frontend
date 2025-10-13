@@ -110,6 +110,7 @@ export const Thread: FC = () => {
   const baselineHeight = useAtomValue(viewportHeightAtom);
   const orientation = useAtomValue(viewportOrientationAtom);
   const [vvh, setVvh] = useState<number>(0);
+  const dvhBaselineRef = useRef<number>(0);
 
   useEffect(() => {
     const update = () => {
@@ -121,6 +122,25 @@ export const Thread: FC = () => {
     window.visualViewport?.addEventListener("resize", update);
     return () => window.visualViewport?.removeEventListener("resize", update);
   }, []);
+
+  // Maintain a baseline approximation of 100dvh independent of keyboard
+  useEffect(() => {
+    const measure = () => {
+      const vv =
+        typeof window !== "undefined" ? window.visualViewport?.height ?? 0 : 0;
+      const ih = typeof window !== "undefined" ? window.innerHeight ?? 0 : 0;
+      const candidate = Math.max(vv, ih, 0);
+      if (candidate > dvhBaselineRef.current) dvhBaselineRef.current = candidate;
+    };
+
+    // Always try once
+    measure();
+    // Refresh baseline when keyboard is hidden or on orientation changes
+    if (!keyboardVisible) {
+      const t = setTimeout(measure, 100);
+      return () => clearTimeout(t);
+    }
+  }, [keyboardVisible, orientation]);
 
   // Scroll composer into view above the keyboard when it opens
   useEffect(() => {
@@ -175,6 +195,7 @@ export const Thread: FC = () => {
                   isMobile && keyboardVisible
                     ? (() => {
                         const dvh =
+                          dvhBaselineRef.current ||
                           baselineHeight ||
                           (typeof window !== "undefined"
                             ? window.innerHeight
@@ -185,7 +206,7 @@ export const Thread: FC = () => {
                             ? window.visualViewport?.height ?? 0
                             : 0);
                         const margin =
-                          orientation === "portrait" ? 0.15 * dvh : 0;
+                          orientation === "portrait" ? 0.075 * dvh : 0;
                         const GAP = 32; // 2rem breathing room
                         const pad = Math.max(0, dvh - vv - margin - GAP);
                         return { paddingBottom: `${pad}px` };
