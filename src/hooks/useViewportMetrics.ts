@@ -123,8 +123,7 @@ export const useViewportMetrics = () => {
       );
       orientationRef.current = orientation;
 
-      // Only reset baseline on orientation reset events
-      if (reset) {
+      if (reset || !keyboardVisible) {
         maxHeightRef.current[orientation] = 0;
       }
 
@@ -141,21 +140,10 @@ export const useViewportMetrics = () => {
         maxHeightRef.current[orientation] = stableHeight;
       }
 
-      // Calculate delta between baseline and current viewport
-      const delta = Math.max(0, stableHeight - height);
-      // Infer visibility based on viewport shrink, to handle Android back gesture
-      try {
-        const KEYBOARD_DELTA_PX = 120; // tune if needed (100–180)
-        const active = document.activeElement as Element | null;
-        const inferredVisible = delta > KEYBOARD_DELTA_PX && isKeyboardElement(active);
-        if (inferredVisible !== keyboardVisibleRef.current) {
-          keyboardVisibleRef.current = inferredVisible;
-          setKeyboardVisible(inferredVisible);
-        }
-      } catch {}
-
-      // Keyboard height for consumers that need it
-      const keyboardHeight = keyboardVisibleRef.current ? delta : 0;
+      // Calculate keyboard height: difference between stable and current viewport
+      const keyboardHeight = keyboardVisible
+        ? Math.max(0, stableHeight - height)
+        : 0;
 
       root.style.setProperty("--viewport-height", `${stableHeight}px`);
 
@@ -184,8 +172,7 @@ export const useViewportMetrics = () => {
       }
       keyboardVisibleRef.current = visible;
       setKeyboardVisible(visible);
-      // Do not reset baseline on visibility toggles
-      scheduleUpdate(false);
+      scheduleUpdate(true);
     };
 
     const handleFocusIn = (event: FocusEvent) => {

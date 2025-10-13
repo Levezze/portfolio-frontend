@@ -30,8 +30,6 @@ import {
   gimliChoiceAtom,
   isMobileAtom,
   keyboardVisibleAtom,
-  viewportHeightAtom,
-  viewportOrientationAtom,
   pushNavigationCallbackAtom,
 } from "@/atoms/atomStore";
 import { UserMessageAttachments } from "@/components/scene/chat/assistant-ui/attachment";
@@ -107,35 +105,6 @@ const ChatBackButton: FC = () => {
 export const Thread: FC = () => {
   const isMobile = useAtomValue(isMobileAtom);
   const keyboardVisible = useAtomValue(keyboardVisibleAtom);
-  const baselineHeight = useAtomValue(viewportHeightAtom);
-  const orientation = useAtomValue(viewportOrientationAtom);
-  const [vvh, setVvh] = useState<number>(0);
-
-  // Keep visualViewport height updated for inline padding calc
-  useEffect(() => {
-    const update = () => {
-      setVvh(
-        typeof window !== "undefined" ? window.visualViewport?.height ?? 0 : 0
-      );
-    };
-    update();
-    window.visualViewport?.addEventListener("resize", update);
-    return () => window.visualViewport?.removeEventListener("resize", update);
-  }, []);
-
-  // Scroll composer into view just above keyboard when it opens
-  useEffect(() => {
-    if (!isMobile || !keyboardVisible) return;
-    const t = setTimeout(() => {
-      const el = document.querySelector(
-        ".aui-composer-wrapper"
-      ) as HTMLElement | null;
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" });
-      }
-    }, 120);
-    return () => clearTimeout(t);
-  }, [isMobile, keyboardVisible, vvh]);
 
   // Reverted: no dynamic keyboard padding logic
 
@@ -167,22 +136,8 @@ export const Thread: FC = () => {
               <ThreadPrimitive.Viewport
                 className={cn(
                   "aui-thread-viewport relative flex flex-1 flex-col overflow-x-auto overflow-y-auto",
-                  // Fallback while vv is unavailable
-                  isMobile && keyboardVisible && "pb-[30dvh]"
+                  isMobile && keyboardVisible && "pb-[40dvh]"
                 )}
-                style={
-                  isMobile && keyboardVisible && vvh > 0
-                    ? (() => {
-                        const dvh =
-                          baselineHeight ||
-                          (typeof window !== "undefined" ? window.innerHeight : 0);
-                        const margin = orientation === "portrait" ? 0.15 * dvh : 0;
-                        const GAP = 32; // 2rem breathing room
-                        const pad = Math.max(0, dvh - margin - vvh + GAP);
-                        return { paddingBottom: `${pad}px` };
-                      })()
-                    : undefined
-                }
               >
                 {chatConfig && <ThreadWelcome config={chatConfig} />}
 
