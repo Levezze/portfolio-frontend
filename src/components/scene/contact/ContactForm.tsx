@@ -8,7 +8,7 @@ import * as m from "motion/react-m";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 
-import { isMobileAtom } from "@/atoms/atomStore";
+import { isMobileAtom, keyboardVisibleAtom } from "@/atoms/atomStore";
 import { Button } from "@/components/shared/ui/button";
 import { CheckIcon } from "lucide-react";
 import {
@@ -32,6 +32,7 @@ import { useAnalytics } from "@/hooks/useAnalytics";
 
 const ContactForm = () => {
   const isMobile = useAtomValue(isMobileAtom);
+  const keyboardVisible = useAtomValue(keyboardVisibleAtom);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const trackEvent = useAnalytics();
 
@@ -144,7 +145,7 @@ const ContactForm = () => {
           ref={wrapperRef}
           className={cn(
             "flex flex-col items-center justify-start h-full w-full px-2 pt-2 gap-2 overflow-y-auto",
-            isMobile && "kb-pad"
+            isMobile && keyboardVisible && "kb-pad kb-extra-contact"
           )}
         >
           <m.div

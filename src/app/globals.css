@@ -131,9 +131,15 @@
 }
 
 /* Mobile keyboard-aware padding utility */
-.kb-pad { 
-  padding-bottom: calc(var(--kb-pad, 0px) + env(safe-area-inset-bottom));
+.kb-pad {
+  padding-bottom: calc(
+    var(--kb-pad, 0px) + var(--kb-extra, 0px) + env(safe-area-inset-bottom)
+  );
 }
+
+/* Optional per-page extra padding shims */
+.kb-extra-chat { --kb-extra: 12px; }
+.kb-extra-contact { --kb-extra: 48px; }
 
 .dark {
   --background: oklch(0.205 0 0);

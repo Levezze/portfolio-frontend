@@ -123,7 +123,9 @@ export const useViewportMetrics = () => {
       );
       orientationRef.current = orientation;
 
-      if (reset || !keyboardVisible) {
+      // Only reset baseline when keyboard is not visible.
+      // This preserves the last known full-height baseline across keyboard toggles.
+      if (reset && !keyboardVisible) {
         maxHeightRef.current[orientation] = 0;
       }
 
@@ -152,8 +154,10 @@ export const useViewportMetrics = () => {
       const bottomMargin =
         orientation === "portrait" ? Math.round(stableHeight * 0.075) : 0;
       root.style.setProperty("--mobile-bottom-margin", `${bottomMargin}px`);
+      // Keyboard padding should exclude existing bottom margin:
+      // we only need the portion of the keyboard that intrudes into the content area
       const pad = keyboardVisible
-        ? Math.max(0, keyboardHeight + bottomMargin)
+        ? Math.max(0, keyboardHeight - bottomMargin)
         : 0;
       root.style.setProperty("--kb-pad", `${pad}px`);
 
@@ -182,7 +186,8 @@ export const useViewportMetrics = () => {
       }
       keyboardVisibleRef.current = visible;
       setKeyboardVisible(visible);
-      scheduleUpdate(true);
+      // Do not reset baseline on keyboard visibility toggles
+      scheduleUpdate(false);
     };
 
     const handleFocusIn = (event: FocusEvent) => {

@@ -26,7 +26,7 @@ import { domAnimation, LazyMotion, MotionConfig } from "motion/react";
 import * as m from "motion/react-m";
 import { type FC, useEffect, useRef, useState } from "react";
 import useSWR from "swr";
-import { gimliChoiceAtom, isMobileAtom, pushNavigationCallbackAtom } from "@/atoms/atomStore";
+import { gimliChoiceAtom, isMobileAtom, keyboardVisibleAtom, pushNavigationCallbackAtom } from "@/atoms/atomStore";
 import { UserMessageAttachments } from "@/components/scene/chat/assistant-ui/attachment";
 import { MarkdownText } from "@/components/scene/chat/assistant-ui/markdown-text";
 import { ToolFallback } from "@/components/scene/chat/assistant-ui/tool-fallback";
@@ -99,6 +99,7 @@ const ChatBackButton: FC = () => {
 
 export const Thread: FC = () => {
   const isMobile = useAtomValue(isMobileAtom);
+  const keyboardVisible = useAtomValue(keyboardVisibleAtom);
 
   const {
     data: chatConfig,
@@ -128,7 +129,7 @@ export const Thread: FC = () => {
               <ThreadPrimitive.Viewport
                 className={cn(
                   "aui-thread-viewport relative flex flex-1 flex-col overflow-x-auto overflow-y-auto",
-                  isMobile && "kb-pad"
+                  isMobile && keyboardVisible && "kb-pad kb-extra-chat"
                 )}
               >
                 {chatConfig && <ThreadWelcome config={chatConfig} />}
