@@ -269,11 +269,11 @@ const ThreadWelcome: FC<{ config: ChatConfig }> = ({ config }) => {
               }`}
             >
               <Tooltip>
-                <TooltipTrigger>
+                <TooltipTrigger className="h-full w-full">
                   <Image
                     src="/images/photo-lev.jpg"
                     alt="Lev Zhitnik"
-                    className="rounded-[25px] object-cover h-full w-full grayscale-15 border shadow-md shadow-muted-foreground/10 hover:scale-103 transition-all duration-300 hover:shadow-lg hover:shadow-muted-foreground/20"
+                    className="rounded-[25px] object-cover h-full w-full grayscale-15 border shadow-lg shadow-muted-foreground/10 dark:shadow-muted-foreground/2 hover:scale-102 transition-all duration-300 hover:shadow-md hover:animate-jiggle hover:grayscale-0"
                     unoptimized={true}
                     loading="lazy"
                     fill={true}
@@ -409,7 +409,7 @@ const ThreadWelcomeSuggestions: FC<{ suggestions: any[] }> = ({
           >
             <Button
               variant="ghost"
-              className="aui-thread-welcome-suggestion w-full h-auto hover:opacity-90 flex flex-col items-start justify-around gap-0.5 px-6 rounded-[25px] cursor-pointer [@media(max-width:600px)_or_(max-height:600px)]:gap-0 shadow-sm shadow-muted-foreground/10"
+              className="aui-thread-welcome-suggestion w-full h-auto flex flex-col items-start justify-around gap-0.5 px-6 rounded-[25px] cursor-pointer [@media(max-width:600px)_or_(max-height:600px)]:gap-0 shadow-sm shadow-muted-foreground/10"
               aria-label={suggestedAction.action}
               matchBgColor={true}
             >

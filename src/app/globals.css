@@ -54,6 +54,18 @@
   /* --font-merriweather-semibold: var(--font-mw-600); */
   --font-inter: var(--font-inter);
   /* --font-inter-semibold: var(--font-inter-600); */
+
+  /* Jiggle animation */
+  --animate-jiggle: jiggle 0.17s ease-in-out 1;
+}
+
+@keyframes jiggle {
+  0%, 100% {
+    transform: rotate(-2deg);
+  }
+  50% {
+    transform: rotate(2deg);
+  }
 }
 
 :root {

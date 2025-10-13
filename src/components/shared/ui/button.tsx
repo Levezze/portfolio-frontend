@@ -25,8 +25,7 @@ const buttonVariants = cva(
         // dark:bg-input/30 dark:border-input dark:hover:bg-input/50
         secondary:
           "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
-        ghost:
-          "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
+        ghost: "hover:bg-accent hover:bg-white/75",
         // suggestions:
         //   "bg-primary hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
@@ -46,7 +45,8 @@ const buttonVariants = cva(
       {
         variant: "ghost",
         matchBgColor: true,
-        class: "bg-[var(--dynamic-bg)] transition-colors ease-in-out",
+        class:
+          "bg-[var(--dynamic-bg)] hover:bg-[var(--dynamic-bg)]/75 transition-colors ease-in-out",
       },
     ],
     defaultVariants: {
