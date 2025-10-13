@@ -111,6 +111,10 @@
   --page-resume: #e6c9b5;
   --page-secret: #e4dfda;
   --viewport-height: 100vh;
+  /* Mobile keyboard + bottom margin metrics (set at runtime) */
+  --keyboard-inset: 0px;
+  --mobile-bottom-margin: 0px;
+  --kb-pad: 0px;
 
   /* Responsive face padding for mobile/tablet letterboxing */
   /* Vertical padding: when face is taller than viewport + 10px margin */
@@ -124,6 +128,11 @@
   --face-padding-x: max(0px, calc(((var(--face-size) - 100vw) / 2) + 20px));
   /* Minimal padding for desktop (always applies) */
   --face-padding-base: 1rem;
+}
+
+/* Mobile keyboard-aware padding utility */
+.kb-pad { 
+  padding-bottom: calc(var(--kb-pad, 0px) + env(safe-area-inset-bottom));
 }
 
 .dark {

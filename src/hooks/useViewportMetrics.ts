@@ -146,6 +146,16 @@ export const useViewportMetrics = () => {
         : 0;
 
       root.style.setProperty("--viewport-height", `${stableHeight}px`);
+      // Expose keyboard + mobile padding metrics as CSS variables
+      // Consumers should apply padding via a class, not inline styles
+      root.style.setProperty("--keyboard-inset", `${keyboardHeight}px`);
+      const bottomMargin =
+        orientation === "portrait" ? Math.round(stableHeight * 0.075) : 0;
+      root.style.setProperty("--mobile-bottom-margin", `${bottomMargin}px`);
+      const pad = keyboardVisible
+        ? Math.max(0, keyboardHeight + bottomMargin)
+        : 0;
+      root.style.setProperty("--kb-pad", `${pad}px`);
 
       setViewportHeight(stableHeight);
       setViewportWidth(width);

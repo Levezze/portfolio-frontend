@@ -8,7 +8,7 @@ import * as m from "motion/react-m";
 import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 
-import { isMobileAtom, keyboardVisibleAtom, keyboardHeightAtom } from "@/atoms/atomStore";
+import { isMobileAtom } from "@/atoms/atomStore";
 import { Button } from "@/components/shared/ui/button";
 import { CheckIcon } from "lucide-react";
 import {
@@ -32,8 +32,6 @@ import { useAnalytics } from "@/hooks/useAnalytics";
 
 const ContactForm = () => {
   const isMobile = useAtomValue(isMobileAtom);
-  const keyboardVisible = useAtomValue(keyboardVisibleAtom);
-  const keyboardHeight = useAtomValue(keyboardHeightAtom);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const trackEvent = useAnalytics();
 
@@ -144,10 +142,10 @@ const ContactForm = () => {
       <LazyMotion features={domAnimation}>
         <div
           ref={wrapperRef}
-          className="flex flex-col items-center justify-start h-full w-full px-2 pt-2 gap-2 overflow-y-auto"
-          style={{
-            paddingBottom: isMobile && keyboardVisible ? `${keyboardHeight}px` : undefined,
-          }}
+          className={cn(
+            "flex flex-col items-center justify-start h-full w-full px-2 pt-2 gap-2 overflow-y-auto",
+            isMobile && "kb-pad"
+          )}
         >
           <m.div
             initial={{ opacity: 0, y: 10 }}
