@@ -30,8 +30,6 @@ import {
   gimliChoiceAtom,
   isMobileAtom,
   keyboardVisibleAtom,
-  viewportHeightAtom,
-  viewportOrientationAtom,
   pushNavigationCallbackAtom,
 } from "@/atoms/atomStore";
 import { UserMessageAttachments } from "@/components/scene/chat/assistant-ui/attachment";
@@ -107,59 +105,8 @@ const ChatBackButton: FC = () => {
 export const Thread: FC = () => {
   const isMobile = useAtomValue(isMobileAtom);
   const keyboardVisible = useAtomValue(keyboardVisibleAtom);
-  const baselineHeight = useAtomValue(viewportHeightAtom);
-  const orientation = useAtomValue(viewportOrientationAtom);
-  const [vvh, setVvh] = useState<number>(0);
-  const dvhBaselineRef = useRef<number>(0);
 
-  useEffect(() => {
-    const update = () => {
-      setVvh(
-        typeof window !== "undefined" ? window.visualViewport?.height ?? 0 : 0
-      );
-    };
-    update();
-    window.visualViewport?.addEventListener("resize", update);
-    return () => window.visualViewport?.removeEventListener("resize", update);
-  }, []);
-
-  // Maintain a baseline approximation of 100dvh independent of keyboard
-  useEffect(() => {
-    const measure = () => {
-      const vv =
-        typeof window !== "undefined" ? window.visualViewport?.height ?? 0 : 0;
-      const ih = typeof window !== "undefined" ? window.innerHeight ?? 0 : 0;
-      const candidate = Math.max(vv, ih, 0);
-      if (candidate > dvhBaselineRef.current) dvhBaselineRef.current = candidate;
-    };
-
-    // Always try once
-    measure();
-    // Refresh baseline when keyboard is hidden or on orientation changes
-    if (!keyboardVisible) {
-      const t = setTimeout(measure, 100);
-      return () => clearTimeout(t);
-    }
-  }, [keyboardVisible, orientation]);
-
-  // Scroll composer into view above the keyboard when it opens
-  useEffect(() => {
-    if (!isMobile || !keyboardVisible) return;
-    const scroll = () => {
-      const el = document.querySelector(
-        ".aui-composer-wrapper"
-      ) as HTMLElement | null;
-      if (el) {
-        el.scrollIntoView({
-          behavior: "smooth",
-          block: "end",
-          inline: "nearest",
-        });
-      }
-    };
-    const t = setTimeout(scroll, 120);
-    return () => clearTimeout(t);
-  }, [isMobile, keyboardVisible, vvh]);
+  // Reverted: no dynamic keyboard padding logic
 
   const {
     data: chatConfig,
@@ -188,31 +135,9 @@ export const Thread: FC = () => {
             <ThreadPrimitive.Root className="aui-root aui-thread-root @container flex h-full flex-col bg-background">
               <ThreadPrimitive.Viewport
                 className={cn(
-                  "aui-thread-viewport relative flex flex-1 flex-col overflow-x-auto overflow-y-auto"
-                  // isMobile && keyboardVisible && "pb-[40dvh]"
+                  "aui-thread-viewport relative flex flex-1 flex-col overflow-x-auto overflow-y-auto",
+                  isMobile && keyboardVisible && "pb-[40dvh]"
                 )}
-                style={
-                  isMobile && keyboardVisible
-                    ? (() => {
-                        const dvh =
-                          dvhBaselineRef.current ||
-                          baselineHeight ||
-                          (typeof window !== "undefined"
-                            ? window.innerHeight
-                            : 0);
-                        const vv =
-                          vvh ||
-                          (typeof window !== "undefined"
-                            ? window.visualViewport?.height ?? 0
-                            : 0);
-                        const margin =
-                          orientation === "portrait" ? 0.075 * dvh : 0;
-                        const GAP = 32; // 2rem breathing room
-                        const pad = Math.max(0, dvh - vv - margin - GAP);
-                        return { paddingBottom: `${pad}px` };
-                      })()
-                    : undefined
-                }
               >
                 {chatConfig && <ThreadWelcome config={chatConfig} />}
 
