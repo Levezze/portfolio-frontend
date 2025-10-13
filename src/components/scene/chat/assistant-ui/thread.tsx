@@ -263,7 +263,9 @@ const ThreadWelcome: FC<{ config: ChatConfig }> = ({ config }) => {
               exit={{ opacity: 0, y: 10 }}
               transition={{ delay: 0.0 }}
               className={`aui-thread-welcome-avatar relative self-stretch aspect-square ${
-                isMobile ? "h-28 w-28" : "h-35 w-35 lg:h-42 lg:w-42"
+                isMobile
+                  ? "h-28 w-28"
+                  : "h-35 w-35 lg:h-42 lg:w-42 xl:h-52 xl:w-52"
               }`}
             >
               <Tooltip>
