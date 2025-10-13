@@ -61,6 +61,7 @@ import { useInputValidation } from "@/hooks/useInputValidation";
 import { CharacterCounter } from "./CharacterCounter";
 import { RateLimitWarning } from "./RateLimitWarning";
 import { ValidationError } from "./ValidationError";
+import Image from "next/image";
 
 const ChatBackButton: FC = () => {
   const runtime = useAssistantRuntime();
@@ -253,13 +254,64 @@ const ThreadWelcome: FC<{ config: ChatConfig }> = ({ config }) => {
   return (
     <ThreadPrimitive.Empty>
       <div className="aui-thread-welcome-root mx-auto my-auto flex w-full max-w-[var(--thread-max-width)] flex-col h-full justify-around overflow-y-auto px-0 md:px-8 mobile-landscape:p-0">
-        <div className="aui-thread-welcome-center flex w-full flex-col justify-center">
-          <div className="aui-thread-welcome-message flex size-full flex-col justify-center">
+        <div className="aui-thread-welcome-center flex w-full justify-center gap-4 md:gap-6">
+          <div className="aui-thread-welcome-picture flex flex-col items-center justify-start pt-1 gap-1 md:gap-2">
             <m.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
-              className="aui-thread-welcome-message-motion-1 font-merriweather font-bold text-base [@media(min-width:700px)_and_(min-height:700px)]:text-xl [@media(min-width:800px)_and_(min-height:800px)]:text-2xl mb-2"
+              transition={{ delay: 0.0 }}
+              className="aui-thread-welcome-avatar self-stretch aspect-square max-h-32 md:max-h-52"
+            >
+              <Image
+                src="/images/photo-lev.jpg"
+                alt="Lev Zhitnik"
+                width={128}
+                height={128}
+                className="rounded-[25px] object-cover h-full w-full grayscale-15"
+                unoptimized={true}
+                loading="lazy"
+              />
+            </m.div>
+            <m.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              transition={{ delay: 0.2 }}
+              className="w-full"
+            >
+              <ButtonFrame
+                variant="default"
+                classNameAdditional="px-2 bg-foreground border-muted-foreground w-full"
+                border={false}
+              >
+                <LinkButton
+                  className="text-background color-foreground size-4 md:size-4.5"
+                  icon="linkedin"
+                  linkUrl="https://www.linkedin.com/in/lev-zhitnik/"
+                  tooltipText="LinkedIn profile"
+                />
+                <LinkButton
+                  className="text-background color-foreground size-4 md:size-4.5"
+                  icon="github"
+                  linkUrl="https://github.com/Levezze"
+                  tooltipText="GitHub profile"
+                />
+                <LinkButton
+                  className="text-background color-foreground size-5 md:size-5.5"
+                  icon="email"
+                  linkUrl="mailto:contact@levezze.com"
+                  tooltipText="Email me"
+                />
+              </ButtonFrame>
+            </m.div>
+          </div>
+          <div className="aui-thread-welcome-message flex size-full flex-col justify-start">
+            <m.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className="aui-thread-welcome-message-motion-1 font-merriweather font-bold text-lg [@media(min-width:700px)_and_(min-height:700px)]:text-xl [@media(min-width:800px)_and_(min-height:800px)]:text-2xl mb-2"
             >
               {
                 welcome_messages.filter(
@@ -281,37 +333,6 @@ const ThreadWelcome: FC<{ config: ChatConfig }> = ({ config }) => {
                     message.message_type === "secondary"
                 )[0]?.message_text
               }
-            </m.div>
-            <m.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              transition={{ delay: 0.2 }}
-            >
-              <ButtonFrame
-                variant="default"
-                classNameAdditional="px-2 bg-foreground border-muted-foreground"
-                border={false}
-              >
-                <LinkButton
-                  className="text-background color-foreground size-4"
-                  icon="linkedin"
-                  linkUrl="https://www.linkedin.com/in/lev-zhitnik/"
-                  tooltipText="LinkedIn profile"
-                />
-                <LinkButton
-                  className="text-background color-foreground size-4"
-                  icon="github"
-                  linkUrl="https://github.com/Levezze"
-                  tooltipText="GitHub profile"
-                />
-                <LinkButton
-                  className="text-background color-foreground size-5"
-                  icon="email"
-                  linkUrl="mailto:contact@levezze.com"
-                  tooltipText="Email me"
-                />
-              </ButtonFrame>
             </m.div>
           </div>
         </div>

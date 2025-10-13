@@ -12,7 +12,7 @@ export const ButtonFrame = ({
 
   return (
     <div
-      className={`gap-2 flex justify-around z-100 p-1 w-fit [@media(max-height:600px)]:p-0 ${
+      className={`flex justify-around z-100 p-0.5 w-fit [@media(max-height:600px)]:py-0 ${
         border ? "border" : ""
       } ${borderColorClass} ${classNameAdditional} ${
         orientation === "horizontal"
