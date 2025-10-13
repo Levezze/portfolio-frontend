@@ -37,8 +37,8 @@ export const TooltipButton = ({
     height: `${height || size / 4}rem`,
     borderRadius: `${round ? "50%" : "25px"}`,
     cursor: "pointer",
-    padding: "0",
-    margin: "0",
+    padding: "1",
+    margin: "1",
   };
   return (
     <Tooltip>

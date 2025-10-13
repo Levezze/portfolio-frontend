@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import {
   isMobileAtom,
   keyboardVisibleAtom,
+  keyboardHeightAtom,
   viewportHeightAtom,
   viewportOrientationAtom,
   viewportWidthAtom,
@@ -54,6 +55,7 @@ export const useViewportMetrics = () => {
   const setOrientation = useSetAtom(viewportOrientationAtom);
   const setIsMobile = useSetAtom(isMobileAtom);
   const setKeyboardVisible = useSetAtom(keyboardVisibleAtom);
+  const setKeyboardHeight = useSetAtom(keyboardHeightAtom);
 
   const maxHeightRef = useRef<{ portrait: number; landscape: number }>({
     portrait: 0,
@@ -138,12 +140,18 @@ export const useViewportMetrics = () => {
         maxHeightRef.current[orientation] = stableHeight;
       }
 
+      // Calculate keyboard height: difference between stable and current viewport
+      const keyboardHeight = keyboardVisible
+        ? Math.max(0, stableHeight - height)
+        : 0;
+
       root.style.setProperty("--viewport-height", `${stableHeight}px`);
 
       setViewportHeight(stableHeight);
       setViewportWidth(width);
       setOrientation(orientation);
       setIsMobile(isMobileDevice({ width, height }));
+      setKeyboardHeight(keyboardHeight);
     };
 
     const scheduleUpdate = (reset = false) => {
@@ -246,5 +254,6 @@ export const useViewportMetrics = () => {
     setViewportWidth,
     isKeyboardElement,
     setKeyboardVisible,
+    setKeyboardHeight,
   ]);
 };

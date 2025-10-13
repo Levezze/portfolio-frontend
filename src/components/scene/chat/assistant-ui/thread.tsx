@@ -30,6 +30,7 @@ import {
   gimliChoiceAtom,
   isMobileAtom,
   keyboardVisibleAtom,
+  keyboardHeightAtom,
   pushNavigationCallbackAtom,
 } from "@/atoms/atomStore";
 import { UserMessageAttachments } from "@/components/scene/chat/assistant-ui/attachment";
@@ -105,6 +106,7 @@ const ChatBackButton: FC = () => {
 export const Thread: FC = () => {
   const isMobile = useAtomValue(isMobileAtom);
   const keyboardVisible = useAtomValue(keyboardVisibleAtom);
+  const keyboardHeight = useAtomValue(keyboardHeightAtom);
 
   const {
     data: chatConfig,
@@ -132,10 +134,10 @@ export const Thread: FC = () => {
           <MotionConfig reducedMotion="user">
             <ThreadPrimitive.Root className="aui-root aui-thread-root @container flex h-full flex-col bg-background">
               <ThreadPrimitive.Viewport
-                className={cn(
-                  "aui-thread-viewport relative flex flex-1 flex-col overflow-x-auto overflow-y-auto",
-                  isMobile && keyboardVisible && "pb-[40dvh]"
-                )}
+                className="aui-thread-viewport relative flex flex-1 flex-col overflow-x-auto overflow-y-auto"
+                style={{
+                  paddingBottom: isMobile && keyboardVisible ? `${keyboardHeight}px` : '0',
+                }}
               >
                 {chatConfig && <ThreadWelcome config={chatConfig} />}
 
@@ -322,7 +324,7 @@ const ThreadWelcome: FC<{ config: ChatConfig }> = ({ config }) => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
-              className="aui-thread-welcome-message-motion-1 font-merriweather font-bold text-lg [@media(min-width:700px)_and_(min-height:700px)]:text-xl [@media(min-width:800px)_and_(min-height:800px)]:text-2xl mb-2"
+              className="aui-thread-welcome-message-motion-1 font-merriweather font-bold text-lg [@media(min-width:700px)_and_(min-height:700px)]:text-xl [@media(min-width:800px)_and_(min-height:800px)]:text-2xl md:mb-2"
             >
               {
                 welcome_messages.filter(
