@@ -56,7 +56,7 @@ const ProjectDialog = ({ project, index }: { project: any; index: number }) => {
             className={`object-cover group-hover:scale-105 transition-transform duration-300`}
           />
           <div
-            className={`absolute inset-0 bg-black/0 group-hover:bg-white/20 dark:group-hover:bg-black/20 transition-colors duration-300 pointer-events-none`}
+            className={`absolute inset-0 bg-black/0 group-hover:bg-white/20 transition-colors duration-300 pointer-events-none`}
           />
           <div className="absolute inset-0 shadow-[inset_0px_-10px_10px_-10px_rgba(0,0,0,0.05)] pointer-events-none" />
           <div className="relative h-full z-10 flex flex-col items-start justify-between p-4 md:p-4">
