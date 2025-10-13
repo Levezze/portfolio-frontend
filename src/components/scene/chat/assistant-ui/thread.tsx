@@ -227,7 +227,7 @@ const FakeAssistantMessage: FC<{ text: string }> = ({ text }) => {
     >
       <div className="flex">
         <Tooltip>
-          <Avatar className="mr-3 mt-1 h-12 w-12 shadow-sm shadow-muted-foreground/10">
+          <Avatar className="mr-3 mt-1 h-12 w-12 border shadow-sm shadow-muted-foreground/10">
             <TooltipTrigger>
               <AvatarImage
                 src={`/gimli-ai/gimli-ai-avatar-${gimliChoice.choice}.webp`}
@@ -251,27 +251,36 @@ const FakeAssistantMessage: FC<{ text: string }> = ({ text }) => {
 
 const ThreadWelcome: FC<{ config: ChatConfig }> = ({ config }) => {
   const welcome_messages = config.welcome_messages;
+  const isMobile = useAtomValue(isMobileAtom);
   return (
     <ThreadPrimitive.Empty>
-      <div className="aui-thread-welcome-root mx-auto my-auto flex w-full max-w-[var(--thread-max-width)] flex-col h-full justify-around overflow-y-auto px-0 md:px-8 mobile-landscape:p-0">
+      <div className="aui-thread-welcome-root mx-auto my-auto flex w-full max-w-[var(--thread-max-width)] flex-col h-full justify-around overflow-y-auto px-0 md:px-4 mobile-landscape:p-0">
         <div className="aui-thread-welcome-center flex w-full justify-center gap-4 md:gap-6">
-          <div className="aui-thread-welcome-picture flex flex-col items-center justify-start pt-1 gap-1 md:gap-2">
+          <div className="aui-thread-welcome-picture flex flex-col items-center justify-start pt-1 gap-1.5 md:gap-2">
             <m.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
               transition={{ delay: 0.0 }}
-              className="aui-thread-welcome-avatar self-stretch aspect-square max-h-32 md:max-h-52"
+              className={`aui-thread-welcome-avatar relative self-stretch aspect-square ${
+                isMobile ? "h-28 w-28" : "h-35 w-35 lg:h-42 lg:w-42"
+              }`}
             >
-              <Image
-                src="/images/photo-lev.jpg"
-                alt="Lev Zhitnik"
-                width={128}
-                height={128}
-                className="rounded-[25px] object-cover h-full w-full grayscale-15"
-                unoptimized={true}
-                loading="lazy"
-              />
+              <Tooltip>
+                <TooltipTrigger>
+                  <Image
+                    src="/images/photo-lev.jpg"
+                    alt="Lev Zhitnik"
+                    className="rounded-[25px] object-cover h-full w-full grayscale-15 border shadow-md shadow-muted-foreground/10 hover:scale-103 transition-all duration-300 hover:shadow-lg hover:shadow-muted-foreground/20"
+                    unoptimized={true}
+                    loading="lazy"
+                    fill={true}
+                  />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>That's me!</p>
+                </TooltipContent>
+              </Tooltip>
             </m.div>
             <m.div
               initial={{ opacity: 0, y: 10 }}
@@ -282,7 +291,7 @@ const ThreadWelcome: FC<{ config: ChatConfig }> = ({ config }) => {
             >
               <ButtonFrame
                 variant="default"
-                classNameAdditional="px-2 bg-foreground border-muted-foreground w-full"
+                classNameAdditional="px-2 bg-foreground border-muted-foreground w-full shadow-md shadow-muted-foreground/10"
                 border={false}
               >
                 <LinkButton
@@ -398,7 +407,7 @@ const ThreadWelcomeSuggestions: FC<{ suggestions: any[] }> = ({
           >
             <Button
               variant="ghost"
-              className="aui-thread-welcome-suggestion w-full h-auto hover:opacity-90 flex flex-col items-start justify-around gap-0.5 px-6 rounded-full cursor-pointer [@media(max-width:600px)_or_(max-height:600px)]:gap-0"
+              className="aui-thread-welcome-suggestion w-full h-auto hover:opacity-90 flex flex-col items-start justify-around gap-0.5 px-6 rounded-[25px] cursor-pointer [@media(max-width:600px)_or_(max-height:600px)]:gap-0 shadow-sm shadow-muted-foreground/10"
               aria-label={suggestedAction.action}
               matchBgColor={true}
             >
@@ -666,7 +675,7 @@ const AssistantMessage: FC = () => {
       >
         <div className="flex">
           <Tooltip>
-            <Avatar className="mr-3 mt-1 h-10 w-10 shadow-sm shadow-muted-foreground/10">
+            <Avatar className="mr-3 mt-1 h-10 w-10 border shadow-sm shadow-muted-foreground/10">
               <TooltipTrigger className="flex align-top justify-start">
                 <AvatarImage
                   src={`/gimli-ai/gimli-ai-avatar-${gimliChoice.choice}.webp`}
