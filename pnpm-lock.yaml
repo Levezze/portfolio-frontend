@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  jotai: ^2.15.0
+
 importers:
 
   .:
@@ -99,7 +102,7 @@ importers:
         specifier: ^3.13.0
         version: 3.13.0
       jotai:
-        specifier: ^2.14.0
+        specifier: ^2.15.0
         version: 2.15.0(@babel/core@7.28.4)(@babel/template@7.27.2)(@types/react@19.2.0)(react@19.1.0)
       lucide-react:
         specifier: ^0.544.0
