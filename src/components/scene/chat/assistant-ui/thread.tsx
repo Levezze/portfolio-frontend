@@ -104,7 +104,6 @@ const ChatBackButton: FC = () => {
 
 export const Thread: FC = () => {
   const isMobile = useAtomValue(isMobileAtom);
-  const keyboardVisible = useAtomValue(keyboardVisibleAtom);
 
   const {
     data: chatConfig,
@@ -133,8 +132,8 @@ export const Thread: FC = () => {
             <ThreadPrimitive.Root className="aui-root aui-thread-root @container flex h-full flex-col bg-background">
               <ThreadPrimitive.Viewport
                 className={cn(
-                  "aui-thread-viewport relative flex flex-1 flex-col overflow-x-auto overflow-y-auto",
-                  isMobile && keyboardVisible && "pb-[40dvh]"
+                  "aui-thread-viewport relative flex flex-1 flex-col overflow-x-auto overflow-y-auto"
+                  // isMobile && keyboardVisible && "pb-[60dvh]"
                 )}
               >
                 {chatConfig && <ThreadWelcome config={chatConfig} />}
@@ -227,7 +226,7 @@ const FakeAssistantMessage: FC<{ text: string }> = ({ text }) => {
     >
       <div className="flex">
         <Tooltip>
-          <Avatar className="mr-3 mt-1 h-12 w-12 border shadow-sm shadow-muted-foreground/10">
+          <Avatar className="mr-3 mt-1 h-12 w-12 ">
             <TooltipTrigger>
               <AvatarImage
                 src={`/gimli-ai/gimli-ai-avatar-${gimliChoice.choice}.webp`}
@@ -273,7 +272,7 @@ const ThreadWelcome: FC<{ config: ChatConfig }> = ({ config }) => {
                   <Image
                     src="/images/photo-lev.jpg"
                     alt="Lev Zhitnik"
-                    className="rounded-[25px] object-cover h-full w-full grayscale-15 border shadow-lg shadow-muted-foreground/10 dark:shadow-muted-foreground/2 hover:scale-102 transition-all duration-300 hover:shadow-md hover:animate-jiggle hover:grayscale-0"
+                    className="rounded-[25px] object-cover h-full w-full hover:scale-102 transition-all duration-300 hover:shadow-xl shadow-muted-foreground/30 dark:shadow-none hover:animate-jiggle"
                     unoptimized={true}
                     loading="lazy"
                     fill={true}
@@ -322,7 +321,7 @@ const ThreadWelcome: FC<{ config: ChatConfig }> = ({ config }) => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
-              className="aui-thread-welcome-message-motion-1 font-merriweather font-bold text-lg [@media(min-width:700px)_and_(min-height:700px)]:text-xl [@media(min-width:800px)_and_(min-height:800px)]:text-2xl mb-2"
+              className="aui-thread-welcome-message-motion-1 font-merriweather font-bold text-lg [@media(min-width:700px)_and_(min-height:700px)]:text-xl [@media(min-width:800px)_and_(min-height:800px)]:text-2xl md:mb-2"
             >
               {
                 welcome_messages.filter(
@@ -492,10 +491,16 @@ const Composer: FC<{ chatConfig: ChatConfig | null; isLoading: boolean }> = ({
   };
 
   const text = useComposer((state) => state.text) || "";
+  const keyboardVisible = useAtomValue(keyboardVisibleAtom);
 
   return (
     <>
-      <div className="aui-composer-wrapper sticky bottom-0 mx-auto flex w-full max-w-[var(--thread-max-width)] flex-col overflow-visible rounded-t-md bg-background pb-4 md:px-4 md:pb-6 mobile-landscape:p-0">
+      <div
+        className={cn(
+          "aui-composer-wrapper sticky bottom-0 mx-auto flex w-full max-w-[var(--thread-max-width)] flex-col overflow-visible rounded-t-md bg-background pb-4 md:px-4 md:pb-6 mobile-landscape:p-0",
+          isMobile && keyboardVisible && "pb-[40dvh]"
+        )}
+      >
         <ThreadScrollToBottom />
         <ThreadPrimitive.Empty>
           <div className="flex flex-col items-center justify-center mb-4 font-inter">
@@ -677,7 +682,7 @@ const AssistantMessage: FC = () => {
       >
         <div className="flex">
           <Tooltip>
-            <Avatar className="mr-3 mt-1 h-10 w-10 border shadow-sm shadow-muted-foreground/10">
+            <Avatar className="mr-3 mt-1 h-10 w-10">
               <TooltipTrigger className="flex align-top justify-start">
                 <AvatarImage
                   src={`/gimli-ai/gimli-ai-avatar-${gimliChoice.choice}.webp`}

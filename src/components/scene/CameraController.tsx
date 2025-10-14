@@ -14,21 +14,6 @@ export const CameraController = () => {
       return;
     }
 
-    // Debug logs - commented out for production
-    // console.log('camera', camera);
-    // console.log('size', size);
-    // console.log('viewport', viewport);
-    // console.log('scene', scene);
-    // console.log('setSize', setSize);
-
-    // const perspCamera = camera as THREE.PerspectiveCamera;
-    // const viewportHeight = size.height || window.innerHeight || 1;
-    // const distance = calculateDistanceForSize(cubeSize, faceSize, perspCamera, viewportHeight);
-
-    // perspCamera.position.set(0, 0, distance);
-    // perspCamera.lookAt(0, 0, 0);
-    // perspCamera.updateProjectionMatrix();
-
     if (isLoaded) {
       return;
     }

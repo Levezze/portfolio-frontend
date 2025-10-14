@@ -83,6 +83,7 @@ export const viewportOrientationAtom = atom<"portrait" | "landscape">(
 
 // Mobile Keyboard UX
 export const keyboardVisibleAtom = atom<boolean>(false);
+export const keyboardHeightAtom = atom<number>(0);
 
 // Projects Gallery
 export const projectViewAtom = atom<"project" | "zoomed">("project");
