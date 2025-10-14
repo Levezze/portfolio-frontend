@@ -105,7 +105,7 @@ const ChatBackButton: FC = () => {
 export const Thread: FC = () => {
   const isMobile = useAtomValue(isMobileAtom);
   const keyboardVisible = useAtomValue(keyboardVisibleAtom);
-
+  const wrapperRef = useRef<HTMLDivElement>(null);
   // Reverted: no dynamic keyboard padding logic
 
   const {
@@ -122,6 +122,43 @@ export const Thread: FC = () => {
 
   if (error) return <FailedLoad />;
 
+  // Scroll focused input into view when keyboard appears on mobile
+  useEffect(() => {
+    if (!isMobile) return;
+
+    const handleFocus = (e: FocusEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") {
+        // Find the FormItem parent that contains both label and input
+        const formItem = target.closest('[data-slot="form-item"]');
+
+        // Small delay to ensure keyboard is fully visible and padding is applied
+        setTimeout(() => {
+          if (formItem) {
+            formItem.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+              inline: "nearest",
+            });
+          } else {
+            // Fallback to input if FormItem not found
+            target.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+              inline: "nearest",
+            });
+          }
+        }, 50);
+      }
+    };
+
+    const wrapper = wrapperRef.current;
+    if (wrapper) {
+      wrapper.addEventListener("focusin", handleFocus);
+      return () => wrapper.removeEventListener("focusin", handleFocus);
+    }
+  }, [isMobile]);
+
   return (
     <div className="relative h-full">
       <ChatBackButton />
@@ -135,8 +172,8 @@ export const Thread: FC = () => {
             <ThreadPrimitive.Root className="aui-root aui-thread-root @container flex h-full flex-col bg-background">
               <ThreadPrimitive.Viewport
                 className={cn(
-                  "aui-thread-viewport relative flex flex-1 flex-col overflow-x-auto overflow-y-auto",
-                  isMobile && keyboardVisible && "pb-[60dvh]"
+                  "aui-thread-viewport relative flex flex-1 flex-col overflow-x-auto overflow-y-auto"
+                  // isMobile && keyboardVisible && "pb-[60dvh]"
                 )}
               >
                 {chatConfig && <ThreadWelcome config={chatConfig} />}
@@ -494,10 +531,16 @@ const Composer: FC<{ chatConfig: ChatConfig | null; isLoading: boolean }> = ({
   };
 
   const text = useComposer((state) => state.text) || "";
+  const keyboardVisible = useAtomValue(keyboardVisibleAtom);
 
   return (
     <>
-      <div className="aui-composer-wrapper sticky bottom-0 mx-auto flex w-full max-w-[var(--thread-max-width)] flex-col overflow-visible rounded-t-md bg-background pb-4 md:px-4 md:pb-6 mobile-landscape:p-0">
+      <div
+        className={cn(
+          "aui-composer-wrapper sticky bottom-0 mx-auto flex w-full max-w-[var(--thread-max-width)] flex-col overflow-visible rounded-t-md bg-background pb-4 md:px-4 md:pb-6 mobile-landscape:p-0",
+          isMobile && keyboardVisible && "pb-[60dvh]"
+        )}
+      >
         <ThreadScrollToBottom />
         <ThreadPrimitive.Empty>
           <div className="flex flex-col items-center justify-center mb-4 font-inter">
