@@ -498,7 +498,7 @@ const Composer: FC<{ chatConfig: ChatConfig | null; isLoading: boolean }> = ({
       <div
         className={cn(
           "aui-composer-wrapper sticky bottom-0 mx-auto flex w-full max-w-[var(--thread-max-width)] flex-col overflow-visible rounded-t-md bg-background pb-4 md:px-4 md:pb-6 mobile-landscape:p-0",
-          isMobile && keyboardVisible && "pb-[30dvh]"
+          isMobile && keyboardVisible && "pb-[40dvh]"
         )}
       >
         <ThreadScrollToBottom />
