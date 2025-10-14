@@ -136,7 +136,7 @@ export const Thread: FC = () => {
               <ThreadPrimitive.Viewport
                 className={cn(
                   "aui-thread-viewport relative flex flex-1 flex-col overflow-x-auto overflow-y-auto",
-                  isMobile && keyboardVisible && "pb-[35dvh]"
+                  isMobile && keyboardVisible && "pb-[60dvh]"
                 )}
               >
                 {chatConfig && <ThreadWelcome config={chatConfig} />}
