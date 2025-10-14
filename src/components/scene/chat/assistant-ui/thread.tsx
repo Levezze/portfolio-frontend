@@ -104,9 +104,6 @@ const ChatBackButton: FC = () => {
 
 export const Thread: FC = () => {
   const isMobile = useAtomValue(isMobileAtom);
-  const keyboardVisible = useAtomValue(keyboardVisibleAtom);
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  // Reverted: no dynamic keyboard padding logic
 
   const {
     data: chatConfig,
@@ -121,43 +118,6 @@ export const Thread: FC = () => {
   });
 
   if (error) return <FailedLoad />;
-
-  // Scroll focused input into view when keyboard appears on mobile
-  useEffect(() => {
-    if (!isMobile) return;
-
-    const handleFocus = (e: FocusEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") {
-        // Find the FormItem parent that contains both label and input
-        const formItem = target.closest('[data-slot="form-item"]');
-
-        // Small delay to ensure keyboard is fully visible and padding is applied
-        setTimeout(() => {
-          if (formItem) {
-            formItem.scrollIntoView({
-              behavior: "smooth",
-              block: "start",
-              inline: "nearest",
-            });
-          } else {
-            // Fallback to input if FormItem not found
-            target.scrollIntoView({
-              behavior: "smooth",
-              block: "start",
-              inline: "nearest",
-            });
-          }
-        }, 50);
-      }
-    };
-
-    const wrapper = wrapperRef.current;
-    if (wrapper) {
-      wrapper.addEventListener("focusin", handleFocus);
-      return () => wrapper.removeEventListener("focusin", handleFocus);
-    }
-  }, [isMobile]);
 
   return (
     <div className="relative h-full">
@@ -538,7 +498,7 @@ const Composer: FC<{ chatConfig: ChatConfig | null; isLoading: boolean }> = ({
       <div
         className={cn(
           "aui-composer-wrapper sticky bottom-0 mx-auto flex w-full max-w-[var(--thread-max-width)] flex-col overflow-visible rounded-t-md bg-background pb-4 md:px-4 md:pb-6 mobile-landscape:p-0",
-          isMobile && keyboardVisible && "pb-[60dvh]"
+          isMobile && keyboardVisible && "pb-[30dvh]"
         )}
       >
         <ThreadScrollToBottom />

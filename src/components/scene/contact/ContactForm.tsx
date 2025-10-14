@@ -79,7 +79,7 @@ const ContactForm = () => {
               inline: "nearest",
             });
           }
-        }, 350);
+        }, 100);
       }
     };
 
