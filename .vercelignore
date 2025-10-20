@@ -1,0 +1,24 @@
+# Dependencies
+node_modules
+
+# Build cache (489 MB - DO NOT DEPLOY)
+.next/cache
+
+# Local env files
+.env.local
+.env.*.local
+
+# Debug logs
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+
+# Testing
+coverage
+.vitest
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
