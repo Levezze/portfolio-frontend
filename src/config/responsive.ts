@@ -55,11 +55,7 @@ const resolveViewportWidth = (): number => {
     return FALLBACK_DIMENSION;
   }
 
-  const viewportWidth = window.visualViewport?.width;
-  if (typeof viewportWidth === "number" && viewportWidth > 0) {
-    return viewportWidth;
-  }
-
+  // Use layout viewport for stable width (visualViewport changes with zoom)
   return window.innerWidth || FALLBACK_DIMENSION;
 };
 

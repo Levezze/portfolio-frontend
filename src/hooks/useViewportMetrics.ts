@@ -22,17 +22,11 @@ const readViewportSize = (): ViewportSize => {
     return { width: 0, height: 0 };
   }
 
-  const viewport = window.visualViewport;
-  const width =
-    viewport?.width ??
-    window.innerWidth ??
-    document.documentElement.clientWidth ??
-    0;
+  // Use layout viewport for stable sizing across zoom, Safari chrome, etc.
+  // Visual viewport changes with zoom/keyboard/UI chrome - wrong for cube sizing
+  const width = window.innerWidth ?? document.documentElement.clientWidth ?? 0;
   const height =
-    viewport?.height ??
-    window.innerHeight ??
-    document.documentElement.clientHeight ??
-    0;
+    window.innerHeight ?? document.documentElement.clientHeight ?? 0;
 
   return { width, height };
 };
@@ -194,7 +188,8 @@ export const useViewportMetrics = () => {
 
     window.addEventListener("resize", handleResize);
     window.addEventListener("orientationchange", handleOrientationChange);
-    window.visualViewport?.addEventListener("resize", handleResize);
+    // Don't listen to visualViewport resize - it fires on zoom/Safari chrome changes
+    // We only want to resize on real window/orientation changes
 
     const virtualKeyboard = (navigator as any)?.virtualKeyboard;
     if (
@@ -229,7 +224,6 @@ export const useViewportMetrics = () => {
           "orientationchange",
           handleOrientationChange,
         );
-        window.visualViewport?.removeEventListener("resize", handleResize);
         virtualKeyboard.removeEventListener(
           "geometrychange",
           handleGeometryChange,
@@ -245,7 +239,6 @@ export const useViewportMetrics = () => {
       window.removeEventListener("focusout", handleFocusOut, true);
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("orientationchange", handleOrientationChange);
-      window.visualViewport?.removeEventListener("resize", handleResize);
     };
   }, [
     setIsMobile,
