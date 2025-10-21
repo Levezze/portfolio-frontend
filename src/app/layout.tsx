@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Saira } from "next/font/google";
 import { GlobalNavigationManager } from "@/components/GlobalNavigationManager";
 import { ThemeWrapper } from "@/components/ThemeWrapper";
+import { Toaster } from "@/components/shared/ui/sonner";
 import "./globals.css";
 import Script from "next/script";
 
@@ -89,6 +90,7 @@ export default function RootLayout({
       >
         <GlobalNavigationManager />
         <ThemeWrapper>{children}</ThemeWrapper>
+        <Toaster />
       </body>
     </html>
   );

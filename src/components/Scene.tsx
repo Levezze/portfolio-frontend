@@ -8,6 +8,7 @@ import {
 import { Canvas } from "@react-three/fiber";
 import { useAtomValue } from "jotai";
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { isLoadedAtom } from "@/atoms/atomStore";
 import { useResponsiveFaceSize } from "@/hooks/useResponsiveFaceSize";
 import { isIOSDevice, isSafari } from "@/lib/utils/deviceDetection";
@@ -37,6 +38,18 @@ export const Scene = () => {
     setIsIOS(isIOSDevice());
     setIsSafariBrowser(isSafari());
   }, []);
+
+  // Show iOS compatibility warning
+  useEffect(() => {
+    if (isIOS) {
+      toast.warning("iOS Compatibility Notice", {
+        description:
+          "The 3D environment has some technical issues on iOS. For the best experience, please view this portfolio on desktop.",
+        duration: Infinity, // Persistent until dismissed
+        closeButton: true,
+      });
+    }
+  }, [isIOS]);
 
   // Mark scene as successfully loaded after initial render
   useEffect(() => {
