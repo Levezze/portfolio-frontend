@@ -170,3 +170,45 @@ export function getDeviceType(
 ): "mobile" | "desktop" {
   return isMobileDevice(dimensions) ? "mobile" : "desktop";
 }
+
+/**
+ * Detect if the current browser is Safari (desktop or iOS).
+ *
+ * This includes:
+ * - Safari on macOS
+ * - Safari on iOS (iPhone, iPad)
+ * - WebKit-based browsers on iOS (all iOS browsers use WebKit)
+ */
+export function isSafari(): boolean {
+  if (typeof navigator === "undefined" || typeof window === "undefined") {
+    return false;
+  }
+
+  const userAgent = navigator.userAgent || "";
+
+  // Check for Safari-specific characteristics:
+  // UserAgent contains "Safari" but NOT "Chrome" or "Chromium"
+  // (Chrome/Edge also contain "Safari" in UA but have "Chrome" too)
+  const isSafariUA =
+    /Safari/.test(userAgent) &&
+    !/Chrome|Chromium|CriOS|EdgiOS/.test(userAgent);
+
+  // iOS detection (all iOS browsers use WebKit, so this catches them all)
+  const isIOS = /iPhone|iPad|iPod/.test(userAgent);
+
+  return isSafariUA || isIOS;
+}
+
+/**
+ * Detect if the current device is running iOS.
+ *
+ * This includes iPhone, iPad, and iPod touch.
+ */
+export function isIOSDevice(): boolean {
+  if (typeof navigator === "undefined") {
+    return false;
+  }
+
+  const userAgent = navigator.userAgent || "";
+  return /iPhone|iPad|iPod/.test(userAgent);
+}
