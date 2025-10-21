@@ -1,5 +1,5 @@
 import { useAtomValue, useSetAtom } from "jotai";
-import { useEffect } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import {
   cubeSizeAtom,
   faceSizeAtom,
@@ -7,8 +7,12 @@ import {
   viewportHeightAtom,
   viewportOrientationAtom,
   viewportWidthAtom,
+  lockedDimensionsAtom,
+  uiModeAtom,
 } from "@/atoms/atomStore";
 import { RESPONSIVE_CONFIG } from "@/config/responsive";
+import { shouldLockSize } from "@/lib/utils/deviceDetection";
+import { debounce } from "@/utils/debounce";
 
 /**
  * Responsive face size hook - manages cube and HTML face sizing across breakpoints
@@ -32,56 +36,78 @@ export const useResponsiveFaceSize = () => {
   const viewportHeight = useAtomValue(viewportHeightAtom);
   const viewportWidth = useAtomValue(viewportWidthAtom);
   const orientation = useAtomValue(viewportOrientationAtom);
+  const lockedDimensions = useAtomValue(lockedDimensionsAtom);
+  const uiMode = useAtomValue(uiModeAtom);
 
-  useEffect(() => {
-    /**
-     * Update face size and cube size based on current viewport
-     */
-    const updateSize = () => {
-      let faceSize: number;
-      const root = document.documentElement;
+  // Create a debounced update function for desktop
+  const debouncedUpdate = useMemo(
+    () =>
+      debounce((width: number, height: number) => {
+        const root = document.documentElement;
 
-      if (isMobile) {
-        const margin = RESPONSIVE_CONFIG.mobile.marginPercentage ?? 0.15;
-        const fallbackWidth = typeof window !== "undefined" ? window.innerWidth : 0;
-        const fallbackHeight =
-          typeof window !== "undefined" ? window.innerHeight : 0;
-        const availableWidth = viewportWidth || fallbackWidth;
-        const availableHeight = viewportHeight || fallbackHeight;
-        const isPortrait = availableHeight >= availableWidth;
-        const dimension = isPortrait ? availableHeight : availableWidth;
-
-        if (dimension > 0) {
-          faceSize = dimension * (1 - margin);
-          root.style.setProperty("--face-size", `${faceSize}px`);
-        } else {
-          const cssValue = getComputedStyle(root)
-            .getPropertyValue("--face-size")
-            .trim();
-          const parsed = parseInt(cssValue, 10);
-          faceSize = Number.isNaN(parsed) ? 400 : parsed;
-        }
-      } else {
-        // Desktop/Tablet: Read from CSS (media queries control this)
+        // Desktop: Read from CSS (media queries control this)
         const cssValue = getComputedStyle(root)
           .getPropertyValue("--face-size")
           .trim();
 
-        faceSize = parseInt(cssValue, 10);
+        const faceSize = parseInt(cssValue, 10) || 400;
 
-        // Fallback to DEFAULT CSS value if parsing fails
-        if (Number.isNaN(faceSize)) {
-          console.warn(
-            "Failed to read --face-size from CSS, using default 400px",
-          );
-          faceSize = 400;
+        // Update atoms
+        setFaceSize(faceSize);
+        setCubeSize(faceSize / 100);
+      }, 200), // 200ms debounce
+    [setFaceSize, setCubeSize]
+  );
+
+  useEffect(() => {
+    /**
+     * Update face size and cube size based on current viewport or locked dimensions
+     */
+    const updateSize = () => {
+      const root = document.documentElement;
+      const needsLocking = shouldLockSize();
+
+      // Use locked dimensions for touch devices, live viewport for desktop
+      const width = needsLocking && lockedDimensions
+        ? lockedDimensions.width
+        : viewportWidth;
+      const height = needsLocking && lockedDimensions
+        ? lockedDimensions.height
+        : viewportHeight;
+
+      if (needsLocking) {
+        // Touch devices (phones and tablets): Use locked dimensions
+        let faceSize: number;
+
+        // Use mobile UI mode calculation
+        if (uiMode === "mobile") {
+          const margin = RESPONSIVE_CONFIG.mobile.marginPercentage ?? 0.15;
+          const isPortrait = height >= width;
+          const dimension = isPortrait ? height : width;
+
+          if (dimension > 0) {
+            faceSize = dimension * (1 - margin);
+            root.style.setProperty("--face-size", `${faceSize}px`);
+          } else {
+            faceSize = 400; // Fallback
+          }
+        } else {
+          // Large tablets with desktop UI: Read from CSS
+          const cssValue = getComputedStyle(root)
+            .getPropertyValue("--face-size")
+            .trim();
+          faceSize = parseInt(cssValue, 10) || 650;
         }
-      }
 
-      // Update atoms
-      setFaceSize(faceSize);
-      setCubeSize(faceSize / 100);
+        // Update atoms immediately for touch devices (no debounce)
+        setFaceSize(faceSize);
+        setCubeSize(faceSize / 100);
+      } else {
+        // Desktop: Use debounced update
+        debouncedUpdate(width, height);
+      }
     };
+
     updateSize();
   }, [
     isMobile,
@@ -90,5 +116,8 @@ export const useResponsiveFaceSize = () => {
     setFaceSize,
     viewportHeight,
     viewportWidth,
+    lockedDimensions,
+    uiMode,
+    debouncedUpdate,
   ]);
 };

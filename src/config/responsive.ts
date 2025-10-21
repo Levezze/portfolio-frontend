@@ -11,7 +11,7 @@
  * - Mobile: Percentage-based sizing with dynamic calculation
  */
 
-import { isMobileDevice } from "@/lib/utils/deviceDetection";
+import { isMobileDevice, getUIMode } from "@/lib/utils/deviceDetection";
 
 const FALLBACK_DIMENSION = 1000;
 
@@ -55,11 +55,7 @@ const resolveViewportWidth = (): number => {
     return FALLBACK_DIMENSION;
   }
 
-  const viewportWidth = window.visualViewport?.width;
-  if (typeof viewportWidth === "number" && viewportWidth > 0) {
-    return viewportWidth;
-  }
-
+  // Use layout viewport for stable width (visualViewport changes with zoom)
   return window.innerWidth || FALLBACK_DIMENSION;
 };
 
@@ -163,8 +159,8 @@ export type BreakpointKey = keyof typeof RESPONSIVE_CONFIG;
  * Get current breakpoint based on device and window size
  *
  * Priority:
- * 1. Mobile device → 'mobile' breakpoint
- * 2. Window dimensions (both width AND height) → largest matching breakpoint
+ * 1. Mobile UI mode (< 900px width) → 'mobile' breakpoint
+ * 2. Desktop UI mode → check dimensions for appropriate breakpoint
  * 3. Fallback → 'small'
  *
  * @returns Current breakpoint key
@@ -174,29 +170,36 @@ export type BreakpointKey = keyof typeof RESPONSIVE_CONFIG;
  * getCurrentBreakpoint() // → 'mobile'
  *
  * @example
- * // On 1920×1080 desktop
- * getCurrentBreakpoint() // → 'large' (both >= 1000)
+ * // On iPad mini (768px width, mobile UI)
+ * getCurrentBreakpoint() // → 'mobile'
  *
  * @example
- * // On 912×1368 iPad portrait
- * getCurrentBreakpoint() // → 'large' (not mobile, both >= 1000)
+ * // On iPad Pro (1024px width, desktop UI)
+ * getCurrentBreakpoint() // → 'large' or 'medium' based on dimensions
+ *
+ * @example
+ * // On 1920×1080 desktop
+ * getCurrentBreakpoint() // → 'large' (both >= 1000)
  */
 export function getCurrentBreakpoint(): BreakpointKey {
   const { width, height } = getViewportDimensions();
 
-  // Check for mobile device first
-  if (isMobileDevice({ width, height })) {
+  // Use UI mode to determine if should use mobile breakpoint
+  // This handles phones AND small tablets (iPad mini)
+  const uiMode = getUIMode({ width, height });
+
+  if (uiMode === "mobile") {
     return "mobile";
   }
 
-  // For desktop/tablet, check both width AND height
-  // Check in order from largest to smallest
+  // Desktop UI mode (large tablets and desktops)
+  // Check both width AND height for appropriate breakpoint
 
   if (width >= 1000 && height >= 1000) return "large";
   if (width >= 800 && height >= 800) return "medium";
   if (width >= 600 && height >= 600) return "small";
 
-  // Fallback for screens < 600×600 (but not mobile devices)
+  // Fallback for very small screens in desktop UI mode
   return "small";
 }
 

@@ -8,8 +8,10 @@ import {
 import { Canvas } from "@react-three/fiber";
 import { useAtomValue } from "jotai";
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { isLoadedAtom } from "@/atoms/atomStore";
 import { useResponsiveFaceSize } from "@/hooks/useResponsiveFaceSize";
+import { isIOSDevice, isSafari } from "@/lib/utils/deviceDetection";
 import { BowlGroundPlane } from "./scene/BowlGroundPlane";
 import { CameraController } from "./scene/CameraController";
 import { CubeWithFaces } from "./scene/CubeWithFaces";
@@ -20,12 +22,34 @@ export const Scene = () => {
 
   const isLoaded = useAtomValue(isLoadedAtom);
 
+  // iOS/Safari detection (client-side only)
+  const [isIOS, setIsIOS] = useState(false);
+  const [isSafariBrowser, setIsSafariBrowser] = useState(false);
+
   // WebGL context recovery state
   const [contextLost, setContextLost] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const hasSuccessfullyLoaded = useRef(false);
   const maxRetries = 3;
+
+  // Detect iOS/Safari on client side
+  useEffect(() => {
+    setIsIOS(isIOSDevice());
+    setIsSafariBrowser(isSafari());
+  }, []);
+
+  // Show iOS compatibility warning
+  useEffect(() => {
+    if (isIOS) {
+      toast.warning("iOS Compatibility Notice", {
+        description:
+          "The 3D environment has some technical issues on iOS. For the best experience, please view this portfolio on desktop.",
+        duration: Infinity, // Persistent until dismissed
+        closeButton: true,
+      });
+    }
+  }, [isIOS]);
 
   // Mark scene as successfully loaded after initial render
   useEffect(() => {
@@ -146,10 +170,13 @@ export const Scene = () => {
         shadows
         gl={{
           antialias: true,
-          powerPreference: "default", // More stable than high-performance
+          // iOS-specific: Use low-power to stay under memory limits
+          powerPreference: isIOS ? "low-power" : "default",
           failIfMajorPerformanceCaveat: false, // Allow fallback rendering
         }}
-        dpr={[1, 2]}
+        // iOS-specific: Use dpr=1 to avoid CSS3D transform calculation errors
+        // This prevents the Html component positioning bug on high-DPI devices (iPhone 15 Pro)
+        dpr={isIOS ? 1 : [1, 2]}
         onCreated={({ gl }) => {
           // Context created successfully (logging disabled for production)
           // console.log('WebGL context created successfully');

@@ -81,6 +81,13 @@ export const viewportOrientationAtom = atom<"portrait" | "landscape">(
   "portrait"
 );
 
+// Size locking for touch devices (phones and tablets)
+export const lockedDimensionsAtom = atom<{ width: number; height: number } | null>(null);
+export const lastOrientationAtom = atom<"portrait" | "landscape" | null>(null);
+
+// UI mode (mobile vs desktop layout)
+export const uiModeAtom = atom<"mobile" | "desktop">("desktop");
+
 // Mobile Keyboard UX
 export const keyboardVisibleAtom = atom<boolean>(false);
 export const keyboardHeightAtom = atom<number>(0);

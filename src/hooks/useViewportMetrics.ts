@@ -7,8 +7,15 @@ import {
   viewportHeightAtom,
   viewportOrientationAtom,
   viewportWidthAtom,
+  lockedDimensionsAtom,
+  lastOrientationAtom,
+  uiModeAtom,
 } from "@/atoms/atomStore";
-import { isMobileDevice } from "@/lib/utils/deviceDetection";
+import {
+  isMobileDevice,
+  shouldLockSize,
+  getUIMode
+} from "@/lib/utils/deviceDetection";
 
 type Orientation = "portrait" | "landscape";
 
@@ -22,17 +29,11 @@ const readViewportSize = (): ViewportSize => {
     return { width: 0, height: 0 };
   }
 
-  const viewport = window.visualViewport;
-  const width =
-    viewport?.width ??
-    window.innerWidth ??
-    document.documentElement.clientWidth ??
-    0;
+  // Use layout viewport for stable sizing across zoom, Safari chrome, etc.
+  // Visual viewport changes with zoom/keyboard/UI chrome - wrong for cube sizing
+  const width = window.innerWidth ?? document.documentElement.clientWidth ?? 0;
   const height =
-    viewport?.height ??
-    window.innerHeight ??
-    document.documentElement.clientHeight ??
-    0;
+    window.innerHeight ?? document.documentElement.clientHeight ?? 0;
 
   return { width, height };
 };
@@ -56,6 +57,9 @@ export const useViewportMetrics = () => {
   const setIsMobile = useSetAtom(isMobileAtom);
   const setKeyboardVisible = useSetAtom(keyboardVisibleAtom);
   const setKeyboardHeight = useSetAtom(keyboardHeightAtom);
+  const setLockedDimensions = useSetAtom(lockedDimensionsAtom);
+  const setLastOrientation = useSetAtom(lastOrientationAtom);
+  const setUIMode = useSetAtom(uiModeAtom);
 
   const maxHeightRef = useRef<{ portrait: number; landscape: number }>({
     portrait: 0,
@@ -64,6 +68,9 @@ export const useViewportMetrics = () => {
   const orientationRef = useRef<Orientation>("portrait");
   const keyboardVisibleRef = useRef<boolean>(false);
   const rafId = useRef<number | null>(null);
+  const lastOrientationRef = useRef<Orientation | null>(null);
+  const lockedDimensionsRef = useRef<{ width: number; height: number } | null>(null);
+  const isInitializedRef = useRef<boolean>(false);
 
   const isKeyboardElement = (node: Element | null): boolean => {
     if (!node) return false;
@@ -123,6 +130,29 @@ export const useViewportMetrics = () => {
       );
       orientationRef.current = orientation;
 
+      // Check if this is a touch device that needs size locking
+      const needsLocking = shouldLockSize();
+      const orientationChanged = lastOrientationRef.current !== null &&
+                                 lastOrientationRef.current !== orientation;
+
+      // Lock dimensions on touch devices
+      if (needsLocking) {
+        // Initialize or update locked dimensions only on:
+        // 1. First load (!isInitializedRef.current)
+        // 2. Orientation change
+        if (!isInitializedRef.current || orientationChanged) {
+          lockedDimensionsRef.current = { width, height };
+          setLockedDimensions({ width, height });
+          lastOrientationRef.current = orientation;
+          setLastOrientation(orientation);
+          isInitializedRef.current = true;
+        }
+      } else {
+        // Desktop: don't lock dimensions
+        lockedDimensionsRef.current = null;
+        setLockedDimensions(null);
+      }
+
       if (reset || !keyboardVisible) {
         maxHeightRef.current[orientation] = 0;
       }
@@ -147,11 +177,15 @@ export const useViewportMetrics = () => {
 
       root.style.setProperty("--viewport-height", `${stableHeight}px`);
 
+      // Always update viewport dimensions (for keyboard detection)
       setViewportHeight(stableHeight);
       setViewportWidth(width);
       setOrientation(orientation);
       setIsMobile(isMobileDevice({ width, height }));
       setKeyboardHeight(keyboardHeight);
+
+      // Update UI mode based on screen width
+      setUIMode(getUIMode({ width, height }));
     };
 
     const scheduleUpdate = (reset = false) => {
@@ -194,7 +228,8 @@ export const useViewportMetrics = () => {
 
     window.addEventListener("resize", handleResize);
     window.addEventListener("orientationchange", handleOrientationChange);
-    window.visualViewport?.addEventListener("resize", handleResize);
+    // Don't listen to visualViewport resize - it fires on zoom/Safari chrome changes
+    // We only want to resize on real window/orientation changes
 
     const virtualKeyboard = (navigator as any)?.virtualKeyboard;
     if (
@@ -229,7 +264,6 @@ export const useViewportMetrics = () => {
           "orientationchange",
           handleOrientationChange,
         );
-        window.visualViewport?.removeEventListener("resize", handleResize);
         virtualKeyboard.removeEventListener(
           "geometrychange",
           handleGeometryChange,
@@ -245,7 +279,6 @@ export const useViewportMetrics = () => {
       window.removeEventListener("focusout", handleFocusOut, true);
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("orientationchange", handleOrientationChange);
-      window.visualViewport?.removeEventListener("resize", handleResize);
     };
   }, [
     setIsMobile,
@@ -255,5 +288,8 @@ export const useViewportMetrics = () => {
     isKeyboardElement,
     setKeyboardVisible,
     setKeyboardHeight,
+    setLockedDimensions,
+    setLastOrientation,
+    setUIMode,
   ]);
 };
