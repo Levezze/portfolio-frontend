@@ -6,7 +6,6 @@ import {
   SoftShadows,
 } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import { CanvasWrapper } from "@isaac_ua/drei-html-fix";
 import { useAtomValue } from "jotai";
 import { useEffect, useRef, useState } from "react";
 import { isLoadedAtom } from "@/atoms/atomStore";
@@ -154,59 +153,56 @@ export const Scene = () => {
         </div>
       )}
 
-      {/* CanvasWrapper fixes DPR-related Html positioning issues on Safari/iOS */}
-      <CanvasWrapper>
-        <Canvas
-          shadows
-          gl={{
-            antialias: true,
-            // iOS-specific: Use low-power to stay under memory limits
-            powerPreference: isIOS ? "low-power" : "default",
-            failIfMajorPerformanceCaveat: false, // Allow fallback rendering
-          }}
-          // iOS-specific: Use dpr=1 to avoid CSS3D transform calculation errors
-          // This prevents the Html component positioning bug on high-DPI devices (iPhone 15 Pro)
-          dpr={isIOS ? 1 : [1, 2]}
-          onCreated={({ gl }) => {
-            // Context created successfully (logging disabled for production)
-            // console.log('WebGL context created successfully');
-          }}
-          onPointerMissed={() => {
-            // Handle any pointer events that might interfere
-          }}
+      <Canvas
+        shadows
+        gl={{
+          antialias: true,
+          // iOS-specific: Use low-power to stay under memory limits
+          powerPreference: isIOS ? "low-power" : "default",
+          failIfMajorPerformanceCaveat: false, // Allow fallback rendering
+        }}
+        // iOS-specific: Use dpr=1 to avoid CSS3D transform calculation errors
+        // This prevents the Html component positioning bug on high-DPI devices (iPhone 15 Pro)
+        dpr={isIOS ? 1 : [1, 2]}
+        onCreated={({ gl }) => {
+          // Context created successfully (logging disabled for production)
+          // console.log('WebGL context created successfully');
+        }}
+        onPointerMissed={() => {
+          // Handle any pointer events that might interfere
+        }}
+      >
+        <ambientLight intensity={6} />
+        <directionalLight
+          castShadow
+          position={[5, 5, 15]}
+          intensity={2}
+          shadow-mapSize={[2048, 2048]}
+          shadow-camera-far={50}
+          shadow-camera-left={-10}
+          shadow-camera-right={10}
+          shadow-camera-top={10}
+          shadow-camera-bottom={-10}
+        />
+        <SoftShadows size={4} samples={16} />
+
+        <OrthographicCamera makeDefault position={[0, 0, 100]} zoom={100} />
+        <CameraController />
+
+        <Float
+          speed={1}
+          rotationIntensity={1.2}
+          floatIntensity={0.1}
+          floatingRange={[0.1, 1.5]}
         >
-          <ambientLight intensity={6} />
-          <directionalLight
-            castShadow
-            position={[5, 5, 15]}
-            intensity={2}
-            shadow-mapSize={[2048, 2048]}
-            shadow-camera-far={50}
-            shadow-camera-left={-10}
-            shadow-camera-right={10}
-            shadow-camera-top={10}
-            shadow-camera-bottom={-10}
-          />
-          <SoftShadows size={4} samples={16} />
+          <BowlGroundPlane position={bowlPosition} color={"#1c1c1c"} />
+        </Float>
+        <CubeWithFaces />
 
-          <OrthographicCamera makeDefault position={[0, 0, 100]} zoom={100} />
-          <CameraController />
+        <OrbitControls enabled={false} />
 
-          <Float
-            speed={1}
-            rotationIntensity={1.2}
-            floatIntensity={0.1}
-            floatingRange={[0.1, 1.5]}
-          >
-            <BowlGroundPlane position={bowlPosition} color={"#1c1c1c"} />
-          </Float>
-          <CubeWithFaces />
-
-          <OrbitControls enabled={false} />
-
-          <Preload all />
-        </Canvas>
-      </CanvasWrapper>
+        <Preload all />
+      </Canvas>
     </div>
   );
 };

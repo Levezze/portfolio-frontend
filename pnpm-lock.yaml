@@ -23,9 +23,6 @@ importers:
       '@hookform/resolvers':
         specifier: ^5.2.2
         version: 5.2.2(react-hook-form@7.64.0(react@19.1.0))
-      '@isaac_ua/drei-html-fix':
-        specifier: ^1.0.2
-        version: 1.0.2(@react-three/fiber@9.3.0(@types/react@19.2.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(three@0.180.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       '@radix-ui/react-avatar':
         specifier: ^1.1.10
         version: 1.1.10(@types/react-dom@19.2.0(@types/react@19.2.0))(@types/react@19.2.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -800,13 +797,6 @@ packages:
     engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
     cpu: [x64]
     os: [win32]
-
-  '@isaac_ua/drei-html-fix@1.0.2':
-    resolution: {integrity: sha512-WC/h5j1hVHwfF3HqpbXfL2b6ii9bihQNdAK/9rDzRepIYOfHvSpsjTWokuWtn5rTT5/GlcR4252mAnmeBCEV/w==}
-    peerDependencies:
-      '@react-three/fiber': ^8.0.0
-      react: ^18.0.0
-      react-dom: ^18.0.0
 
   '@isaacs/fs-minipass@4.0.1':
     resolution: {integrity: sha512-wgm9Ehl2jpeqP3zw/7mo3kRHFp5MEDhqAdwy1fTGkHAwnkGOVsgpvQhL8B5n1qlb01jV3n/bI0ZfZp5lWA1k4w==}
@@ -4415,12 +4405,6 @@ snapshots:
 
   '@img/sharp-win32-x64@0.34.4':
     optional: true
-
-  '@isaac_ua/drei-html-fix@1.0.2(@react-three/fiber@9.3.0(@types/react@19.2.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(three@0.180.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)':
-    dependencies:
-      '@react-three/fiber': 9.3.0(@types/react@19.2.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(three@0.180.0)
-      react: 19.1.0
-      react-dom: 19.1.0(react@19.1.0)
 
   '@isaacs/fs-minipass@4.0.1':
     dependencies:
