@@ -1,6 +1,5 @@
 import { useAtomValue, useSetAtom } from "jotai";
 import {
-  CircleUserIcon,
   FileUserIcon,
   FolderGit2Icon,
   MailIcon,
@@ -71,6 +70,7 @@ export const Navigation = ({
           round={isMobile ? false : true}
           size={10}
         />
+        {/* Blog button hidden temporarily — re-enable when blog is live
         {isMobile && <Separator className="my-1" />}
         <TooltipButton
           tooltip={activeFace !== "blog"}
@@ -93,6 +93,7 @@ export const Navigation = ({
           size={10}
         />
         {isMobile && <Separator className="my-1" />}
+        */}
         <TooltipButton
           tooltip={activeFace !== "projects"}
           disabled={activeFace === "projects"}
