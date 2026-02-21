@@ -89,6 +89,9 @@
   "pnpm": {
     "overrides": {
       "jotai": "^2.15.0"
-    }
+    },
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
   }
 }

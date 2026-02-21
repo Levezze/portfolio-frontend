@@ -109,7 +109,7 @@ const Projects = () => {
       className="
       w-full h-full p-0 grid gap-4
       overflow-x-hidden overflow-y-hidden
-      grid-rows-3 grid-cols-1 grow-1
+      flex flex-col grow-1
       md:p-4 md:grid-rows-2 md:grid-cols-2 md:gap-4"
     >
       {projectsArray.map((project, index) => (
