@@ -1,22 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import { Saira } from "next/font/google";
-import { GlobalNavigationManager } from "@/components/GlobalNavigationManager";
-import { ThemeWrapper } from "@/components/ThemeWrapper";
-import { Toaster } from "@/components/shared/ui/sonner";
-import "./globals.css";
 import Script from "next/script";
-
-const inter = Saira({
-  variable: "--font-inter",
-  weight: ["400", "600"],
-  subsets: ["latin"],
-});
-
-const merriweather = Saira({
-  variable: "--font-mw",
-  weight: ["400", "700"],
-  subsets: ["latin"],
-});
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Levezze | Portfolio",
@@ -33,10 +17,10 @@ export const metadata: Metadata = {
     locale: "en_US",
     images: [
       {
-        url: "/levezze-og.png",
+        url: "/levezze-og-turn.jpg",
         width: 1200,
         height: 630,
-        alt: "Levezze Portfolio",
+        alt: "The site mid page turn: its pages cut into slices, caught rotating",
       },
     ],
   },
@@ -45,12 +29,12 @@ export const metadata: Metadata = {
     title: "Levezze | Portfolio",
     description:
       "Lev Zhitnik | Full Stack & AI Engineer | Former Computational Designer & Architect",
-    images: ["/levezze-og.png"],
+    images: ["/levezze-og-turn.jpg"],
   },
   icons: {
     icon: [
-      { url: "/favicon.ico", sizes: "any" },
-      { url: "/favicon.svg", type: "image/svg+xml" },
+      // Drawn per size on a pixel grid, so no SVG: a scaled vector blurs it.
+      { url: "/favicon.ico", sizes: "16x16 32x32 48x48" },
       { url: "/favicon-96x96.png", sizes: "96x96", type: "image/png" },
     ],
     apple: "/apple-touch-icon.png",
@@ -62,6 +46,8 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
+  themeColor: "#0a0909",
+  colorScheme: "dark",
 };
 
 export default function RootLayout({
@@ -70,7 +56,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark">
       <head>
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-K4FR2L92KD"
@@ -85,13 +71,7 @@ export default function RootLayout({
           `}
         </Script>
       </head>
-      <body
-        className={`${inter.variable} ${merriweather.variable} antialiased bg-background font-inter-regular`}
-      >
-        <GlobalNavigationManager />
-        <ThemeWrapper>{children}</ThemeWrapper>
-        <Toaster />
-      </body>
+      <body className="antialiased">{children}</body>
     </html>
   );
 }
