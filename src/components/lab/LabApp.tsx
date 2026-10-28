@@ -22,6 +22,8 @@ import { LAB_PAGES, PAGE_COMPONENTS, resolveSkin } from "./LabPages";
 import { prismLayout, sliceCount } from "./layout";
 import { planTurn } from "./motion";
 import type { PrismHandle } from "./PrismScene";
+import { ResumeContext } from "./pages/ResumePage";
+import type { Resume } from "./profile";
 import { usePrefersReducedMotion } from "./useReducedMotion";
 
 const PrismScene = dynamic(() => import("./PrismScene"), { ssr: false });
@@ -66,7 +68,7 @@ class SceneBoundary extends Component<
   }
 }
 
-export function LabApp() {
+export function LabApp({ resume }: { resume: Resume }) {
   const [size, setSize] = useState<Size | null>(null);
   const [active, setActive] = useState(0);
   const [phase, setPhase] = useState<Phase>("intro");
@@ -389,33 +391,35 @@ export function LabApp() {
           </SceneBoundary>
         )}
 
-        <div className="fixed inset-0 z-10" aria-hidden={domHidden}>
-          {PAGE_COMPONENTS.map((Page, i) => {
-            const visible = !domHidden && i === active;
-            return (
-              <div
-                key={LAB_PAGES[i]}
-                className="absolute inset-0"
-                // Hidden pages stay rendered (opacity 0) so they can be
-                // snapshotted, but must not take clicks or focus.
-                inert={!visible}
-                style={{
-                  opacity: visible ? 1 : 0,
-                  pointerEvents: visible ? "auto" : "none",
-                  transition: still ? "opacity 250ms ease" : undefined,
-                }}
-              >
-                <Page
-                  skin={skins[i]}
-                  nav={nav}
-                  ref={(el: HTMLDivElement | null) => {
-                    pageRefs.current[i] = el;
+        <ResumeContext value={resume}>
+          <div className="fixed inset-0 z-10" aria-hidden={domHidden}>
+            {PAGE_COMPONENTS.map((Page, i) => {
+              const visible = !domHidden && i === active;
+              return (
+                <div
+                  key={LAB_PAGES[i]}
+                  className="absolute inset-0"
+                  // Hidden pages stay rendered (opacity 0) so they can be
+                  // snapshotted, but must not take clicks or focus.
+                  inert={!visible}
+                  style={{
+                    opacity: visible ? 1 : 0,
+                    pointerEvents: visible ? "auto" : "none",
+                    transition: still ? "opacity 250ms ease" : undefined,
                   }}
-                />
-              </div>
-            );
-          })}
-        </div>
+                >
+                  <Page
+                    skin={skins[i]}
+                    nav={nav}
+                    ref={(el: HTMLDivElement | null) => {
+                      pageRefs.current[i] = el;
+                    }}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        </ResumeContext>
 
         {layout && (
           <Cubes

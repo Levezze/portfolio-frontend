@@ -26,7 +26,8 @@ Everything lives in `src/components/lab/`; `src/app/page.tsx` only renders `<Lab
 | `config.ts` | **Every tunable value** (motion, light, slice size, skin). Change it here, nowhere else |
 | `presets.ts`, `fonts.ts` | Palettes and design tokens; self-hosted fonts via `next/font/local` |
 | `pages/` | One file per page plus `shared.tsx` (Frame, panel, blurs, media). `LabPages.tsx` is the index |
-| `content.ts` | All copy about Lev: projects, resume, welcome text. Mirrors the backend seeds |
+| `content.ts` | Copy about Lev that is still frontend-side: projects, welcome text, contact. Mirrors the backend seeds |
+| `profile.ts` | Reads the resume from the backend's `/api/v1/public/profile` on the server, cached for 60s. `src/app/page.tsx` passes it to `LabApp` |
 | `chat.ts`, `useLabChat.ts` | Pure chat logic (wire format, error copy, typing pace) and the hook that drives it |
 | `backStack.ts` | The browser back button undoes page turns and in-page steps |
 | `Drift.tsx`, `Cubes.tsx` | Background glow and passing cube shadows; both stop under reduced motion |
@@ -37,7 +38,7 @@ Everything lives in `src/components/lab/`; `src/app/page.tsx` only renders `<Lab
 
 - **Snapshots must match the screen.** Anything that differs between the live page and its snapshot shows as a jump at the end of a turn. That is why the drift runs on one shared clock that pauses during turns, why media is same-origin (`public/media`, or the Next image route), and why overlays carry `data-lab-nocapture`.
 - **Panel borders go through `--panel-line`.** `panel` sets the border inline, which beats any Tailwind class. Change the colour with `hover:[--panel-line:var(--accent)]`, not `hover:border-*`.
-- **Copy about Lev comes from the user or the backend seeds.** Never invent it. Keep `content.ts` and the backend's `profile.json` and seeds in step when either changes.
+- **Copy about Lev comes from the user or the backend seeds.** Never invent it. The resume lives only in the backend's `content/profile.json`: edit it there and reseed (`scripts/seed_profile.py`); the site picks it up within a minute, no deploy. Keep the rest of `content.ts` and the backend seeds in step when either changes.
 - **Type never goes below 14px.**
 - **A turn always ends.** A failed snapshot or turn still lands on the target page, and with no WebGL the pages show without the prism. Keep any new async step inside that guarantee.
 

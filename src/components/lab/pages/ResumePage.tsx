@@ -1,9 +1,16 @@
 "use client";
 
 import { motion } from "motion/react";
-import { type ReactNode, useEffect, useRef, useState } from "react";
-import { RESUME } from "../content";
+import {
+  createContext,
+  type ReactNode,
+  use,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import type { Design } from "../presets";
+import type { Resume } from "../profile";
 import { Frame, h1, type PageProps, panel } from "./shared";
 
 /**
@@ -158,17 +165,22 @@ function SkillGroup({
   );
 }
 
+/** The resume the server read from the backend; LabApp provides it. */
+export const ResumeContext = createContext<Resume | null>(null);
+
 export function ResumePage({ skin, nav, ref }: PageProps) {
   const { design } = skin;
+  const resume = use(ResumeContext);
+  if (!resume) throw new Error("ResumePage needs a ResumeContext");
   const section = `mt-10 text-[var(--faint)] ${design.label}`;
   return (
     <Frame index={2} title="Resume" skin={skin} nav={nav} ref={ref}>
-      <h1 className={`mt-8 ${h1(design)}`}>{RESUME.name}</h1>
+      <h1 className={`mt-8 ${h1(design)}`}>{resume.name}</h1>
       <div className="mt-4 min-h-0 flex-1 overflow-y-auto pr-2" data-lab-scroll>
-        <p>{RESUME.tagline}</p>
-        <p className="mt-3 text-[var(--muted)]">{RESUME.summary}</p>
+        <p>{resume.tagline}</p>
+        <p className="mt-3 text-[var(--muted)]">{resume.summary}</p>
         <div className="mt-6 grid items-start gap-4 sm:grid-cols-2">
-          {RESUME.skills.map((g) => (
+          {resume.skills.map((g) => (
             <SkillGroup
               key={g.group}
               group={g.group}
@@ -180,7 +192,7 @@ export function ResumePage({ skin, nav, ref }: PageProps) {
         <div className={section}>Experience</div>
         <Timeline
           design={design}
-          items={RESUME.roles.map((r) => ({
+          items={resume.roles.map((r) => ({
             key: r.company,
             years: r.years,
             body: (
@@ -205,7 +217,7 @@ export function ResumePage({ skin, nav, ref }: PageProps) {
         <div className={section}>Education</div>
         <Timeline
           design={design}
-          items={RESUME.education.map((e) => ({
+          items={resume.education.map((e) => ({
             key: e.title,
             years: e.years,
             body: (
