@@ -115,7 +115,7 @@ export function Frame({
         data-lab-frame
       >
         <div
-          className={`flex items-baseline justify-between border-b border-[var(--line)] pb-3 ${design.label}`}
+          className={`flex items-baseline justify-between whitespace-nowrap border-b border-[var(--line)] pb-3 ${design.label}`}
         >
           <span className="text-[var(--accent)]">
             0{index + 1} / {title}
@@ -203,8 +203,15 @@ export function BottomBlur({ height }: { height: string }) {
  * A row of chips that scrolls sideways. The chips fade out at an edge with
  * more of them past it, and the fade grows with the distance left to scroll,
  * so it eases in from nothing instead of switching on.
+ *
+ * What scrolls behind the row is blurred by a band under it, not by the chips
+ * themselves: the row's fade mask cuts its children off from the page behind,
+ * so a backdrop blur on a chip would have nothing to blur.
  */
 const CHIP_FADE_PX = 48;
+const CHIP_BLUR = "blur(8px)";
+/** The band eases in over this much above the chips. */
+const CHIP_BLUR_RISE_PX = 20;
 
 export function ChipRow({ children }: { children: ReactNode }) {
   const row = useRef<HTMLDivElement>(null);
@@ -228,11 +235,22 @@ export function ChipRow({ children }: { children: ReactNode }) {
   }, [update]);
   const mask = `linear-gradient(to right, transparent 0, black ${fade.left}px, black calc(100% - ${fade.right}px), transparent 100%)`;
   return (
-    <div className="-mx-6 sm:-mx-12">
+    <div className="relative -mx-6 sm:-mx-12">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0"
+        style={{
+          top: -CHIP_BLUR_RISE_PX,
+          backdropFilter: CHIP_BLUR,
+          WebkitBackdropFilter: CHIP_BLUR,
+          maskImage: `linear-gradient(to bottom, transparent, black ${CHIP_BLUR_RISE_PX}px)`,
+          WebkitMaskImage: `linear-gradient(to bottom, transparent, black ${CHIP_BLUR_RISE_PX}px)`,
+        }}
+      />
       <div
         ref={row}
         onScroll={update}
-        className="lab-noscrollbar flex gap-2 overflow-x-auto px-6 pb-3 sm:px-12"
+        className="lab-noscrollbar relative flex gap-2 overflow-x-auto px-6 pb-3 sm:px-12"
         style={{ maskImage: mask, WebkitMaskImage: mask }}
       >
         {children}

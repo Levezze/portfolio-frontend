@@ -172,13 +172,19 @@ export function LabApp() {
         width: size.w,
         height: size.h,
         features: { restoreScrollPosition: true },
-        // modern-screenshot copies each field's -webkit-text-fill-color (the
-        // text colour) inline and not its ::placeholder, and the fill colour
-        // paints placeholders too, so they went white mid-turn. An empty
-        // field shows only its placeholder, so fill it with that colour.
         onCloneNode: (clone) => {
+          if (!(clone instanceof HTMLElement)) return;
+          // The copy pins every box to its on-screen width. Without kerning
+          // (modern-screenshot turns it back on in Chrome only) Safari sets
+          // the copy's text a hair wider, and a label one line wide on
+          // screen wraps to two mid-turn. Kerning on keeps the widths equal.
+          clone.style.fontKerning = "normal";
+          // modern-screenshot copies each field's -webkit-text-fill-color (the
+          // text colour) inline and not its ::placeholder, and the fill colour
+          // paints placeholders too, so they went white mid-turn. An empty
+          // field shows only its placeholder, so fill it with that colour.
           const live = el.querySelector("input, textarea");
-          if (!live || !(clone instanceof Element)) return;
+          if (!live) return;
           const color = getComputedStyle(live, "::placeholder").color;
           for (const f of clone.querySelectorAll<HTMLElement>(
             "input[placeholder], textarea[placeholder]",
