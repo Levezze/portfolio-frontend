@@ -3,7 +3,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { wsManager } from "@/lib/api/core/wsManager";
-import { type ServerMessage, step, type Turn, toWire } from "./chat";
+import {
+  restoreTurns,
+  type ServerMessage,
+  step,
+  type Turn,
+  toWire,
+} from "./chat";
 import type { NavState } from "./LabNav";
 
 /**
@@ -12,9 +18,14 @@ import type { NavState } from "./LabNav";
  * reply that has not started within FIRST_TOKEN_MS counts as offline:
  * wsManager queues sends while disconnected and never fails them, so without
  * this timer a reply would wait forever.
+ *
+ * The conversation is kept in localStorage so a reload carries on where it
+ * left off. The backend is stateless (every send carries the whole history),
+ * so nothing else needs restoring.
  */
 
 const FIRST_TOKEN_MS = 8000;
+const STORAGE_KEY = "levezze-chat";
 
 export type ChatStatus = "idle" | "waiting" | "streaming" | "offline";
 
@@ -27,6 +38,25 @@ export function useLabChat(nav: NavState) {
   const cleanup = useRef<(() => void) | null>(null);
 
   useEffect(() => () => cleanup.current?.(), []);
+
+  // Read after mount, not during render, so the server HTML still matches.
+  const restored = useRef(false);
+  useEffect(() => {
+    try {
+      setTurns(restoreTurns(localStorage.getItem(STORAGE_KEY)));
+    } catch {
+      // Storage can be blocked; the chat simply starts fresh.
+    }
+    restored.current = true;
+  }, []);
+  useEffect(() => {
+    if (!restored.current) return;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(turns));
+    } catch {
+      // Same: no storage, no memory across reloads.
+    }
+  }, [turns]);
 
   const send = useCallback(
     (text: string) => {

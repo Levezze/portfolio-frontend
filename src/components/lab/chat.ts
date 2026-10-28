@@ -70,3 +70,27 @@ export function toWire(turns: Turn[]) {
       content: [{ type: "text" as const, text: t.text }],
     }));
 }
+
+/**
+ * Turns saved in the browser, read back defensively: anything malformed is
+ * dropped, and so is a trailing question that never got its reply.
+ */
+export function restoreTurns(raw: string | null): Turn[] {
+  if (!raw) return [];
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return [];
+  }
+  if (!Array.isArray(parsed)) return [];
+  const turns = parsed.filter(
+    (t): t is Turn =>
+      typeof t === "object" &&
+      t !== null &&
+      (t.role === "user" || t.role === "assistant") &&
+      typeof t.text === "string" &&
+      t.text.trim() !== "",
+  );
+  return turns.at(-1)?.role === "user" ? turns.slice(0, -1) : turns;
+}

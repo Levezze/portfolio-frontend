@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { pageForTool, step, toWire } from "../chat";
+import { pageForTool, restoreTurns, step, type Turn, toWire } from "../chat";
 
 describe("pageForTool", () => {
   it("maps navigate_page to the lab page index", () => {
@@ -80,5 +80,44 @@ describe("toWire", () => {
         { role: "assistant", text: "" },
       ]),
     ).toEqual([{ role: "user", content: [{ type: "text", text: "Hi" }] }]);
+  });
+});
+
+describe("restoreTurns", () => {
+  it("round-trips finished turns", () => {
+    const turns: Turn[] = [
+      { role: "user", text: "hi" },
+      { role: "assistant", text: "hello" },
+    ];
+    expect(restoreTurns(JSON.stringify(turns))).toEqual(turns);
+  });
+
+  it("starts empty on nothing stored or on garbage", () => {
+    expect(restoreTurns(null)).toEqual([]);
+    expect(restoreTurns("{not json")).toEqual([]);
+    expect(restoreTurns(JSON.stringify({ role: "user" }))).toEqual([]);
+  });
+
+  it("drops malformed entries and empty replies", () => {
+    const raw = JSON.stringify([
+      { role: "user", text: "hi" },
+      { role: "system", text: "x" },
+      { role: "assistant", text: 42 },
+      { role: "assistant", text: "" },
+      { role: "assistant", text: "hello" },
+    ]);
+    expect(restoreTurns(raw)).toEqual([
+      { role: "user", text: "hi" },
+      { role: "assistant", text: "hello" },
+    ]);
+  });
+
+  it("drops a question left without a reply", () => {
+    const raw = JSON.stringify([
+      { role: "user", text: "hi" },
+      { role: "assistant", text: "hello" },
+      { role: "user", text: "still there?" },
+    ]);
+    expect(restoreTurns(raw)).toHaveLength(2);
   });
 });
