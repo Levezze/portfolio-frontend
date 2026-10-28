@@ -6,6 +6,8 @@
  * Either way each slice's cross-section is a square, so it turns cleanly.
  */
 
+import { SITE } from "./config";
+
 export type Axis = "x" | "y";
 
 export type SliceRect = {
@@ -28,12 +30,11 @@ export type PrismLayout = {
 export const MIN_SLICES = 5;
 export const MAX_LANDSCAPE_SLICES = 12;
 export const MAX_SLICES = 10;
-export const DEFAULT_SLICE_PX = 150;
 
 export function sliceCount(
   width: number,
   height: number,
-  targetPx = DEFAULT_SLICE_PX,
+  targetPx = SITE.slicePx,
 ): number {
   const n = Math.round(Math.max(width, height) / targetPx);
   if (height >= width) return Math.min(MAX_SLICES, Math.max(MIN_SLICES, n));

@@ -5,11 +5,19 @@ import {
   type CSSProperties,
   type ReactNode,
   type Ref,
+  useCallback,
   useEffect,
   useId,
   useRef,
   useState,
 } from "react";
+import {
+  type ContactErrors,
+  type ContactValues,
+  emailConfig,
+  emailParams,
+  validateContact,
+} from "./contact";
 import {
   CONTACT,
   mediaSrc,
@@ -21,12 +29,12 @@ import {
   WELCOME,
 } from "./content";
 import { Drift } from "./Drift";
-import { fontById } from "./fonts";
+import { BODY_FONT, HEADING_FONT } from "./fonts";
 import { LabMarkdown } from "./LabMarkdown";
-import { IndexNav, type NavState, PageNav } from "./LabNav";
+import { type NavState, PageNav } from "./LabNav";
 import {
+  DESIGN,
   type Design,
-  designById,
   type Palette,
   paletteById,
   type SkinSpec,
@@ -47,7 +55,7 @@ export type Skin = { palette: Palette; design: Design; spec: SkinSpec };
 /** The skin of one page: palettes are per page, the design is shared. */
 export const resolveSkin = (spec: SkinSpec, page: number): Skin => ({
   palette: paletteById(spec.pagePalettes[page] ?? spec.pagePalettes[0]),
-  design: designById(spec.designId),
+  design: DESIGN,
   spec,
 });
 
@@ -69,6 +77,7 @@ function Frame({
   nav,
   children,
   ref,
+  blurHeight = "var(--nav-pad)",
 }: {
   index: number;
   title: string;
@@ -76,20 +85,13 @@ function Frame({
   nav: NavState;
   children: ReactNode;
   ref?: Ref<HTMLDivElement>;
+  /** How far up from the bottom edge the page blurs out. */
+  blurHeight?: string;
 }) {
   const { palette, design, spec } = skin;
-  // Room under the content for the page's own nav build: the rail stacks
-  // four rows at the bottom-left from `sm` up, the others are one row.
-  // The pill floats over the content, which blurs out as it reaches it
+  // The pill nav floats over the content, which blurs out as it reaches it
   // (BottomBlur), so the page runs to the bottom edge and each scroll area
   // pads itself by `--nav-pad` instead.
-  const bottomPad = {
-    tabs: "pb-24",
-    rail: "pb-24 sm:pb-44",
-    pill: "pb-0",
-    index: "pb-10",
-  }[design.nav];
-  const navPad = design.nav === "pill" ? "92px" : "0px";
   // This page's copy of the nav shows itself selected, whatever the app's
   // current page is, so a snapshot of it is right the moment it lands.
   const own: NavState = { ...nav, active: index };
@@ -103,10 +105,10 @@ function Frame({
           ...palette.vars,
           "--radius": design.radius,
           "--title-scale": spec.titleScale,
-          "--nav-pad": navPad,
+          "--nav-pad": "92px",
           "--nav-bg": `color-mix(in srgb, ${palette.capColor} 92%, transparent)`,
-          "--font-heading": fontById(spec.headingFontId).family,
-          "--font-body": fontById(spec.bodyFontId).family,
+          "--font-heading": HEADING_FONT,
+          "--font-body": BODY_FONT,
           fontFamily: "var(--font-body)",
           background: palette.sceneBackground,
         } as CSSProperties
@@ -117,27 +119,25 @@ function Frame({
 [data-lab-frame] .lab-h1 { font-size: calc(${design.h1Rem[0]}rem * var(--title-scale)); }
 @media (min-width: 640px) { [data-lab-frame] .lab-h1 { font-size: calc(${design.h1Rem[1]}rem * var(--title-scale)); } }
 [data-lab-frame] [data-lab-scroll] { padding-bottom: var(--nav-pad); }
-[data-lab-frame] [data-lab-scroll]::-webkit-scrollbar-track { margin-bottom: var(--nav-pad); }
+@media (hover: hover) and (pointer: fine) { [data-lab-frame] [data-lab-scroll]::-webkit-scrollbar-track { margin-bottom: var(--nav-pad); } }
+[data-lab-root] .lab-noscrollbar { scrollbar-width: none; }
+[data-lab-root] .lab-noscrollbar::-webkit-scrollbar { display: none; }
 [data-lab-root] button:not(:disabled), [data-lab-root] a[href] { cursor: pointer; }`}</style>
       <div
-        className={`relative flex h-full flex-col px-6 pt-8 sm:px-12 sm:pt-10 ${bottomPad}`}
+        className="relative flex h-full flex-col px-6 pt-8 sm:px-12 sm:pt-10"
         data-lab-frame
       >
         <div
           className={`flex items-baseline justify-between border-b border-[var(--line)] pb-3 ${design.label}`}
         >
-          {design.nav === "index" ? (
-            <IndexNav nav={own} design={design} />
-          ) : (
-            <span className="text-[var(--accent)]">
-              0{index + 1} / {title}
-            </span>
-          )}
+          <span className="text-[var(--accent)]">
+            0{index + 1} / {title}
+          </span>
           <span className="text-[var(--faint)]">levezze.com</span>
         </div>
         {children}
       </div>
-      {design.nav === "pill" && <BottomBlur />}
+      <BottomBlur height={blurHeight} />
       <PageNav nav={own} design={design} />
     </div>
   );
@@ -157,15 +157,26 @@ const BLUR_STEPS = [
   { px: 16, from: 60 },
 ];
 
-function BottomBlur() {
+function EdgeBlur({
+  side,
+  className,
+  style,
+  children,
+}: {
+  /** The edge the blur deepens toward. */
+  side: "bottom" | "left" | "right";
+  className: string;
+  style?: CSSProperties;
+  children?: ReactNode;
+}) {
   return (
     <div
       aria-hidden
-      className="pointer-events-none absolute inset-x-0 bottom-0"
-      style={{ height: "var(--nav-pad)" }}
+      className={`pointer-events-none absolute ${className}`}
+      style={style}
     >
       {BLUR_STEPS.map((s) => {
-        const mask = `linear-gradient(to bottom, transparent ${s.from}%, black ${s.from + 25}%)`;
+        const mask = `linear-gradient(to ${side}, transparent ${s.from}%, black ${s.from + 25}%)`;
         return (
           <div
             key={s.px}
@@ -179,12 +190,72 @@ function BottomBlur() {
           />
         );
       })}
+      {children}
+    </div>
+  );
+}
+
+function BottomBlur({ height }: { height: string }) {
+  return (
+    <EdgeBlur side="bottom" className="inset-x-0 bottom-0" style={{ height }}>
       <div
         className="absolute inset-0"
         style={{
           background:
             "linear-gradient(to bottom, transparent, color-mix(in srgb, var(--nav-bg) 45%, transparent))",
         }}
+      />
+    </EdgeBlur>
+  );
+}
+
+/**
+ * A row that scrolls sideways with no scrollbar. It runs out past the page
+ * padding to the screen edges, and whatever sits beyond the content column
+ * blurs out: on the right while there is more to see, on the left once it
+ * has been scrolled.
+ */
+function ChipRow({ children }: { children: ReactNode }) {
+  const row = useRef<HTMLDivElement>(null);
+  const [edges, setEdges] = useState({ left: false, right: false });
+  const update = useCallback(() => {
+    const el = row.current;
+    if (!el) return;
+    setEdges({
+      left: el.scrollLeft > 1,
+      right: el.scrollLeft + el.clientWidth < el.scrollWidth - 1,
+    });
+  }, []);
+  useEffect(() => {
+    const el = row.current;
+    if (!el) return;
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [update]);
+  const fade = (on: boolean) => ({
+    opacity: on ? 1 : 0,
+    transition: "opacity 200ms ease",
+  });
+  return (
+    <div className="relative -mx-6 sm:-mx-12">
+      <div
+        ref={row}
+        onScroll={update}
+        className="lab-noscrollbar flex gap-2 overflow-x-auto px-6 pb-3 sm:px-12"
+      >
+        {children}
+      </div>
+      <EdgeBlur
+        side="left"
+        className="inset-y-0 left-0 w-6 sm:w-12"
+        style={fade(edges.left)}
+      />
+      <EdgeBlur
+        side="right"
+        className="inset-y-0 right-0 w-6 sm:w-12"
+        style={fade(edges.right)}
       />
     </div>
   );
@@ -231,17 +302,6 @@ function Message({
   design: Design;
   children: ReactNode;
 }) {
-  if (design.bubble === "plain") {
-    return (
-      <div className="flex max-w-2xl gap-4 border-t border-[var(--line)] pt-5">
-        {avatar}
-        <div className="min-w-0">
-          <div className={`text-[var(--faint)] ${design.label}`}>{from}</div>
-          <div className="mt-2 space-y-2 text-lg leading-snug">{children}</div>
-        </div>
-      </div>
-    );
-  }
   return (
     <div className="flex max-w-2xl gap-4">
       {avatar}
@@ -255,19 +315,14 @@ function Message({
   );
 }
 
-function UserMessage({ design, text }: { design: Design; text: string }) {
+function UserMessage({ text }: { text: string }) {
   return (
     <div
       className="ml-auto max-w-xl px-5 py-3 whitespace-pre-wrap"
-      style={
-        design.bubble === "plain"
-          ? { borderRight: "2px solid var(--accent)", paddingRight: 16 }
-          : {
-              ...panel,
-              background:
-                "color-mix(in srgb, var(--accent) 16%, var(--surface))",
-            }
-      }
+      style={{
+        ...panel,
+        background: "color-mix(in srgb, var(--accent) 16%, var(--surface))",
+      }}
     >
       {text}
     </div>
@@ -290,16 +345,19 @@ function Typing() {
 }
 
 /**
- * The composer is pinned: messages scroll in their own area above it, so a
- * long conversation never pushes it down, even on a 667px-tall phone. The
- * scroller is not a `data-lab-scroll` area; the composer, not the scroller,
- * is what has to clear the nav.
+ * The composer floats just above the nav, and the messages scroll the full
+ * height behind it, blurring out as they reach it like every other page does
+ * at the nav. The scroller is not a `data-lab-scroll` area: it pads itself by
+ * the composer's measured height instead of by `--nav-pad`.
  */
+const DOCK_OFFSET = "var(--dock-offset)";
 function ChatPage({ skin, nav, ref }: PageProps) {
   const { design } = skin;
   const { turns, status, send } = useLabChat(nav);
   const [draft, setDraft] = useState("");
   const scroller = useRef<HTMLDivElement>(null);
+  const dock = useRef<HTMLDivElement>(null);
+  const [dockH, setDockH] = useState(0);
   const busy = status === "waiting" || status === "streaming";
   const lastText = turns.at(-1)?.text;
 
@@ -309,16 +367,38 @@ function ChatPage({ skin, nav, ref }: PageProps) {
     if (el) el.scrollTop = el.scrollHeight;
   }, [turns.length, lastText, status]);
 
+  useEffect(() => {
+    const el = dock.current;
+    if (!el) return;
+    const ro = new ResizeObserver(() => setDockH(el.offsetHeight));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
   const submit = (text: string) => {
     if (busy || !text.trim()) return;
     send(text);
     setDraft("");
   };
 
+  // From the bottom edge to the top of the composer.
+  const dockTop = `calc(${DOCK_OFFSET} + ${dockH}px)`;
+
   return (
-    <Frame index={0} title="Chat" skin={skin} nav={nav} ref={ref}>
-      <div className="flex min-h-0 flex-1 flex-col">
-        <div ref={scroller} className="min-h-0 flex-1 overflow-y-auto pr-1">
+    <Frame
+      index={0}
+      title="Chat"
+      skin={skin}
+      nav={nav}
+      ref={ref}
+      blurHeight={`calc(${dockTop} + 24px)`}
+    >
+      <div className="relative min-h-0 flex-1 [--dock-offset:72px] sm:[--dock-offset:84px]">
+        <div
+          ref={scroller}
+          className="absolute inset-0 overflow-y-auto pr-1"
+          style={{ paddingBottom: `calc(${dockTop} + 8px)` }}
+        >
           <div className="flex min-h-full flex-col">
             <div className="mt-auto flex flex-col gap-6 pt-8 pb-6">
               <Message
@@ -333,11 +413,7 @@ function ChatPage({ skin, nav, ref }: PageProps) {
               </Message>
               {turns.map((t, i) =>
                 t.role === "user" ? (
-                  <UserMessage
-                    key={`u${i.toString()}`}
-                    design={design}
-                    text={t.text}
-                  />
+                  <UserMessage key={`u${i.toString()}`} text={t.text} />
                 ) : t.text ? (
                   <Message
                     key={`a${i.toString()}`}
@@ -363,9 +439,13 @@ function ChatPage({ skin, nav, ref }: PageProps) {
             </div>
           </div>
         </div>
-        <div className="shrink-0" style={{ marginBottom: "var(--nav-pad)" }}>
+        <div
+          ref={dock}
+          className="absolute inset-x-0 z-10"
+          style={{ bottom: DOCK_OFFSET }}
+        >
           {turns.length === 0 && (
-            <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-3">
+            <ChipRow>
               {SUGGESTIONS.map((s) => (
                 <button
                   key={s.title}
@@ -377,15 +457,11 @@ function ChatPage({ skin, nav, ref }: PageProps) {
                   {s.title}
                 </button>
               ))}
-            </div>
+            </ChipRow>
           )}
           <form
             className="flex items-center gap-3 px-5 py-2"
-            style={
-              design.bubble === "plain"
-                ? { borderBottom: "1px solid var(--muted)", paddingInline: 0 }
-                : { ...panel, background: "var(--well)" }
-            }
+            style={{ ...panel, background: "var(--well)" }}
             onSubmit={(e) => {
               e.preventDefault();
               submit(draft);
@@ -434,112 +510,32 @@ function ProjectCard({
   onOpen: () => void;
 }) {
   const n = String(i + 1).padStart(2, "0");
-  if (design.card === "row") {
-    return (
-      <motion.button
-        layoutId={`card-${p.slug}`}
-        type="button"
-        onClick={onOpen}
-        className="group grid w-full grid-cols-[3rem_1fr] items-baseline gap-4 border-b border-[var(--line)] py-4 text-left transition-colors hover:border-[var(--accent)] sm:grid-cols-[3rem_1fr_1.3fr]"
-      >
-        <span className={`text-[var(--faint)] ${design.label}`}>{n}</span>
-        <span
-          className={`text-2xl transition-colors group-hover:text-[var(--accent)] sm:text-3xl ${design.heading}`}
-          style={headingFont}
-        >
-          {p.name}
-        </span>
-        <span className="hidden text-[var(--muted)] sm:block">{p.short}</span>
-      </motion.button>
-    );
-  }
-  if (design.card === "edge") {
-    return (
-      <motion.button
-        layoutId={`card-${p.slug}`}
-        type="button"
-        onClick={onOpen}
-        whileHover={{ x: 4 }}
-        whileTap={{ scale: 0.99 }}
-        className="relative flex min-h-36 flex-col justify-between gap-4 overflow-hidden p-5 pl-6 text-left transition-colors hover:bg-[var(--surface)]"
-        style={{
-          background: "var(--well)",
-          borderLeft: "3px solid var(--accent)",
-          borderRadius: "var(--radius)",
-        }}
-      >
-        <span className={`text-[var(--faint)] ${design.label}`}>{n}</span>
-        <span>
-          <span
-            className={`block text-2xl ${design.heading}`}
-            style={headingFont}
-          >
-            {p.name}
-          </span>
-          <span className="mt-1 block text-sm text-[var(--muted)]">
-            {p.short}
-          </span>
-        </span>
-      </motion.button>
-    );
-  }
-  if (design.card === "tile") {
-    return (
-      <motion.button
-        layoutId={`card-${p.slug}`}
-        type="button"
-        onClick={onOpen}
-        whileHover={{ y: -3 }}
-        whileTap={{ scale: 0.99 }}
-        className="group relative flex flex-col overflow-hidden text-left transition-colors hover:bg-[var(--surface)]"
-        style={{ background: "var(--well)", borderRadius: "var(--radius)" }}
-      >
-        <span className="relative block h-40 overflow-hidden sm:h-48">
-          {/* biome-ignore lint/performance/noImgElement: snapshot needs a same-origin plain img */}
-          <img
-            src={mediaSrc(p.still, 828)}
-            alt=""
-            loading="lazy"
-            className={`h-full w-full opacity-70 transition-[opacity,transform] duration-500 group-hover:scale-[1.03] group-hover:opacity-100 ${p.logo ? "object-scale-down p-8" : "object-cover"}`}
-          />
-          <span
-            className={`absolute top-3 left-3 rounded-full px-2.5 py-0.5 text-[var(--muted)] ${design.label}`}
-            style={{ background: "var(--well)" }}
-          >
-            {n}
-          </span>
-        </span>
-        <span className="block p-5">
-          <span
-            className={`block text-2xl ${design.heading}`}
-            style={headingFont}
-          >
-            {p.name}
-          </span>
-          <span className="mt-1 block text-sm text-[var(--muted)]">
-            {p.short}
-          </span>
-        </span>
-      </motion.button>
-    );
-  }
-  // wire: outline only, the number drawn big and light, fills on hover
   return (
     <motion.button
       layoutId={`card-${p.slug}`}
       type="button"
       onClick={onOpen}
+      whileHover={{ y: -3 }}
       whileTap={{ scale: 0.99 }}
-      className="group relative flex min-h-36 flex-col justify-between gap-4 overflow-hidden border border-[var(--line)] p-5 text-left transition-colors hover:border-[var(--accent)] hover:bg-[var(--surface)]"
-      style={{ borderRadius: "var(--radius)" }}
+      className="group relative flex flex-col overflow-hidden text-left transition-colors hover:bg-[var(--surface)]"
+      style={{ background: "var(--well)", borderRadius: "var(--radius)" }}
     >
-      <span
-        className={`text-4xl text-[var(--faint)] transition-colors group-hover:text-[var(--accent)] ${design.heading}`}
-        style={headingFont}
-      >
-        {n}
+      <span className="relative block h-40 overflow-hidden sm:h-48">
+        {/* biome-ignore lint/performance/noImgElement: snapshot needs a same-origin plain img */}
+        <img
+          src={mediaSrc(p.still, 828)}
+          alt=""
+          loading="lazy"
+          className={`h-full w-full opacity-70 transition-[opacity,transform] duration-500 group-hover:scale-[1.03] group-hover:opacity-100 ${p.logo ? "object-scale-down p-8" : "object-cover"}`}
+        />
+        <span
+          className={`absolute top-3 left-3 rounded-full px-2.5 py-0.5 text-[var(--muted)] ${design.label}`}
+          style={{ background: "var(--well)" }}
+        >
+          {n}
+        </span>
       </span>
-      <span>
+      <span className="block p-5">
         <span
           className={`block text-2xl ${design.heading}`}
           style={headingFont}
@@ -581,10 +577,7 @@ function ProjectsPage({ skin, nav, ref }: PageProps) {
   const { design } = skin;
   const [open, setOpen] = useState<Project | null>(null);
   const group = useId();
-  const grid =
-    design.card === "row"
-      ? "mt-8 flex flex-col"
-      : "mt-8 grid grid-cols-1 content-start gap-3 sm:grid-cols-2";
+  const grid = "mt-8 grid grid-cols-1 content-start gap-3 sm:grid-cols-2";
   return (
     <Frame index={1} title="Projects" skin={skin} nav={nav} ref={ref}>
       <LayoutGroup id={group}>
@@ -723,7 +716,7 @@ function ProjectDetail({
               <OutLink href={project.demo} label="Live site" design={design} />
             )}
             {project.github && (
-              <OutLink href={project.github} label="Source" design={design} />
+              <OutLink href={project.github} label="GitHub" design={design} />
             )}
           </div>
         )}
@@ -850,12 +843,92 @@ function Timeline({
   );
 }
 
+/**
+ * One skill group, collapsed to its first row of badges. A click anywhere on
+ * it, heading or badge, opens or closes it.
+ */
+function SkillGroup({
+  group,
+  items,
+  design,
+}: {
+  group: string;
+  items: string[];
+  design: Design;
+}) {
+  const [open, setOpen] = useState(false);
+  const list = useRef<HTMLSpanElement>(null);
+  // Row height, full height, and how many badges sit below the first row.
+  const [size, setSize] = useState({ row: 0, full: 0, hidden: 0 });
+  useEffect(() => {
+    const el = list.current;
+    if (!el) return;
+    const measure = () => {
+      const badges = [...el.children] as HTMLElement[];
+      const top = badges[0]?.offsetTop ?? 0;
+      setSize({
+        row: badges[0]?.offsetHeight ?? 0,
+        full: el.scrollHeight,
+        hidden: badges.filter((b) => b.offsetTop > top).length,
+      });
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  const folds = size.hidden > 0;
+  return (
+    <button
+      type="button"
+      aria-expanded={folds ? open : undefined}
+      onClick={() => folds && setOpen((o) => !o)}
+      className="block w-full text-left"
+    >
+      <span
+        className={`flex items-center justify-between gap-3 text-[var(--faint)] ${design.label}`}
+      >
+        {group}
+        {folds && (
+          <span className="flex items-center gap-2">
+            {!open && <span>+{size.hidden}</span>}
+            <motion.span
+              aria-hidden
+              animate={{ rotate: open ? 180 : 0 }}
+              transition={{ duration: 0.3 }}
+              className="inline-block"
+            >
+              ⌄
+            </motion.span>
+          </span>
+        )}
+      </span>
+      <motion.span
+        className="mt-2 block overflow-hidden"
+        initial={false}
+        animate={{
+          height: size.row === 0 ? "auto" : open ? size.full : size.row,
+        }}
+        transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+      >
+        <span ref={list} className="flex flex-wrap gap-1.5 sm:gap-2">
+          {items.map((s) => (
+            <span
+              key={s}
+              className="px-2.5 py-1 text-sm sm:px-3 sm:py-1.5"
+              style={panel}
+            >
+              {s}
+            </span>
+          ))}
+        </span>
+      </motion.span>
+    </button>
+  );
+}
+
 function ResumePage({ skin, nav, ref }: PageProps) {
   const { design } = skin;
-  const tag =
-    design.card === "row"
-      ? "border-b border-[var(--line)] px-1 py-1 text-sm sm:py-1.5"
-      : "px-2.5 py-1 text-sm sm:px-3 sm:py-1.5";
   const section = `mt-10 text-[var(--faint)] ${design.label}`;
   return (
     <Frame index={2} title="Resume" skin={skin} nav={nav} ref={ref}>
@@ -863,24 +936,14 @@ function ResumePage({ skin, nav, ref }: PageProps) {
       <div className="mt-4 min-h-0 flex-1 overflow-y-auto pr-2" data-lab-scroll>
         <p className="max-w-2xl">{RESUME.tagline}</p>
         <p className="mt-3 max-w-2xl text-[var(--muted)]">{RESUME.summary}</p>
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+        <div className="mt-6 grid items-start gap-4 sm:grid-cols-2">
           {RESUME.skills.map((g) => (
-            <div key={g.group}>
-              <div className={`text-[var(--faint)] ${design.label}`}>
-                {g.group}
-              </div>
-              <div className="mt-2 flex flex-wrap gap-1.5 sm:gap-2">
-                {g.items.map((s) => (
-                  <span
-                    key={s}
-                    className={tag}
-                    style={design.card === "row" ? undefined : panel}
-                  >
-                    {s}
-                  </span>
-                ))}
-              </div>
-            </div>
+            <SkillGroup
+              key={g.group}
+              group={g.group}
+              items={g.items}
+              design={design}
+            />
           ))}
         </div>
         <div className={section}>Experience</div>
@@ -931,20 +994,152 @@ const field: CSSProperties = {
   ...panel,
   background: "var(--well)",
 };
-/** Editorial design: fields are underlines, not boxes. */
-const lineField: CSSProperties = {
-  background: "transparent",
-  borderBottom: "1px solid var(--muted)",
-};
+
+const inputClass =
+  "px-4 py-3 text-base outline-none placeholder:text-[var(--faint)] focus:border-[var(--accent)]";
+
+type SendState = "idle" | "sending" | "sent" | "error";
+
+/** Sends through EmailJS, to the same template the old site's form used. */
+function ContactForm({ design }: { design: Design }) {
+  const [values, setValues] = useState<ContactValues>({
+    name: "",
+    email: "",
+    message: "",
+  });
+  const [errors, setErrors] = useState<ContactErrors>({});
+  const [state, setState] = useState<SendState>("idle");
+  const set =
+    (k: keyof ContactValues) => (e: { target: { value: string } }) => {
+      setValues((v) => ({ ...v, [k]: e.target.value }));
+      if (errors[k]) setErrors((x) => ({ ...x, [k]: undefined }));
+      if (state === "sent" || state === "error") setState("idle");
+    };
+
+  const submit = async (e: { preventDefault: () => void }) => {
+    e.preventDefault();
+    const found = validateContact(values);
+    setErrors(found);
+    if (Object.keys(found).length > 0) return;
+    const config = emailConfig(
+      process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID,
+      process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID,
+      process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY,
+    );
+    if (!config) {
+      setState("error");
+      return;
+    }
+    setState("sending");
+    try {
+      const { default: emailjs } = await import("@emailjs/browser");
+      await emailjs.send(
+        config.serviceId,
+        config.templateId,
+        emailParams(values),
+        config.publicKey,
+      );
+      setValues({ name: "", email: "", message: "" });
+      setState("sent");
+      window.gtag?.("event", "contact_form_submitted");
+    } catch {
+      setState("error");
+    }
+  };
+
+  const fieldError = (k: keyof ContactValues) =>
+    errors[k] && (
+      <span id={`contact-${k}-error`} className="text-sm text-[var(--accent)]">
+        {errors[k]}
+      </span>
+    );
+  const aria = (k: keyof ContactValues) => ({
+    "aria-invalid": errors[k] ? true : undefined,
+    "aria-describedby": errors[k] ? `contact-${k}-error` : undefined,
+  });
+
+  return (
+    <form
+      className="flex flex-col gap-4 lg:min-h-0 lg:flex-1 lg:overflow-y-auto"
+      onSubmit={submit}
+      noValidate
+    >
+      <div className="grid gap-4 sm:grid-cols-2">
+        <label className="flex flex-col gap-2">
+          <span className={`text-[var(--faint)] ${design.label}`}>Name</span>
+          <input
+            className={inputClass}
+            style={field}
+            placeholder="Your name"
+            name="name"
+            autoComplete="name"
+            value={values.name}
+            onChange={set("name")}
+            {...aria("name")}
+          />
+          {fieldError("name")}
+        </label>
+        <label className="flex flex-col gap-2">
+          <span className={`text-[var(--faint)] ${design.label}`}>Email</span>
+          <input
+            className={inputClass}
+            style={field}
+            placeholder="you@company.com"
+            type="email"
+            name="email"
+            autoComplete="email"
+            value={values.email}
+            onChange={set("email")}
+            {...aria("email")}
+          />
+          {fieldError("email")}
+        </label>
+      </div>
+      <label className="flex flex-col gap-2 lg:min-h-0 lg:flex-1">
+        <span className={`text-[var(--faint)] ${design.label}`}>Message</span>
+        <textarea
+          className={`min-h-40 resize-none lg:flex-1 ${inputClass}`}
+          style={field}
+          placeholder="Your message"
+          name="message"
+          value={values.message}
+          onChange={set("message")}
+          {...aria("message")}
+        />
+        {fieldError("message")}
+      </label>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5">
+        <button
+          type="submit"
+          disabled={state === "sending"}
+          className={`w-full px-6 py-3 sm:w-auto text-[var(--on-accent)] transition-opacity hover:opacity-85 disabled:opacity-60 ${design.label}`}
+          style={{
+            background: "var(--accent)",
+            borderRadius: "var(--radius)",
+          }}
+        >
+          {state === "sending" ? "Sending…" : "Send message"}
+        </button>
+        <output className="text-sm text-[var(--muted)]">
+          {state === "sent" && "Thanks, your message is on its way."}
+          {state === "error" &&
+            `Couldn't send it. Email me at ${CONTACT.email} instead.`}
+        </output>
+      </div>
+    </form>
+  );
+}
+
+declare global {
+  interface Window {
+    gtag?: (command: "event", name: string, params?: object) => void;
+  }
+}
 
 function ContactPage({ skin, nav, ref }: PageProps) {
   const { design } = skin;
   const [copied, setCopied] = useState(false);
-  const input = design.card === "row" ? lineField : field;
-  const inputClass =
-    design.card === "row"
-      ? "px-0 py-3 text-base outline-none placeholder:text-[var(--faint)] focus:border-[var(--accent)]"
-      : "px-4 py-3 text-base outline-none placeholder:text-[var(--faint)] focus:border-[var(--accent)]";
+  const input = field;
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(CONTACT.email);
@@ -977,14 +1172,14 @@ function ContactPage({ skin, nav, ref }: PageProps) {
             <div className="flex items-center" style={input}>
               <a
                 href={`mailto:${CONTACT.email}`}
-                className={`py-4 text-lg transition-colors hover:text-[var(--accent)] ${design.card === "row" ? "" : "px-5"}`}
+                className={`py-4 text-lg transition-colors hover:text-[var(--accent)] px-5`}
               >
                 {CONTACT.email}
               </a>
               <button
                 type="button"
                 onClick={copy}
-                className={`ml-auto py-4 text-[var(--accent)] transition-opacity hover:opacity-70 ${design.card === "row" ? "" : "px-5"} ${design.label}`}
+                className={`ml-auto py-4 text-[var(--accent)] transition-opacity hover:opacity-70 px-5 ${design.label}`}
               >
                 {copied ? "Copied" : "Copy"}
               </button>
@@ -1007,54 +1202,7 @@ function ContactPage({ skin, nav, ref }: PageProps) {
             {CONTACT.location}
           </p>
         </div>
-        <form
-          className="flex flex-col gap-4 lg:min-h-0 lg:flex-1 lg:overflow-y-auto"
-          onSubmit={(e) => e.preventDefault()}
-        >
-          <div className="grid gap-4 sm:grid-cols-2">
-            <label className="flex flex-col gap-2">
-              <span className={`text-[var(--faint)] ${design.label}`}>
-                Name
-              </span>
-              <input
-                className={inputClass}
-                style={input}
-                placeholder="Your name"
-              />
-            </label>
-            <label className="flex flex-col gap-2">
-              <span className={`text-[var(--faint)] ${design.label}`}>
-                Email
-              </span>
-              <input
-                className={inputClass}
-                style={input}
-                placeholder="you@company.com"
-                type="email"
-              />
-            </label>
-          </div>
-          <label className="flex flex-col gap-2 lg:min-h-0 lg:flex-1">
-            <span className={`text-[var(--faint)] ${design.label}`}>
-              Message
-            </span>
-            <textarea
-              className={`min-h-40 resize-none lg:flex-1 ${inputClass}`}
-              style={input}
-              placeholder="Your message"
-            />
-          </label>
-          <button
-            type="submit"
-            className={`self-start px-6 py-3 text-[var(--on-accent)] transition-opacity hover:opacity-85 ${design.label}`}
-            style={{
-              background: "var(--accent)",
-              borderRadius: "var(--radius)",
-            }}
-          >
-            Send
-          </button>
-        </form>
+        <ContactForm design={design} />
       </div>
     </Frame>
   );

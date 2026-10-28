@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { SITE } from "../config";
 import {
   cubicBezier,
-  DEFAULT_SPEC,
   faceForQuarter,
   planTurn,
   stepOffsetDeg,
@@ -9,7 +9,7 @@ import {
   turnOffsetDeg,
 } from "../motion";
 
-const spec = DEFAULT_SPEC;
+const spec = SITE.motion;
 const EPS = 1e-6;
 
 describe("cubicBezier", () => {

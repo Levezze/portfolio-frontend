@@ -22,16 +22,6 @@ export type MotionSpec = {
   bounceDeg: number;
 };
 
-/** Tuned by the user in the motion mock on 2026-10-27. */
-export const DEFAULT_SPEC: MotionSpec = {
-  stepMs: 410,
-  holdMs: 30,
-  staggerMs: 70,
-  slowStart: 0.7,
-  impactAt: 0.9,
-  bounceDeg: 2.5,
-};
-
 /** Point within the rebound window where the kick-back peaks. */
 const REBOUND_PEAK = 0.45;
 

@@ -24,15 +24,15 @@ export type LightSpec = {
   shadowStrength: number;
   /** Angle between the key light and the camera axis, degrees. */
   lightAngleDeg: number;
+  /**
+   * How far the key light swings off the cut toward the top-left corner,
+   * degrees: 0 is straight down the cut, 45 is the corner.
+   */
+  tiltDeg: number;
+  /** Shadow edge blur, in shadow-map texels (about 1px at 1440 wide). */
+  shadowRadius: number;
   fovDeg: number;
   seamPx: number;
-};
-
-export const DEFAULT_LIGHT: LightSpec = {
-  shadowStrength: 0.85,
-  lightAngleDeg: 50,
-  fovDeg: 30,
-  seamPx: 0,
 };
 
 export type PrismHandle = {
@@ -62,11 +62,14 @@ const UP = new THREE.Vector3(0, 0, 1);
 /**
  * Key light, `angle` degrees off the camera axis. It comes from the side the
  * cascade starts on, so slice shadows fall along the cut: from the top for
- * portrait rows, from the left for landscape columns.
+ * portrait rows, from the left for landscape columns, each swung `tilt`
+ * degrees toward the top-left so the shadows are not cast dead along the cut.
  */
-function lightDirection(angleDeg: number, axis: Axis) {
+function lightDirection(angleDeg: number, tiltDeg: number, axis: Axis) {
   const t = THREE.MathUtils.degToRad(angleDeg);
-  const phi = THREE.MathUtils.degToRad(axis === "y" ? 90 : 180);
+  const phi = THREE.MathUtils.degToRad(
+    axis === "y" ? 90 + tiltDeg : 180 - tiltDeg,
+  );
   return new THREE.Vector3(
     Math.sin(t) * Math.cos(phi),
     Math.sin(t) * Math.sin(phi),
@@ -80,7 +83,7 @@ function lightDirection(angleDeg: number, axis: Axis) {
  * shadow removes the key share.
  */
 function lightIntensities(light: LightSpec, axis: Axis) {
-  const cos = lightDirection(light.lightAngleDeg, axis).dot(UP);
+  const cos = lightDirection(light.lightAngleDeg, light.tiltDeg, axis).dot(UP);
   return {
     ambient: Math.PI * (1 - light.shadowStrength),
     key: (Math.PI * light.shadowStrength) / cos,
@@ -130,7 +133,7 @@ function KeyLight({
   light: LightSpec;
 }) {
   const { ambient, key } = lightIntensities(light, layout.axis);
-  const dir = lightDirection(light.lightAngleDeg, layout.axis);
+  const dir = lightDirection(light.lightAngleDeg, light.tiltDeg, layout.axis);
   const reach = layout.depth * 2.5;
   const half = Math.max(layout.width, layout.height) * 0.75;
   return (
@@ -141,6 +144,7 @@ function KeyLight({
         intensity={key}
         position={[dir.x * reach, dir.y * reach, dir.z * reach]}
         shadow-mapSize={[2048, 2048]}
+        shadow-radius={light.shadowRadius}
         shadow-bias={-0.0004}
         shadow-normalBias={1.5}
         shadow-camera-left={-half}
@@ -362,7 +366,8 @@ export default function PrismScene(props: {
   return (
     <Canvas
       flat
-      shadows="soft"
+      // PCF, not PCF-soft: only PCF honours shadow-radius.
+      shadows="percentage"
       dpr={[1, 2]}
       gl={{ antialias: true }}
       style={{ position: "fixed", inset: 0 }}

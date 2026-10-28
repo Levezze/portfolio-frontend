@@ -5,14 +5,13 @@ import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { Cubes } from "./Cubes";
+import { SITE } from "./config";
 import { driftClock } from "./Drift";
 import type { NavState } from "./LabNav";
 import { LAB_PAGES, PAGE_COMPONENTS, resolveSkin } from "./LabPages";
-import { DEFAULT_SLICE_PX, prismLayout, sliceCount } from "./layout";
-import { DEFAULT_SPEC, planTurn } from "./motion";
-import { DEFAULT_LIGHT, type PrismHandle } from "./PrismScene";
-import { DEFAULT_SKIN } from "./presets";
-import { TuningPanel } from "./TuningPanel";
+import { prismLayout, sliceCount } from "./layout";
+import { planTurn } from "./motion";
+import type { PrismHandle } from "./PrismScene";
 
 const PrismScene = dynamic(() => import("./PrismScene"), { ssr: false });
 
@@ -26,6 +25,8 @@ const nextFrames = () =>
     requestAnimationFrame(() => requestAnimationFrame(() => r())),
   );
 const readSize = (): Size => ({ w: window.innerWidth, h: window.innerHeight });
+const { motion: spec, light, skin: skinSpec } = SITE;
+const skins = LAB_PAGES.map((_, i) => resolveSkin(skinSpec, i));
 
 function usePrefersReducedMotion() {
   const [reduced, setReduced] = useState(false);
@@ -41,23 +42,14 @@ function usePrefersReducedMotion() {
 
 export function LabApp() {
   const [size, setSize] = useState<Size | null>(null);
-  const [slicePx, setSlicePx] = useState(DEFAULT_SLICE_PX);
-  const [spec, setSpec] = useState(DEFAULT_SPEC);
-  const [light, setLight] = useState(DEFAULT_LIGHT);
-  const [skinSpec, setSkinSpec] = useState(DEFAULT_SKIN);
-  const skins = useMemo(
-    () => LAB_PAGES.map((_, i) => resolveSkin(skinSpec, i)),
-    [skinSpec],
-  );
   const [active, setActive] = useState(0);
   const [phase, setPhase] = useState<Phase>("intro");
   const [domHidden, setDomHidden] = useState(true);
   const [textures, setTextures] = useState<(THREE.Texture | null)[]>(
     LAB_PAGES.map(() => null),
   );
-  const [captureMs, setCaptureMs] = useState<number | null>(null);
   const [sceneReady, setSceneReady] = useState(false);
-  const [introRun, setIntroRun] = useState(0);
+  const [veil, setVeil] = useState(true);
   const reducedMotion = usePrefersReducedMotion();
 
   const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -70,10 +62,8 @@ export function LabApp() {
 
   const layout = useMemo(
     () =>
-      size
-        ? prismLayout(size.w, size.h, sliceCount(size.w, size.h, slicePx))
-        : null,
-    [size, slicePx],
+      size ? prismLayout(size.w, size.h, sliceCount(size.w, size.h)) : null,
+    [size],
   );
 
   // Resizes rebuild the prism, so they only land while it is at rest.
@@ -107,6 +97,30 @@ export function LabApp() {
     else driftClock.resume();
   }, [domHidden]);
 
+  // Scrollbars show only while their area scrolls (globals.css): mark the
+  // scrolling element, and unmark it once it has been still for a moment.
+  useEffect(() => {
+    const timers = new Map<Element, ReturnType<typeof setTimeout>>();
+    const onScroll = (e: Event) => {
+      const el = e.target;
+      if (!(el instanceof Element)) return;
+      el.setAttribute("data-scrolling", "");
+      clearTimeout(timers.get(el));
+      timers.set(
+        el,
+        setTimeout(() => {
+          el.removeAttribute("data-scrolling");
+          timers.delete(el);
+        }, 900),
+      );
+    };
+    document.addEventListener("scroll", onScroll, true);
+    return () => {
+      document.removeEventListener("scroll", onScroll, true);
+      for (const t of timers.values()) clearTimeout(t);
+    };
+  }, []);
+
   const capture = useCallback(
     async (i: number) => {
       const el = pageRefs.current[i];
@@ -116,6 +130,21 @@ export function LabApp() {
         width: size.w,
         height: size.h,
         features: { restoreScrollPosition: true },
+        // modern-screenshot copies each field's -webkit-text-fill-color (the
+        // text colour) inline and not its ::placeholder, and the fill colour
+        // paints placeholders too, so they went white mid-turn. An empty
+        // field shows only its placeholder, so fill it with that colour.
+        onCloneNode: (clone) => {
+          const live = el.querySelector("input, textarea");
+          if (!live || !(clone instanceof Element)) return;
+          const color = getComputedStyle(live, "::placeholder").color;
+          for (const f of clone.querySelectorAll<HTMLElement>(
+            "input[placeholder], textarea[placeholder]",
+          )) {
+            if (!f.getAttribute("value"))
+              f.style.setProperty("-webkit-text-fill-color", color);
+          }
+        },
         filter: (node) =>
           !(
             node instanceof HTMLElement &&
@@ -145,18 +174,16 @@ export function LabApp() {
 
   const captureAll = useCallback(async () => {
     await document.fonts.ready;
-    const t0 = performance.now();
     const next = new Map<number, THREE.Texture>();
     for (let i = 0; i < LAB_PAGES.length; i++) {
       const tex = await capture(i);
       if (tex) next.set(i, tex);
     }
     replaceTextures(next);
-    setCaptureMs(Math.round((performance.now() - t0) / LAB_PAGES.length));
   }, [capture, replaceTextures]);
 
   // Intro: spin while the pages are captured, then lock onto page 1.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: runs once per scene/size/replay
+  // biome-ignore lint/correctness/useExhaustiveDependencies: runs once per scene
   useEffect(() => {
     if (!sceneReady || !layout || !handle.current) return;
     let cancelled = false;
@@ -179,13 +206,13 @@ export function LabApp() {
     return () => {
       cancelled = true;
     };
-  }, [sceneReady, introRun]);
+  }, [sceneReady]);
 
   // Pages render at the new size, so re-snapshot them after a rebuild.
   // biome-ignore lint/correctness/useExhaustiveDependencies: only on rebuild
   useEffect(() => {
     if (phaseRef.current === "idle") captureAll();
-  }, [layout, skinSpec]);
+  }, [layout]);
 
   const go = useCallback(
     async (to: number) => {
@@ -201,12 +228,10 @@ export function LabApp() {
       // and the target's old snapshot has the drift where it was minutes ago.
       // The live target then resumes from exactly the frame the slices show.
       driftClock.pause();
-      const t0 = performance.now();
       const [fromTex, toTex] = await Promise.all([
         capture(active),
         capture(to),
       ]);
-      setCaptureMs(Math.round((performance.now() - t0) / 2));
       const fresh = new Map<number, THREE.Texture>();
       if (fromTex) fresh.set(active, fromTex);
       if (toTex) fresh.set(to, toTex);
@@ -220,15 +245,7 @@ export function LabApp() {
       setDomHidden(false);
       setPhase("idle");
     },
-    [
-      phase,
-      active,
-      layout,
-      reducedMotion,
-      capture,
-      replaceTextures,
-      spec.staggerMs,
-    ],
+    [phase, active, layout, reducedMotion, capture, replaceTextures],
   );
 
   const setHandle = useCallback((h: PrismHandle | null) => {
@@ -298,12 +315,17 @@ export function LabApp() {
         />
       )}
 
-      {(phase === "intro" || phase === "locking") && (
+      {/* The veil stays up until every slice has settled on page 1, so the
+          spin only ever shows as loading; then it fades and unmounts. */}
+      {veil && (
         <div
           className="fixed inset-0 z-20 flex items-center justify-center backdrop-blur-md transition-opacity duration-500"
           style={{
-            opacity: phase === "intro" ? 1 : 0,
+            opacity: phase === "idle" ? 0 : 1,
             background: "rgba(3,4,5,0.35)",
+          }}
+          onTransitionEnd={() => {
+            if (phaseRef.current === "idle") setVeil(false);
           }}
         >
           <span className="text-sm tracking-[0.6em] text-white/70 uppercase">
@@ -311,34 +333,6 @@ export function LabApp() {
           </span>
         </div>
       )}
-
-      <TuningPanel
-        settings={{ spec, light, slicePx, skin: skinSpec }}
-        setSpec={setSpec}
-        setLight={setLight}
-        setSlicePx={setSlicePx}
-        setSkin={setSkinSpec}
-        idle={idle}
-        readout={{
-          Phase: phase,
-          Axis: layout
-            ? layout.axis === "y"
-              ? "rows (Y)"
-              : "columns (X)"
-            : "-",
-          Slices: layout ? String(layout.slices.length) : "-",
-          Viewport: size ? `${size.w}×${size.h}` : "-",
-          "Capture/page": captureMs === null ? "-" : `${captureMs}ms`,
-          "Reduced motion": reducedMotion ? "on" : "off",
-        }}
-        onReplayIntro={() => setIntroRun((n) => n + 1)}
-        onReset={() => {
-          setSpec(DEFAULT_SPEC);
-          setLight(DEFAULT_LIGHT);
-          setSlicePx(DEFAULT_SLICE_PX);
-          setSkinSpec(DEFAULT_SKIN);
-        }}
-      />
     </div>
   );
 }

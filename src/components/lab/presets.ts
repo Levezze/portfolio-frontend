@@ -1,11 +1,15 @@
 /**
- * Skin presets for the lab. All of them are the same heavy, flat, high-contrast
- * direction; they differ in temperature, accent and type. Texture comes from
- * light only: a slow drifting glow and the slice shadows, never a pattern.
+ * The site's palettes and design. Each page has its own palette, all of them
+ * the same heavy, flat, high-contrast direction on a near-black base; they
+ * differ only in temperature and accent. Texture comes from light only: a
+ * slow drifting glow and the slice shadows, never a pattern. Which page uses
+ * which palette is set in config.ts.
  */
 
+export type PaletteId = "slab" | "rain" | "violet" | "teal";
+
 export type Palette = {
-  id: string;
+  id: PaletteId;
   name: string;
   /** CSS variables the page components read. */
   vars: Record<`--${string}`, string>;
@@ -85,26 +89,6 @@ export const PALETTES: Palette[] = [
     sceneBackground: "#08070b",
   },
   {
-    id: "ember",
-    name: "Ember",
-    vars: {
-      ...shared,
-      "--text": "#ede6e3",
-      "--muted": "#b3a8a4",
-      "--faint": "#877c78",
-      "--line": "rgba(255,255,255,0.08)",
-      "--surface": "rgba(255,255,255,0.04)",
-      "--well": "rgba(0,0,0,0.32)",
-      "--accent": "#ff6b57",
-      "--on-accent": "#1a0906",
-    },
-    base: "linear-gradient(160deg, #332a2a 0%, #201a1a 55%, #110e0e 100%)",
-    glowA: "rgba(255,110,80,0.16)",
-    glowB: "rgba(120,150,210,0.10)",
-    capColor: "#262020",
-    sceneBackground: "#0a0707",
-  },
-  {
     id: "teal",
     name: "Teal",
     vars: {
@@ -124,118 +108,29 @@ export const PALETTES: Palette[] = [
     capColor: "#1c2528",
     sceneBackground: "#070a0b",
   },
-  {
-    id: "graphite",
-    name: "Graphite",
-    vars: {
-      ...shared,
-      "--text": "#dcdcdc",
-      "--muted": "#9c9c9c",
-      "--faint": "#767676",
-      "--line": "rgba(255,255,255,0.09)",
-      "--surface": "rgba(255,255,255,0.045)",
-      "--well": "rgba(0,0,0,0.3)",
-      "--accent": "#ffffff",
-      "--on-accent": "#111111",
-    },
-    base: "linear-gradient(160deg, #373737 0%, #232323 55%, #141414 100%)",
-    glowA: "rgba(255,255,255,0.10)",
-    glowB: "rgba(170,185,210,0.08)",
-    capColor: "#262626",
-    sceneBackground: "#0a0a0a",
-  },
 ];
 
-export const paletteById = (id: string) =>
+export const paletteById = (id: PaletteId) =>
   PALETTES.find((p) => p.id === id) ?? PALETTES[0];
 
-/**
- * A design is everything that is not colour: type, how cards and labels are
- * built, and which nav the page carries. Palettes and designs combine freely.
- * All four are the Signal family: same attitude, different weight and build.
- */
+/** Everything that is not colour: type and how labels and corners are built. */
 export type Design = {
-  id: string;
-  name: string;
-  headingFontId: string;
-  bodyFontId: string;
   /** Tailwind classes for h1/h2 (weight, case, leading, tracking; no size). */
   heading: string;
-  /** Page title size in rem, phone and desktop. The title slider scales it. */
+  /** Page title size in rem, phone and desktop; config.ts scales it. */
   h1Rem: [number, number];
   /** Tailwind classes for small labels. */
   label: string;
   radius: string;
-  /**
-   * Project list: filled cards with an accent edge, hairline rows, rounded
-   * filled tiles, or outlined wireframes.
-   */
-  card: "edge" | "row" | "tile" | "wire";
-  /** Chat messages: boxed panels or plain text under a hairline. */
-  bubble: "box" | "plain";
-  nav: "index" | "rail" | "tabs" | "pill";
 };
 
-export const DESIGNS: Design[] = [
-  {
-    id: "signal",
-    name: "Signal",
-    headingFontId: "archivo",
-    bodyFontId: "grotesk",
-    heading: "font-extrabold uppercase leading-[0.85] tracking-[-0.045em]",
-    h1Rem: [3, 4.5],
-    label: "text-sm uppercase tracking-[0.12em]",
-    radius: "3px",
-    card: "edge",
-    bubble: "box",
-    nav: "tabs",
-  },
-  {
-    // Same bones, half the weight: mixed case, hairlines instead of fills.
-    id: "lean",
-    name: "Lean",
-    headingFontId: "archivo",
-    bodyFontId: "grotesk",
-    heading: "font-semibold leading-[0.98] tracking-[-0.03em]",
-    h1Rem: [2.5, 3.75],
-    label: "text-sm font-medium uppercase tracking-[0.18em]",
-    radius: "0px",
-    card: "row",
-    bubble: "plain",
-    nav: "rail",
-  },
-  {
-    // Rounded, sentence case, a pill nav: the friendly cut of the same idea.
-    id: "soft",
-    name: "Soft",
-    headingFontId: "archivo",
-    bodyFontId: "grotesk",
-    heading: "font-bold leading-[0.95] tracking-[-0.03em]",
-    h1Rem: [2.75, 4],
-    label: "text-sm tracking-[0.02em]",
-    radius: "14px",
-    card: "tile",
-    bubble: "box",
-    nav: "pill",
-  },
-  {
-    // Tall condensed caps at medium weight, outlines only, nav in the header.
-    id: "wire",
-    name: "Wire",
-    headingFontId: "barlow",
-    bodyFontId: "plex",
-    heading: "font-medium uppercase leading-[0.9] tracking-[0.03em]",
-    h1Rem: [3.25, 5],
-    label: "text-sm uppercase tracking-[0.28em]",
-    radius: "0px",
-    card: "wire",
-    bubble: "plain",
-    nav: "index",
-  },
-];
-
-export const designById = (id: string) =>
-  DESIGNS.find((d) => d.id === id) ?? DESIGNS[0];
+/** "Soft": rounded, sentence case, tiles and a pill nav. */
+export const DESIGN: Design = {
+  heading: "font-bold leading-[0.95] tracking-[-0.03em]",
+  h1Rem: [2.75, 4],
+  label: "text-sm tracking-[0.02em]",
+  radius: "14px",
+};
 
 export type DriftSpec = {
   enabled: boolean;
@@ -265,33 +160,10 @@ export type CubeSpec = {
 };
 
 export type SkinSpec = {
-  /** One palette id per page; the turn shows the colours change slice by slice. */
-  pagePalettes: string[];
-  designId: string;
-  headingFontId: string;
-  bodyFontId: string;
+  /** One palette per page; the turn shows the colours change slice by slice. */
+  pagePalettes: PaletteId[];
   /** Multiplier on the design's page-title size. */
   titleScale: number;
   drift: DriftSpec;
   cubes: CubeSpec;
-};
-
-export const DEFAULT_SKIN: SkinSpec = {
-  pagePalettes: ["slab", "rain", "violet", "teal"],
-  designId: "soft",
-  headingFontId: "archivo",
-  bodyFontId: "grotesk",
-  titleScale: 1,
-  drift: { enabled: true, speed: 1, glow: 1, swingDeg: 22 },
-  cubes: {
-    enabled: true,
-    mode: "shadow",
-    everyS: 25,
-    sizeMin: 104,
-    sizeMax: 226,
-    passS: 16,
-    blurPx: 9,
-    shadowOpacity: 0.35,
-    directions: "any",
-  },
 };
