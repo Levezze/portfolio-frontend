@@ -15,19 +15,20 @@ const R2 = "https://pub-8cd13f499aba45a08aa5d342d7244fe7.r2.dev/";
  * Animated GIFs pass through the optimizer unconverted.
  */
 export const mediaSrc = (key: string, w = 1200) =>
-  `/_next/image?url=${encodeURIComponent(key.startsWith("https://") ? key : R2 + key)}&w=${w}&q=75`;
-/** Video can't go through the image route; served straight from R2. */
-export const videoSrc = (key: string) => R2 + key;
+  `/_next/image?url=${encodeURIComponent(key.startsWith("/") || key.startsWith("https://") ? key : R2 + key)}&w=${w}&q=75`;
+/**
+ * Video can't go through the image route. Keys starting with "/" are small
+ * re-encodes in public/media; the rest are served straight from R2.
+ */
+export const videoSrc = (key: string) => (key.startsWith("/") ? key : R2 + key);
 
 export type Media = {
   kind: "image" | "video";
   key: string;
   caption: string;
+  /** A still for a video: its gallery thumbnail and its snapshot stand-in. */
+  poster?: string;
 };
-
-/** Public brand asset; product screenshots will replace it. */
-const AEV_WORDMARK =
-  "https://storage.googleapis.com/aevark-email-assets/email/aev-logo-teal-v2.png";
 
 const CBC_WORDMARK =
   "https://raw.githubusercontent.com/Levezze/chatbotchat/main/logo/chatbotchat-logo-dark-transparent.png";
@@ -41,10 +42,16 @@ export type Project = {
   stack: string[];
   demo?: string;
   github?: string;
-  /** A light still for the list tile; the big GIFs stay in the detail view. */
+  /** A light still for the list tile; full-quality media stays in the detail view. */
   still: string;
   /** The still is a small wordmark: shown at its own size, never stretched. */
   logo?: boolean;
+  /**
+   * A short, slow, low-quality loop that replaces the still on the list tile
+   * only; the project page shows the full-quality media. Re-encoded from the
+   * old thumbnail GIFs (10–11MB each) to MP4.
+   */
+  thumb?: Media;
   media: Media[];
 };
 
@@ -81,67 +88,27 @@ export const PROJECTS: Project[] = [
       "Stripe",
     ],
     demo: "https://www.aevark.com/",
-    still: AEV_WORDMARK,
-    logo: true,
-    media: [{ kind: "image", key: AEV_WORDMARK, caption: "aēv wordmark" }],
-  },
-  {
-    slug: "chatbotchat",
-    name: "chatbotchat",
-    short:
-      "Open-source message bus that lets AI coding agents talk across repos and providers",
-    description: [
-      "chatbotchat (cbc) is a local message bus that lets AI coding agents talk to each other directly, across repos and sessions, without me copying messages between terminals. One always-on Rust daemon owns the conversation state in SQLite. Agents reach it through the same actions exposed as MCP tools and as a CLI, so it works with Claude Code, Codex and any other MCP client.",
-      "The design goal is bounded autonomy, not a black-box agent swarm. Two agents in a room trade messages hands-free: each waits on a background poll and re-reads the room before replying instead of trusting its own compacted memory. A soft cap on autonomous turns pulls the human back in, and a room only closes when both sides vote to close it.",
-      "On top of the bus I run a hierarchy of agents through skills: a project lead over repo leads, feature leads and task agents, plus orchestrator, peer and reconcile roles for coordinating parallel work across repos and worktrees. It's how I run agentic development day to day.",
-    ],
-    stack: [
-      "Rust",
-      "Tokio",
-      "axum",
-      "SQLite",
-      "SQLx",
-      "MCP",
-      "Claude Code",
-      "Codex",
-    ],
-    github: "https://github.com/Levezze/chatbotchat",
-    still: CBC_WORDMARK,
-    logo: true,
-    media: [{ kind: "image", key: CBC_WORDMARK, caption: "chatbotchat logo" }],
-  },
-  {
-    slug: "stealth",
-    name: "Stealth-Mode Startup",
-    short:
-      "Transforming structured content into engaging, narrated experiences",
-    description: [
-      "Designed and built an innovative AI platform that solves the challenge of information overload by transforming dense, structured content into engaging, narrated experiences. The platform uses sophisticated LLM orchestration to analyze, restructure, and present complex information in formats that maximize understanding and retention.",
-      "Designed and implemented the complete technical architecture: a modular FastAPI backend handling AI workflows, real-time WebSocket communication for instant updates, SSE, and a dynamic Next.js frontend supporting live content editing and sharing. A Javascript renderer service handles animations and dynamic rendering of the content. The system seamlessly integrates multiple AI models through the OpenAI SDK and LangChain, with robust data persistence via PostgreSQL, R2 Queue, and Redis caching for optimal performance.",
-    ],
-    stack: [
-      "Next.js",
-      "FastAPI",
-      "Node.js",
-      "Zod",
-      "Gulp.js",
-      "OpenAI SDK",
-      "LangChain",
-      "WebSocket",
-      "Pydantic",
-      "SQLAlchemy",
-      "Alembic",
-      "PostgreSQL",
-      "Redis",
-      "Cloudflare Queues",
-      "Cloudflare R2",
-    ],
-    still: "projects/stealth/stealth-1-logo.png",
+    still: "/media/projects/aev/list.jpg",
     media: [
       {
         kind: "image",
-        key: "projects/stealth/stealth-1-logo.png",
-        caption: "Stealth AI platform",
+        key: "/media/projects/aev/home.jpg",
+        caption: "Home page",
+      },
+      {
+        kind: "image",
+        key: "/media/projects/aev/companion-desktop-v2.jpg",
+        caption: "Companion dashboard",
+      },
+      {
+        kind: "image",
+        key: "/media/projects/aev/companion-phone.jpg",
+        caption: "Companion dashboard on a phone",
+      },
+      {
+        kind: "image",
+        key: "/media/projects/aev/pillars-phone.jpg",
+        caption: "Health pillars on a phone",
       },
     ],
   },
@@ -173,74 +140,63 @@ export const PROJECTS: Project[] = [
       "Blender",
     ],
     demo: "https://www.cties.net/",
-    still: "projects/cties/SCENARIO_3.png",
+    still: "/media/projects/cties/scenario-3.jpg",
+    thumb: {
+      kind: "video",
+      key: "/media/projects/cties/thumb.mp4",
+      poster: "/media/projects/cties/thumb.jpg",
+      caption: "C-Ties",
+    },
     media: [
       {
-        kind: "image",
-        key: "projects/cties/animation_ui.gif",
+        // Re-encoded from projects/cties/animation_ui.gif (20MB) to MP4.
+        kind: "video",
+        key: "/media/projects/cties/animation-ui.mp4",
+        poster: "/media/projects/cties/animation-ui.jpg",
         caption: "Dashboard UI Animation",
       },
       {
         kind: "video",
-        key: "projects/cties/ANIMATION_1080p-1080p.mp4",
+        key: "/media/projects/cties/animation-1080p.mp4",
+        poster: "/media/projects/cties/animation-1080p.jpg",
         caption: "Generative AI Animation",
       },
       {
         kind: "image",
-        key: "projects/cties/SCENARIO_3.png",
+        key: "/media/projects/cties/scenario-3.jpg",
         caption: "Scenario #8 in dashboard",
       },
       {
         kind: "image",
-        key: "projects/cties/SCENARIO_4.png",
+        key: "/media/projects/cties/scenario-4.jpg",
         caption: "Scenario #16 in dashboard",
       },
     ],
   },
   {
-    slug: "portfolio",
-    name: "Portfolio Website",
-    short: "Built with Three.js, based on AI chat agent interactions",
+    slug: "chatbotchat",
+    name: "chatbotchat",
+    short:
+      "Open-source message bus that lets AI coding agents talk across repos and providers",
     description: [
-      "Personal portfolio featuring a unique 3D cube interface where each face represents a different section. The AI chat agent (Gimli-AI) uses custom tools to navigate between pages by rotating the cube, creating an immersive, conversational browsing experience.",
-      "Built with Three.js and React Three Fiber, the main challenge was synchronizing 3D world units and animations with CSS pixels and transitions across breakpoints while maintaining responsive design. The orthographic projection ensures consistent scaling, while the AI agent handles navigation through WebSocket connections to a FastAPI backend. Pages aren't routes but dynamically rendered faces on a floating cube in 3D space.",
+      "chatbotchat (cbc) is a local message bus that lets AI coding agents talk to each other directly, across repos and sessions, without me copying messages between terminals. One always-on Rust daemon owns the conversation state in SQLite. Agents reach it through the same actions exposed as MCP tools and as a CLI, so it works with Claude Code, Codex and any other MCP client.",
+      "The design goal is bounded autonomy, not a black-box agent swarm. Two agents in a room trade messages hands-free: each waits on a background poll and re-reads the room before replying instead of trusting its own compacted memory. A soft cap on autonomous turns pulls the human back in, and a room only closes when both sides vote to close it.",
+      "On top of the bus I run a hierarchy of agents through skills: a project lead over repo leads, feature leads and task agents, plus orchestrator, peer and reconcile roles for coordinating parallel work across repos and worktrees. It's how I run agentic development day to day.",
     ],
     stack: [
-      "Next.js",
-      "Jotai",
-      "FastAPI",
-      "Tailwind CSS",
-      "React PDF",
-      "Three.js",
-      "React Three Fiber",
-      "OpenAI SDK",
-      "WebSocket",
-      "Pydantic",
-      "SQLAlchemy",
-      "Alembic",
-      "PostgreSQL",
-      "Cloudflare R2",
+      "Rust",
+      "Tokio",
+      "axum",
+      "SQLite",
+      "SQLx",
+      "MCP",
+      "Claude Code",
+      "Codex",
     ],
-    demo: "https://levezze.com/",
-    github: "https://github.com/Levezze/portfolio-frontend",
-    still: "projects/portfolio/3d-scene.png",
-    media: [
-      {
-        kind: "image",
-        key: "projects/portfolio/main-page.png",
-        caption: "Main Page",
-      },
-      {
-        kind: "image",
-        key: "projects/portfolio/main-page-mobile.png",
-        caption: "Main Page Mobile",
-      },
-      {
-        kind: "image",
-        key: "projects/portfolio/3d-scene.png",
-        caption: "Three.js Orthographic3D Scene",
-      },
-    ],
+    github: "https://github.com/Levezze/chatbotchat",
+    still: CBC_WORDMARK,
+    logo: true,
+    media: [{ kind: "image", key: CBC_WORDMARK, caption: "chatbotchat logo" }],
   },
   {
     slug: "fishnt",
@@ -270,27 +226,122 @@ export const PROJECTS: Project[] = [
       "NumPy",
     ],
     demo: "https://fishnt.app",
-    still: "projects/fishnt/iphone-dashboard.png",
+    still: "/media/projects/fishnt/iphone-dashboard.png",
+    thumb: {
+      kind: "video",
+      key: "/media/projects/fishnt/thumb.mp4",
+      poster: "/media/projects/fishnt/thumb.jpg",
+      caption: "Fishnt",
+    },
     media: [
       {
         kind: "image",
-        key: "projects/fishnt/iphone-dashboard.png",
+        key: "/media/projects/fishnt/iphone-dashboard.png",
         caption: "Productivity dashboard with all-time stats and trends",
       },
       {
         kind: "image",
-        key: "projects/fishnt/iphone-main-page.png",
+        key: "/media/projects/fishnt/iphone-main-page.png",
         caption: "Clean, distraction-free timer interface",
       },
       {
         kind: "image",
-        key: "projects/fishnt/iphone-notification.png",
+        key: "/media/projects/fishnt/iphone-notification.png",
         caption: "Focus check notifications keep you accountable",
       },
       {
         kind: "image",
-        key: "projects/fishnt/iphone-presets.png",
+        key: "/media/projects/fishnt/iphone-presets.png",
         caption: "Manage and switch between timer presets",
+      },
+    ],
+  },
+  {
+    slug: "stealth",
+    name: "Stealth-Mode Startup",
+    short:
+      "Transforming structured content into engaging, narrated experiences",
+    description: [
+      "Designed and built an innovative AI platform that solves the challenge of information overload by transforming dense, structured content into engaging, narrated experiences. The platform uses sophisticated LLM orchestration to analyze, restructure, and present complex information in formats that maximize understanding and retention.",
+      "Designed and implemented the complete technical architecture: a modular FastAPI backend handling AI workflows, real-time WebSocket communication for instant updates, SSE, and a dynamic Next.js frontend supporting live content editing and sharing. A Javascript renderer service handles animations and dynamic rendering of the content. The system seamlessly integrates multiple AI models through the OpenAI SDK and LangChain, with robust data persistence via PostgreSQL, R2 Queue, and Redis caching for optimal performance.",
+    ],
+    stack: [
+      "Next.js",
+      "FastAPI",
+      "Node.js",
+      "Zod",
+      "Gulp.js",
+      "OpenAI SDK",
+      "LangChain",
+      "WebSocket",
+      "Pydantic",
+      "SQLAlchemy",
+      "Alembic",
+      "PostgreSQL",
+      "Redis",
+      "Cloudflare Queues",
+      "Cloudflare R2",
+    ],
+    still: "/media/projects/stealth/logo.png",
+    media: [
+      {
+        kind: "image",
+        key: "/media/projects/stealth/logo.png",
+        caption: "Stealth AI platform",
+      },
+    ],
+  },
+  {
+    slug: "portfolio",
+    name: "Portfolio Website",
+    short: "This site: pages on slices of a prism, with an AI guide",
+    description: [
+      "The screen is cut into slices, rows on a phone and columns on a wider screen. Each slice is a prism with one page on each face, and changing page turns the slices one after another in a cascade, under a key light that casts their shadows.",
+      "The pages are live HTML. Before a turn they are snapshotted into textures for the 3D scene, then swapped back once the slices settle. Gimli-AI, the chat guide, streams its replies over a WebSocket from a FastAPI backend and can turn the site to another page with a tool call.",
+    ],
+    stack: [
+      "Next.js",
+      "React",
+      "Tailwind CSS",
+      "Motion",
+      "Three.js",
+      "React Three Fiber",
+      "FastAPI",
+      "OpenAI SDK",
+      "WebSocket",
+      "Pydantic",
+      "SQLAlchemy",
+      "Alembic",
+      "PostgreSQL",
+      "Cloudflare R2",
+    ],
+    github: "https://github.com/Levezze/portfolio-frontend",
+    still: "/media/projects/portfolio/thumb.jpg",
+    media: [
+      {
+        kind: "image",
+        key: "/media/projects/portfolio/turn-desktop.jpg",
+        caption: "Slices mid-turn",
+      },
+      {
+        kind: "image",
+        key: "/media/projects/portfolio/projects-desktop.jpg",
+        caption: "Projects page",
+      },
+      {
+        kind: "image",
+        key: "/media/projects/portfolio/resume-desktop.jpg",
+        caption: "Resume page",
+      },
+      {
+        kind: "image",
+        key: "/media/projects/portfolio/chat-phone.jpg",
+        caption: "Chat on a phone",
+      },
+      {
+        kind: "image",
+        key: "/media/projects/portfolio/turn-phone.jpg",
+        caption: "Slices mid-turn on a phone",
       },
     ],
   },
@@ -351,12 +402,13 @@ export const RESUME = {
     {
       years: "05/2022 — present",
       company: "Navon Systems",
-      role: "Automation & Systems Consultant",
+      role: "Software, AI & Automation Consultant",
       place: "Remote",
       blurb:
-        "Delivering custom automation tools for physical manufacturing and simulation-driven workflows.",
+        "Software architecture and AI consulting, alongside computational design automation for physical manufacturing.",
       bullets: [
-        "Develop Python, RhinoCommon, and Grasshopper systems that eliminate repetitive modeling and have reduced fabrication errors by up to 66% through automated validation & 3D modeling scripts.",
+        "Consult on software architecture and AI, covering both the orchestration design and the hands-on implementation.",
+        "Build Python, RhinoCommon, and Grasshopper systems that eliminate repetitive modeling and have reduced fabrication errors by up to 66% through automated validation & 3D modeling scripts.",
         "Create generative 3D workflows and AI-driven automation scripts to multiply iteration capacity and unlock new strategies.",
       ],
     },
@@ -443,7 +495,16 @@ export const RESUME = {
     },
     {
       group: "Domain",
-      items: ["Rhino3D", "Grasshopper", "Ladybug", "Mapbox", "GIS", "PUG"],
+      items: [
+        "Rhino3D",
+        "Grasshopper",
+        "Ladybug",
+        "Mapbox",
+        "GIS",
+        "PUG",
+        "Adobe Suite",
+        "Figma",
+      ],
     },
   ],
   education: [
