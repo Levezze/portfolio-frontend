@@ -223,6 +223,17 @@ describe("errors in the conversation", () => {
     ]);
   });
 
+  it("never sends two questions back to back", () => {
+    // A reply that was only a page turn leaves its question unanswered.
+    const toolOnly: Turn[] = [
+      { role: "user", text: "show projects" },
+      { role: "user", text: "and the resume?" },
+    ];
+    expect(toWire(toolOnly)).toEqual([
+      { role: "user", content: [{ type: "text", text: "and the resume?" }] },
+    ]);
+  });
+
   it("remembers which replies were errors across a reload", () => {
     expect(restoreTurns(JSON.stringify(turns))).toEqual(turns);
   });

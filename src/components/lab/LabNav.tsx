@@ -99,6 +99,9 @@ export function PageNav({ nav, design }: { nav: NavState; design: Design }) {
             type="button"
             disabled={!nav.idle}
             onClick={() => nav.go(i)}
+            // Phones show only an icon, so the name is given here.
+            aria-label={name}
+            aria-current={on ? "page" : undefined}
             className={`flex flex-1 items-center justify-center rounded-full px-4 py-2 transition-colors ${
               on
                 ? "text-[var(--on-accent)]"

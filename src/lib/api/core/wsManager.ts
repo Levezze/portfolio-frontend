@@ -150,6 +150,13 @@ class WebSocketManager {
     }
   }
 
+  /** Withdraw a queued message its sender has given up on. */
+  cancel(messageId: string) {
+    this.messageQueue = this.messageQueue.filter(
+      (m) => m?.message_id !== messageId,
+    );
+  }
+
   private flushMessageQueue() {
     while (
       this.messageQueue.length > 0 &&
@@ -205,12 +212,17 @@ class WebSocketManager {
   }
 
   private getOrCreateVisitorId() {
-    let id = localStorage.getItem("visitor_id");
-    if (!id) {
-      id = uuidv4();
-      localStorage.setItem("visitor_id", id);
+    // Storage can be blocked; the visitor is then new on every page load.
+    try {
+      let id = localStorage.getItem("visitor_id");
+      if (!id) {
+        id = uuidv4();
+        localStorage.setItem("visitor_id", id);
+      }
+      return id;
+    } catch {
+      return uuidv4();
     }
-    return id;
   }
 }
 

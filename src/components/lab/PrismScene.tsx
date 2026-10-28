@@ -42,6 +42,8 @@ export type PrismHandle = {
   startIntro: (dirs: SliceTurn[], spec: MotionSpec) => void;
   /** Let every slice keep stepping until it faces `page`, then stop. */
   lockIntro: (page: number) => Promise<void>;
+  /** Stop any motion and face `page` at once, for a turn that wasn't shown. */
+  snap: (page: number) => void;
 };
 
 type Motion = {
@@ -185,17 +187,21 @@ function Slices({
   const specRef = useRef(spec);
   specRef.current = spec;
 
-  // A new layout always starts at rest on the current page.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: restPage is read only on rebuild
-  useLayoutEffect(() => {
-    quarters.current = layout.slices.map(() => -restPage);
+  const restOn = (page: number) => {
+    quarters.current = layout.slices.map(() => -page);
+    // A motion cut short still settles, so nothing waits on it forever.
+    motion.current?.done?.();
     motion.current = null;
     for (const g of groups.current) {
       if (!g) continue;
       g.rotation.set(0, 0, 0);
-      g.rotation[layout.axis] = THREE.MathUtils.degToRad(-restPage * 90);
+      g.rotation[layout.axis] = THREE.MathUtils.degToRad(-page * 90);
     }
-  }, [layout]);
+  };
+
+  // A new layout always starts at rest on the current page.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: restPage is read only on rebuild
+  useLayoutEffect(() => restOn(restPage), [layout]);
 
   const faceMaterials = useMemo(
     () =>
@@ -273,6 +279,7 @@ function Slices({
         });
         m.done = done;
       }),
+    snap: restOn,
   }));
 
   useFrame(() => {

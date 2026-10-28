@@ -1,4 +1,4 @@
-import { Fragment } from "react";
+import { Fragment, useMemo } from "react";
 import { type Inline, parseBlocks } from "./markdown";
 
 function Inlines({ parts }: { parts: Inline[] }) {
@@ -43,9 +43,10 @@ function Inlines({ parts }: { parts: Inline[] }) {
 
 /** Chat reply text with light Markdown, rendered as React elements only. */
 export function LabMarkdown({ text }: { text: string }) {
+  const blocks = useMemo(() => parseBlocks(text), [text]);
   return (
     <>
-      {parseBlocks(text).map((b, i) => {
+      {blocks.map((b, i) => {
         const k = `${i}-${b.t}`;
         if (b.t === "p")
           return (

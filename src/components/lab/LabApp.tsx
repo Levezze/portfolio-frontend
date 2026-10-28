@@ -2,7 +2,15 @@
 
 import { domToCanvas } from "modern-screenshot";
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  Component,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import * as THREE from "three";
 import { createBackStack } from "./backStack";
 import { Cubes } from "./Cubes";
@@ -13,6 +21,7 @@ import { LAB_PAGES, PAGE_COMPONENTS, resolveSkin } from "./LabPages";
 import { prismLayout, sliceCount } from "./layout";
 import { planTurn } from "./motion";
 import type { PrismHandle } from "./PrismScene";
+import { usePrefersReducedMotion } from "./useReducedMotion";
 
 const PrismScene = dynamic(() => import("./PrismScene"), { ssr: false });
 
@@ -29,16 +38,31 @@ const readSize = (): Size => ({ w: window.innerWidth, h: window.innerHeight });
 const { motion: spec, introMotion, light, skin: skinSpec } = SITE;
 const skins = LAB_PAGES.map((_, i) => resolveSkin(skinSpec, i));
 
-function usePrefersReducedMotion() {
-  const [reduced, setReduced] = useState(false);
-  useEffect(() => {
-    const q = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReduced(q.matches);
-    const on = () => setReduced(q.matches);
-    q.addEventListener("change", on);
-    return () => q.removeEventListener("change", on);
-  }, []);
-  return reduced;
+function hasWebGL() {
+  try {
+    const c = document.createElement("canvas");
+    return Boolean(c.getContext("webgl2") ?? c.getContext("webgl"));
+  } catch {
+    return false;
+  }
+}
+
+/** Catches a scene that fails to render, so the site carries on without it. */
+class SceneBoundary extends Component<
+  { onError: () => void; children: ReactNode },
+  { failed: boolean }
+> {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  componentDidCatch(error: unknown) {
+    console.error("Prism scene failed; showing the pages without it.", error);
+    this.props.onError();
+  }
+  render() {
+    return this.state.failed ? null : this.props.children;
+  }
 }
 
 export function LabApp() {
@@ -52,6 +76,10 @@ export function LabApp() {
   const [sceneReady, setSceneReady] = useState(false);
   const [veil, setVeil] = useState(true);
   const reducedMotion = usePrefersReducedMotion();
+  // Without the prism (no WebGL, or it failed) the pages show directly and
+  // turn instantly, as they do for reduced motion.
+  const [noPrism, setNoPrism] = useState(false);
+  const still = reducedMotion || noPrism;
 
   const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
   const handle = useRef<PrismHandle | null>(null);
@@ -70,6 +98,7 @@ export function LabApp() {
   // Resizes rebuild the prism, so they only land while it is at rest.
   useEffect(() => {
     setSize(readSize());
+    if (!hasWebGL()) setNoPrism(true);
     let timer: ReturnType<typeof setTimeout>;
     const onResize = () => {
       clearTimeout(timer);
@@ -90,6 +119,12 @@ export function LabApp() {
       pendingSize.current = null;
     }
   }, [phase]);
+
+  useEffect(() => {
+    if (!noPrism) return;
+    setDomHidden(false);
+    setPhase("idle");
+  }, [noPrism]);
 
   // While the pages are hidden the prism shows a snapshot of them, so the
   // background drift freezes with it and picks up from the same frame after.
@@ -204,7 +239,14 @@ export function LabApp() {
       setActive(0);
       setDomHidden(false);
       setPhase("idle");
-    })();
+    })().catch((error) => {
+      // A failed snapshot would leave the Loading veil up for good.
+      console.error(
+        "Intro failed; showing the pages without the prism.",
+        error,
+      );
+      if (!cancelled) setNoPrism(true);
+    });
     return () => {
       cancelled = true;
     };
@@ -213,7 +255,7 @@ export function LabApp() {
   // Pages render at the new size, so re-snapshot them after a rebuild.
   // biome-ignore lint/correctness/useExhaustiveDependencies: only on rebuild
   useEffect(() => {
-    if (phaseRef.current === "idle") captureAll();
+    if (phaseRef.current === "idle" && !noPrism) captureAll();
   }, [layout]);
 
   // The browser's back button undoes page turns and the pages' own steps.
@@ -230,8 +272,10 @@ export function LabApp() {
 
   const turn = useCallback(
     async (from: number, to: number) => {
-      if (!layout || !handle.current) return;
-      if (reducedMotion) {
+      const prism = handle.current;
+      if (still || !layout || !prism) {
+        // Keep the slices on the shown page for when motion comes back.
+        prism?.snap(to);
         setActive(to);
         setPhase("idle");
         return;
@@ -241,21 +285,31 @@ export function LabApp() {
       // and the target's old snapshot has the drift where it was minutes ago.
       // The live target then resumes from exactly the frame the slices show.
       driftClock.pause();
-      const [fromTex, toTex] = await Promise.all([capture(from), capture(to)]);
-      const fresh = new Map<number, THREE.Texture>();
-      if (fromTex) fresh.set(from, fromTex);
-      if (toTex) fresh.set(to, toTex);
-      replaceTextures(fresh);
-      await nextFrames();
-      setDomHidden(true);
-      await handle.current.turn(
-        planTurn(from, to, layout.slices.length, spec.staggerMs),
-      );
+      try {
+        const [fromTex, toTex] = await Promise.all([
+          capture(from),
+          capture(to),
+        ]);
+        const fresh = new Map<number, THREE.Texture>();
+        if (fromTex) fresh.set(from, fromTex);
+        if (toTex) fresh.set(to, toTex);
+        replaceTextures(fresh);
+        await nextFrames();
+        setDomHidden(true);
+        await prism.turn(
+          planTurn(from, to, layout.slices.length, spec.staggerMs),
+        );
+      } catch (error) {
+        // Still land on the page, just without the animation.
+        console.error("Page turn failed; switching without it.", error);
+        prism.snap(to);
+        driftClock.resume();
+      }
       setActive(to);
       setDomHidden(false);
       setPhase("idle");
     },
-    [layout, reducedMotion, capture, replaceTextures],
+    [layout, still, capture, replaceTextures],
   );
 
   // A back press undoes a turn through this ref, so it reads the app as it is
@@ -267,8 +321,7 @@ export function LabApp() {
   const go = useCallback(
     (to: number, fromHistory = false) => {
       if (to === active) return true;
-      if (phaseRef.current !== "idle" || !layout || !handle.current)
-        return false;
+      if (phaseRef.current !== "idle" || !layout) return false;
       // Mark the turn started now: two quick calls would both see "idle".
       phaseRef.current = "turning";
       setPhase("turning");
@@ -299,17 +352,19 @@ export function LabApp() {
       className="fixed inset-0 overflow-hidden text-white"
       style={{ background: palette.sceneBackground }}
     >
-      {layout && (
-        <PrismScene
-          layout={layout}
-          textures={textures}
-          spec={spec}
-          light={light}
-          capColor={palette.capColor}
-          sceneBackground={palette.sceneBackground}
-          restPage={active}
-          handleRef={setHandle}
-        />
+      {layout && !noPrism && (
+        <SceneBoundary onError={() => setNoPrism(true)}>
+          <PrismScene
+            layout={layout}
+            textures={textures}
+            spec={spec}
+            light={light}
+            capColor={palette.capColor}
+            sceneBackground={palette.sceneBackground}
+            restPage={active}
+            handleRef={setHandle}
+          />
+        </SceneBoundary>
       )}
 
       <div className="fixed inset-0 z-10" aria-hidden={domHidden}>
@@ -325,7 +380,7 @@ export function LabApp() {
               style={{
                 opacity: visible ? 1 : 0,
                 pointerEvents: visible ? "auto" : "none",
-                transition: reducedMotion ? "opacity 250ms ease" : undefined,
+                transition: still ? "opacity 250ms ease" : undefined,
               }}
             >
               <Page

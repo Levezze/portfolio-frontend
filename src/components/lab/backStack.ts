@@ -21,7 +21,9 @@ type Undo = () => unknown;
 const STATE = { lab: true };
 
 export function createBackStack(win: Win) {
-  const steps: { undo: Undo }[] = [];
+  // `closing`: the UI's back() for this step is on the way. popstate lands
+  // later, and a second close before then would go back one entry too far.
+  const steps: { undo: Undo; closing: boolean }[] = [];
 
   const onPop = (e: { state: unknown }) => {
     const step = steps[steps.length - 1];
@@ -31,6 +33,7 @@ export function createBackStack(win: Win) {
       return;
     }
     if (step.undo() === false) {
+      step.closing = false;
       win.history.pushState(STATE, "");
       return;
     }
@@ -44,13 +47,14 @@ export function createBackStack(win: Win) {
      * history while it is the latest step, so the entries stay in step.
      */
     push(undo: Undo) {
-      const step = { undo };
+      const step = { undo, closing: false };
       steps.push(step);
       win.history.pushState(STATE, "");
       return () => {
         const at = steps.indexOf(step);
-        if (at === -1) return;
+        if (at === -1 || step.closing) return;
         if (at === steps.length - 1) {
+          step.closing = true;
           win.history.back();
           return;
         }

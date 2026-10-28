@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Axis } from "./layout";
 import type { CubeSpec } from "./presets";
+import { usePrefersReducedMotion } from "./useReducedMotion";
 
 /**
  * Traffic overhead: now and then a cube tumbles across the page and drags its
@@ -206,9 +207,12 @@ export function Cubes({
   const [passes, setPasses] = useState<Pass[]>([]);
   const specRef = useRef(spec);
   specRef.current = spec;
+  const reduced = usePrefersReducedMotion();
+  // No cubes fly by for visitors who asked for reduced motion.
+  const enabled = spec.enabled && !reduced;
 
   useEffect(() => {
-    if (!spec.enabled) {
+    if (!enabled) {
       setPasses([]);
       return;
     }
@@ -234,7 +238,7 @@ export function Cubes({
     };
     timer = setTimeout(spawn, 3000);
     return () => clearTimeout(timer);
-  }, [spec.enabled]);
+  }, [enabled]);
 
   return (
     <div

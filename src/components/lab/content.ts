@@ -30,8 +30,8 @@ export type Media = {
   poster?: string;
 };
 
-const CBC_WORDMARK =
-  "https://raw.githubusercontent.com/Levezze/chatbotchat/main/logo/chatbotchat-logo-dark-transparent.png";
+// From the chatbotchat repo's logo/chatbotchat-logo-dark-transparent.png.
+const CBC_WORDMARK = "/media/projects/chatbotchat/logo.png";
 
 export type Project = {
   slug: string;

@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { emailConfig, emailParams, validateContact } from "../contact";
+import {
+  CONTACT_SUBJECT,
+  emailConfig,
+  emailParams,
+  validateContact,
+} from "../contact";
 
 const good = {
   name: "Ada Lovelace",
@@ -39,7 +44,7 @@ describe("emailParams", () => {
     expect(emailParams({ ...good, name: " Ada Lovelace " })).toEqual({
       from_name: "Ada Lovelace",
       from_email: "ada@example.com",
-      subject: expect.any(String),
+      subject: CONTACT_SUBJECT,
       message: good.message,
     });
   });

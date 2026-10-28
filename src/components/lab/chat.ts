@@ -78,6 +78,14 @@ export function step(text: string, msg: ServerMessage): Step {
   }
 }
 
+/** Gimli's reply when the backend can't be reached at all. */
+export const OFFLINE_REPLY =
+  "I can't reach the server right now. Try again in a bit, or reach Lev through the Contact page.";
+
+/** Added under a reply the connection or the backend cut short. */
+export const CUT_OFF_NOTE =
+  "The connection dropped before I could finish. Ask again in a moment.";
+
 /** What to show for a backend error, in place of its raw text. */
 export function errorReply(msg: ServerMessage): string {
   switch (msg.error_code) {
@@ -113,12 +121,14 @@ export function messagesLeft(turns: Turn[]): number {
 
 /**
  * The history the backend sees. An error reply and the question it answered
- * are left out: the model never saw either.
+ * are left out: the model never saw either. So is a question whose reply
+ * had no text (a tool call alone), so user turns never come back to back.
  */
 export function toWire(turns: Turn[]) {
   return turns
     .filter((t, i) => !t.error && !turns[i + 1]?.error)
     .filter((t) => t.text.trim() !== "")
+    .filter((t, i, kept) => t.role !== "user" || kept[i + 1]?.role !== "user")
     .map((t) => ({
       role: t.role,
       content: [{ type: "text" as const, text: t.text }],

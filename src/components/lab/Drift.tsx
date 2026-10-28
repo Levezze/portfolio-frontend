@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import type { DriftSpec, Palette } from "./presets";
+import { usePrefersReducedMotion } from "./useReducedMotion";
 
 /**
  * The page background: a base gradient whose direction slowly swings, with
@@ -64,6 +65,9 @@ export function Drift({
   const b = useRef<HTMLDivElement>(null);
   const specRef = useRef(spec);
   specRef.current = spec;
+  const reduced = usePrefersReducedMotion();
+  // Reduced motion holds the background still at its opening frame.
+  const enabled = spec.enabled && !reduced;
 
   useEffect(() => {
     const apply = (clock: number) => {
@@ -84,12 +88,12 @@ export function Drift({
         );
       }
     };
-    if (!spec.enabled) {
+    if (!enabled) {
       apply(0);
       return;
     }
     return subscribe(apply);
-  }, [spec.enabled]);
+  }, [enabled]);
 
   const glow = (color: string) => ({
     background: `radial-gradient(closest-side, ${color}, transparent)`,
