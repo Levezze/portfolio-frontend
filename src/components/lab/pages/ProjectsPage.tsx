@@ -111,7 +111,7 @@ export function ProjectsPage({ skin, nav, ref }: PageProps) {
                 key="back"
                 type="button"
                 onClick={() => close.current()}
-                className="group -mx-2 flex items-center gap-3 rounded-full px-2 py-1 text-[var(--accent)] transition-colors hover:bg-[var(--surface)] hover:text-[var(--text)]"
+                className="group -mx-2 flex items-center gap-3 whitespace-nowrap rounded-full px-2 py-1 text-[var(--accent)] transition-colors hover:bg-[var(--surface)] hover:text-[var(--text)]"
                 {...swap}
               >
                 <BackArrow />
@@ -120,7 +120,7 @@ export function ProjectsPage({ skin, nav, ref }: PageProps) {
             ) : (
               <motion.span
                 key="count"
-                className="text-[var(--faint)]"
+                className="whitespace-nowrap text-[var(--faint)]"
                 {...swap}
               >
                 {PROJECTS.length} projects

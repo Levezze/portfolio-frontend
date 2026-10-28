@@ -255,8 +255,15 @@ export function ChatPage({ skin, nav, ref }: PageProps) {
                   key={s.title}
                   type="button"
                   onClick={() => submit(s.prompt)}
-                  className="shrink-0 rounded-full px-3.5 py-1.5 text-sm text-[var(--muted)] transition-colors hover:text-[var(--text)] hover:[--panel-line:var(--accent)] focus-visible:[--panel-line:var(--accent)]"
-                  style={{ ...panel, borderRadius: 999 }}
+                  className="shrink-0 whitespace-nowrap rounded-full px-3.5 py-1.5 text-sm text-[var(--muted)] transition-colors hover:text-[var(--text)] hover:[--panel-line:var(--accent)] focus-visible:[--panel-line:var(--accent)]"
+                  style={{
+                    ...panel,
+                    borderRadius: 999,
+                    // Mostly the nav's own colour, a touch lighter: enough to
+                    // stand clear of the blurred message behind.
+                    background:
+                      "color-mix(in srgb, var(--text) 8%, var(--nav-bg) 42%)",
+                  }}
                 >
                   {s.title}
                 </button>
