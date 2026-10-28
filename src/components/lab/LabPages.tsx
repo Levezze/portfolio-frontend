@@ -2,6 +2,7 @@
 
 import { AnimatePresence, LayoutGroup, motion } from "motion/react";
 import {
+  type ComponentProps,
   type CSSProperties,
   type ReactNode,
   type Ref,
@@ -11,6 +12,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { CHAT_LIMIT, MAX_MESSAGE_CHARS } from "./chat";
 import {
   type ContactErrors,
   type ContactValues,
@@ -20,6 +22,7 @@ import {
 } from "./contact";
 import {
   CONTACT,
+  type Media,
   mediaSrc,
   PROJECTS,
   type Project,
@@ -78,6 +81,7 @@ function Frame({
   children,
   ref,
   blurHeight = "var(--nav-pad)",
+  className = "",
 }: {
   index: number;
   title: string;
@@ -87,6 +91,8 @@ function Frame({
   ref?: Ref<HTMLDivElement>;
   /** How far up from the bottom edge the page blurs out. */
   blurHeight?: string;
+  /** Extra classes on the page root, e.g. CSS variables `blurHeight` reads. */
+  className?: string;
 }) {
   const { palette, design, spec } = skin;
   // The pill nav floats over the content, which blurs out as it reaches it
@@ -99,7 +105,7 @@ function Frame({
     <div
       ref={ref}
       data-lab-root
-      className="absolute inset-0 overflow-hidden text-base text-[var(--text)]"
+      className={`absolute inset-0 overflow-hidden text-base text-[var(--text)] ${className}`}
       style={
         {
           ...palette.vars,
@@ -118,13 +124,17 @@ function Frame({
       <style>{`[data-lab-frame] h1, [data-lab-frame] h2, [data-lab-frame] h3 { font-family: var(--font-heading); }
 [data-lab-frame] .lab-h1 { font-size: calc(${design.h1Rem[0]}rem * var(--title-scale)); }
 @media (min-width: 640px) { [data-lab-frame] .lab-h1 { font-size: calc(${design.h1Rem[1]}rem * var(--title-scale)); } }
+[data-lab-root] { --gutter: 1.5rem; --nav-gutter: 1rem; }
+@media (min-width: 640px) { [data-lab-root] { --gutter: 3rem; --nav-gutter: 2.5rem; } }
+[data-lab-frame] { padding-inline: max(var(--gutter), calc((100% - var(--page)) / 2 + var(--gutter))); }
+[data-lab-nav] { left: max(var(--nav-gutter), calc((100% - var(--page)) / 2 + var(--nav-gutter))); right: max(var(--nav-gutter), calc((100% - var(--page)) / 2 + var(--nav-gutter))); }
 [data-lab-frame] [data-lab-scroll] { padding-bottom: var(--nav-pad); }
 @media (hover: hover) and (pointer: fine) { [data-lab-frame] [data-lab-scroll]::-webkit-scrollbar-track { margin-bottom: var(--nav-pad); } }
 [data-lab-root] .lab-noscrollbar { scrollbar-width: none; }
 [data-lab-root] .lab-noscrollbar::-webkit-scrollbar { display: none; }
 [data-lab-root] button:not(:disabled), [data-lab-root] a[href] { cursor: pointer; }`}</style>
       <div
-        className="relative flex h-full flex-col px-6 pt-8 sm:px-12 sm:pt-10"
+        className="relative flex h-full flex-col pt-8 sm:pt-10"
         data-lab-frame
       >
         <div
@@ -161,12 +171,15 @@ function EdgeBlur({
   side,
   className,
   style,
+  maxPx = 16,
   children,
 }: {
   /** The edge the blur deepens toward. */
   side: "bottom" | "left" | "right";
   className: string;
   style?: CSSProperties;
+  /** The deepest blur; the steps past it are left out. */
+  maxPx?: number;
   children?: ReactNode;
 }) {
   return (
@@ -175,7 +188,7 @@ function EdgeBlur({
       className={`pointer-events-none absolute ${className}`}
       style={style}
     >
-      {BLUR_STEPS.map((s) => {
+      {BLUR_STEPS.filter((s) => s.px <= maxPx).map((s) => {
         const mask = `linear-gradient(to ${side}, transparent ${s.from}%, black ${s.from + 25}%)`;
         return (
           <div
@@ -247,15 +260,18 @@ function ChipRow({ children }: { children: ReactNode }) {
       >
         {children}
       </div>
+      {/* Softer than the nav's blur: a chip half out of view stays legible. */}
       <EdgeBlur
         side="left"
-        className="inset-y-0 left-0 w-6 sm:w-12"
+        className="inset-y-0 left-0 w-10 sm:w-12"
         style={fade(edges.left)}
+        maxPx={4}
       />
       <EdgeBlur
         side="right"
-        className="inset-y-0 right-0 w-6 sm:w-12"
+        className="inset-y-0 right-0 w-10 sm:w-12"
         style={fade(edges.right)}
+        maxPx={4}
       />
     </div>
   );
@@ -302,11 +318,19 @@ function Message({
   design: Design;
   children: ReactNode;
 }) {
+  // On phones the avatar and name sit on their own row and the bubble goes
+  // underneath, so it gets the column's full width; from sm up, side by side.
+  const name = (
+    <div className={`text-[var(--faint)] ${design.label}`}>{from}</div>
+  );
   return (
-    <div className="flex max-w-2xl gap-4">
-      {avatar}
+    <div className="max-w-[85%] sm:flex sm:gap-4">
+      <div className="flex items-center gap-3 sm:block">
+        {avatar}
+        <div className="sm:hidden">{name}</div>
+      </div>
       <div className="min-w-0">
-        <div className={`text-[var(--faint)] ${design.label}`}>{from}</div>
+        <div className="hidden sm:block">{name}</div>
         <div className="mt-2 space-y-2 px-5 py-4" style={panel}>
           {children}
         </div>
@@ -318,7 +342,8 @@ function Message({
 function UserMessage({ text }: { text: string }) {
   return (
     <div
-      className="ml-auto max-w-xl px-5 py-3 whitespace-pre-wrap"
+      // Phones share the left side's 85% so both read at one width.
+      className="ml-auto max-w-[85%] px-5 py-3 whitespace-pre-wrap sm:max-w-[75%]"
       style={{
         ...panel,
         background: "color-mix(in srgb, var(--accent) 16%, var(--surface))",
@@ -353,7 +378,7 @@ function Typing() {
 const DOCK_OFFSET = "var(--dock-offset)";
 function ChatPage({ skin, nav, ref }: PageProps) {
   const { design } = skin;
-  const { turns, status, send } = useLabChat(nav);
+  const { turns, status, send, left, reset } = useLabChat(nav);
   const [draft, setDraft] = useState("");
   const scroller = useRef<HTMLDivElement>(null);
   const dock = useRef<HTMLDivElement>(null);
@@ -392,8 +417,11 @@ function ChatPage({ skin, nav, ref }: PageProps) {
       nav={nav}
       ref={ref}
       blurHeight={`calc(${dockTop} + 24px)`}
+      // Set on the page root: the blur sits there too, and an undefined
+      // variable made its height calc() invalid, so nothing blurred.
+      className="[--dock-offset:72px] sm:[--dock-offset:84px]"
     >
-      <div className="relative min-h-0 flex-1 [--dock-offset:72px] sm:[--dock-offset:84px]">
+      <div className="relative min-h-0 flex-1">
         <div
           ref={scroller}
           className="absolute inset-0 overflow-y-auto pr-1"
@@ -421,7 +449,11 @@ function ChatPage({ skin, nav, ref }: PageProps) {
                     avatar={<GimliAvatar />}
                     design={design}
                   >
-                    <LabMarkdown text={t.text} />
+                    {t.error ? (
+                      <p className="text-[var(--muted)]">{t.text}</p>
+                    ) : (
+                      <LabMarkdown text={t.text} />
+                    )}
                   </Message>
                 ) : null,
               )}
@@ -459,29 +491,72 @@ function ChatPage({ skin, nav, ref }: PageProps) {
               ))}
             </ChipRow>
           )}
-          <form
-            className="flex items-center gap-3 px-5 py-2"
-            style={{ ...panel, background: "var(--well)" }}
-            onSubmit={(e) => {
-              e.preventDefault();
-              submit(draft);
-            }}
-          >
-            <input
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              placeholder="Message…"
-              aria-label="Message"
-              className="min-w-0 flex-1 bg-transparent py-2 text-base outline-none placeholder:text-[var(--faint)]"
-            />
-            <button
-              type="submit"
-              disabled={busy || !draft.trim()}
-              className={`text-[var(--accent)] transition-opacity hover:opacity-70 disabled:opacity-40 ${design.label}`}
+          {left === 0 && !busy ? (
+            // The soft cap: one chat holds CHAT_LIMIT messages.
+            <div
+              className="flex items-center gap-3 px-5 py-3"
+              style={{
+                ...panel,
+                background: "var(--nav-bg)",
+                backdropFilter: "blur(18px)",
+                WebkitBackdropFilter: "blur(18px)",
+              }}
             >
-              Send
-            </button>
-          </form>
+              <p className="min-w-0 flex-1 text-sm text-[var(--muted)]">
+                That's {CHAT_LIMIT} messages, the most one chat holds. Start a
+                new one to keep talking.
+              </p>
+              <button
+                type="button"
+                onClick={reset}
+                className={`shrink-0 text-[var(--accent)] transition-opacity hover:opacity-70 ${design.label}`}
+              >
+                New chat
+              </button>
+            </div>
+          ) : (
+            <form
+              className="flex items-center gap-3 px-5 py-2"
+              style={{
+                ...panel,
+                // Solid like the nav: the messages scroll behind it.
+                background: "var(--nav-bg)",
+                backdropFilter: "blur(18px)",
+                WebkitBackdropFilter: "blur(18px)",
+              }}
+              onSubmit={(e) => {
+                e.preventDefault();
+                submit(draft);
+              }}
+            >
+              <input
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                placeholder="Message…"
+                aria-label="Message"
+                maxLength={MAX_MESSAGE_CHARS}
+                className="min-w-0 flex-1 bg-transparent py-2 text-base outline-none placeholder:text-[var(--faint)]"
+              />
+              {left < CHAT_LIMIT && (
+                <span
+                  className="shrink-0 text-sm tabular-nums"
+                  style={{
+                    color: left <= 3 ? "var(--accent)" : "var(--faint)",
+                  }}
+                  title="Messages in this chat"
+                >
+                  {CHAT_LIMIT - left}/{CHAT_LIMIT}
+                </span>
+              )}
+              <button
+                type="submit"
+                disabled={busy || !draft.trim()}
+                className={`text-[var(--accent)] transition-opacity hover:opacity-70 disabled:opacity-40 ${design.label}`}
+              >
+                Send
+              </button>
+            </form>
+          )}
         </div>
       </div>
     </Frame>
@@ -496,6 +571,101 @@ const swap = {
 };
 
 const headingFont = { fontFamily: "var(--font-heading)" };
+
+/**
+ * An image with a loading state: a soft shimmer, and a spinner where there is
+ * room, until it has loaded; then it fades in. The placeholder fills the
+ * parent, so the parent must be positioned.
+ */
+function LoadingImg({
+  spinner = true,
+  shimmer = true,
+  alt = "",
+  className = "",
+  style,
+  ...img
+}: ComponentProps<"img"> & { spinner?: boolean; shimmer?: boolean }) {
+  const [loadedSrc, setLoadedSrc] = useState<string | null>(null);
+  const src = typeof img.src === "string" ? img.src : null;
+  const loaded = src !== null && loadedSrc === src;
+  // A cached image can finish before React attaches onLoad.
+  const ref = useCallback(
+    (el: HTMLImageElement | null) => {
+      if (el?.complete && el.naturalWidth) setLoadedSrc(src);
+    },
+    [src],
+  );
+  return (
+    <>
+      {!loaded && (
+        <span
+          aria-hidden
+          className={`pointer-events-none absolute inset-0 flex items-center justify-center ${shimmer ? "lab-shimmer" : ""}`}
+        >
+          {spinner && (
+            <span className="h-6 w-6 animate-spin rounded-full border-2 border-white/10 border-t-white/50 motion-reduce:animate-none" />
+          )}
+        </span>
+      )}
+      {/* biome-ignore lint/performance/noImgElement: snapshot needs a same-origin plain img */}
+      <img
+        ref={ref}
+        {...img}
+        alt={alt}
+        onLoad={() => setLoadedSrc(src)}
+        // A broken image stops the spinner rather than spinning forever.
+        onError={() => setLoadedSrc(src)}
+        className={
+          className.includes("transition")
+            ? className
+            : `${className} transition-opacity duration-300`
+        }
+        style={{ ...style, ...(loaded ? null : { opacity: 0 }) }}
+      />
+    </>
+  );
+}
+
+/**
+ * One media item filling its box. A video loops silently, like the GIFs it
+ * replaces. Videos never go into the page snapshot: modern-screenshot's video
+ * clone waits on a "seeked" event that can never fire, which hung the intro.
+ * The poster sits beneath each video instead, so a turn shows that frame.
+ */
+function MediaFill({ m, className }: { m: Media; className: string }) {
+  if (m.kind === "image")
+    return (
+      <LoadingImg
+        src={mediaSrc(m.key, 1200)}
+        alt={m.caption}
+        draggable={false}
+        className={className}
+      />
+    );
+  return (
+    <>
+      {m.poster && (
+        <LoadingImg
+          src={mediaSrc(m.poster)}
+          alt=""
+          draggable={false}
+          className={`absolute inset-0 ${className}`}
+        />
+      )}
+      <video
+        src={videoSrc(m.key)}
+        poster={m.poster}
+        autoPlay
+        loop
+        muted
+        playsInline
+        aria-label={m.caption}
+        className={`relative ${className}`}
+        data-lab-nocapture
+      />
+    </>
+  );
+}
 
 /** One project in the list, in the design's card build. */
 function ProjectCard({
@@ -521,13 +691,19 @@ function ProjectCard({
       style={{ background: "var(--well)", borderRadius: "var(--radius)" }}
     >
       <span className="relative block h-40 overflow-hidden sm:h-48">
-        {/* biome-ignore lint/performance/noImgElement: snapshot needs a same-origin plain img */}
-        <img
-          src={mediaSrc(p.still, 828)}
-          alt=""
-          loading="lazy"
-          className={`h-full w-full opacity-70 transition-[opacity,transform] duration-500 group-hover:scale-[1.03] group-hover:opacity-100 ${p.logo ? "object-scale-down p-8" : "object-cover"}`}
-        />
+        {p.thumb ? (
+          <MediaFill
+            m={p.thumb}
+            className="h-full w-full object-cover opacity-70 transition-[opacity,transform] duration-500 group-hover:scale-[1.03] group-hover:opacity-100"
+          />
+        ) : (
+          <LoadingImg
+            src={mediaSrc(p.still, 828)}
+            alt=""
+            loading="lazy"
+            className={`h-full w-full opacity-70 transition-[opacity,transform] duration-500 group-hover:scale-[1.03] group-hover:opacity-100 ${p.logo ? "object-scale-down p-8" : "object-cover"}`}
+          />
+        )}
         <span
           className={`absolute top-3 left-3 rounded-full px-2.5 py-0.5 text-[var(--muted)] ${design.label}`}
           style={{ background: "var(--well)" }}
@@ -576,6 +752,12 @@ const BackArrow = () => (
 function ProjectsPage({ skin, nav, ref }: PageProps) {
   const { design } = skin;
   const [open, setOpen] = useState<Project | null>(null);
+  // Closes the open project through history, so browser back stays in step.
+  const close = useRef(() => setOpen(null));
+  const openProject = (p: Project) => {
+    setOpen(p);
+    close.current = nav.remember(() => setOpen(null));
+  };
   const group = useId();
   const grid = "mt-8 grid grid-cols-1 content-start gap-3 sm:grid-cols-2";
   return (
@@ -587,7 +769,7 @@ function ProjectsPage({ skin, nav, ref }: PageProps) {
               <motion.button
                 key="back"
                 type="button"
-                onClick={() => setOpen(null)}
+                onClick={() => close.current()}
                 className="group -mx-2 flex items-center gap-3 rounded-full px-2 py-1 text-[var(--accent)] transition-colors hover:bg-[var(--surface)] hover:text-[var(--text)]"
                 {...swap}
               >
@@ -608,7 +790,12 @@ function ProjectsPage({ skin, nav, ref }: PageProps) {
         <div className="relative mt-2 min-h-0 flex-1">
           <AnimatePresence initial={false}>
             {open ? (
-              <ProjectDetail key="detail" project={open} design={design} />
+              <ProjectDetail
+                key="detail"
+                project={open}
+                design={design}
+                remember={nav.remember}
+              />
             ) : (
               <motion.div
                 key="list"
@@ -627,7 +814,7 @@ function ProjectsPage({ skin, nav, ref }: PageProps) {
                       p={p}
                       i={i}
                       design={design}
-                      onOpen={() => setOpen(p)}
+                      onOpen={() => openProject(p)}
                     />
                   ))}
                 </div>
@@ -665,22 +852,250 @@ function OutLink({
   );
 }
 
+/** Drag distance, px, that counts as a swipe to the next item. */
+const SWIPE = 60;
+
+const CloseIcon = () => (
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 18 18"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.75"
+    strokeLinecap="round"
+    aria-hidden
+    role="presentation"
+  >
+    <path d="M2 2l14 14M16 2 2 16" />
+  </svg>
+);
+
+/**
+ * One gallery item floating over the site in a modal dialog, at the largest
+ * size the window allows. The dialog sits in the top layer, so the page's
+ * overflow and the prism's transforms don't clip it. Escape, the backdrop and
+ * the close button shut it; the arrow keys step through the items.
+ */
+function Lightbox({
+  items,
+  at,
+  onStep,
+  onClose,
+}: {
+  items: Media[];
+  at: number | null;
+  onStep: (d: number) => void;
+  onClose: () => void;
+}) {
+  const ref = useRef<HTMLDialogElement>(null);
+  const open = at !== null;
+  useEffect(() => {
+    const d = ref.current;
+    if (!d) return;
+    if (open && !d.open) d.showModal();
+    else if (!open && d.open) d.close();
+  }, [open]);
+  const m = at === null ? null : items[at];
+  return (
+    <dialog
+      ref={ref}
+      aria-label={m?.caption}
+      onClose={onClose}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      onKeyDown={(e) => {
+        const d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+        if (d && items.length > 1) onStep(d);
+      }}
+      className="fixed inset-0 m-0 h-full max-h-none w-full max-w-none bg-transparent p-0 text-white backdrop:bg-black/80 backdrop:backdrop-blur-sm open:flex open:flex-col open:items-center open:justify-center"
+      data-lab-nocapture
+    >
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Close"
+        className="fixed top-4 right-4 flex h-11 w-11 items-center justify-center rounded-full bg-black/60 text-white/80 backdrop-blur-md transition-colors hover:text-white sm:top-6 sm:right-6"
+      >
+        <CloseIcon />
+      </button>
+      {m &&
+        (m.kind === "image" ? (
+          <LoadingImg
+            // The dialog is the placeholder's box: a spinner, no shimmer.
+            shimmer={false}
+            src={mediaSrc(m.key, 1920)}
+            alt={m.caption}
+            className="max-h-[calc(100dvh-7rem)] max-w-[calc(100vw-2rem)] object-contain sm:max-w-[calc(100vw-8rem)]"
+          />
+        ) : (
+          <video
+            src={videoSrc(m.key)}
+            poster={m.poster}
+            autoPlay
+            loop
+            muted
+            playsInline
+            controls
+            aria-label={m.caption}
+            className="max-h-[calc(100dvh-7rem)] max-w-[calc(100vw-2rem)] sm:max-w-[calc(100vw-8rem)]"
+          />
+        ))}
+      {m && (
+        <div className="mt-4 text-sm text-white/70">
+          {m.caption}
+          {items.length > 1 && (
+            <span className="ml-3 tabular-nums text-white/50">
+              {(at ?? 0) + 1} / {items.length}
+            </span>
+          )}
+        </div>
+      )}
+    </dialog>
+  );
+}
+
+/**
+ * The project's media at the top of its page: one item at a time, switched by
+ * its thumbnail, a horizontal swipe or the arrow keys. Only the shown item is
+ * mounted, so the page snapshot always matches the screen and the large
+ * videos load only when picked.
+ */
+function Gallery({
+  project,
+  remember,
+}: {
+  project: Project;
+  remember: NavState["remember"];
+}) {
+  // The list tile's light thumb stays on the list; here it's full quality.
+  const items = project.media;
+  const [at, setAt] = useState(0);
+  const step = (d: number) =>
+    setAt((i) => (i + d + items.length) % items.length);
+  const [zoomed, setZoomed] = useState<number | null>(null);
+  const unzoom = useRef(() => setZoomed(null));
+  const zoom = (i: number) => {
+    setZoomed(i);
+    unzoom.current = remember(() => setZoomed(null));
+  };
+  // Motion still fires onTap after a drag released over the item, so a press
+  // that dragged at all is a swipe, never an open.
+  const dragged = useRef(false);
+  const m = items[at];
+  const many = items.length > 1;
+  // Capped narrower than the page column: the content leads, the media supports.
+  return (
+    <div className="mt-6 max-w-5xl">
+      <motion.div
+        layoutId={`card-${project.slug}`}
+        className="relative aspect-[16/9] w-full overflow-hidden"
+        style={{ ...panel, background: "var(--well)" }}
+        transition={{ duration: 0.4, ease: [0.7, 0, 0.3, 1] }}
+      >
+        <AnimatePresence initial={false}>
+          <motion.div
+            key={m.key}
+            className={`absolute inset-0 cursor-zoom-in ${many ? "touch-pan-y" : ""}`}
+            // A tap opens the item larger; a swipe only changes the item.
+            onTapStart={() => {
+              dragged.current = false;
+            }}
+            onTap={() => {
+              if (!dragged.current) zoom(at);
+            }}
+            onDragStart={() => {
+              dragged.current = true;
+            }}
+            drag={many ? "x" : false}
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.3}
+            onDragEnd={(_, info) => {
+              if (info.offset.x < -SWIPE || info.velocity.x < -500) step(1);
+              else if (info.offset.x > SWIPE || info.velocity.x > 500) step(-1);
+            }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+          >
+            <MediaFill
+              m={m}
+              className={`pointer-events-none h-full w-full ${project.logo ? "object-scale-down p-12" : "object-contain"}`}
+            />
+          </motion.div>
+        </AnimatePresence>
+      </motion.div>
+      <div className="mt-3 flex items-baseline justify-between gap-4 text-sm text-[var(--faint)]">
+        <span>{m.caption}</span>
+        {many && (
+          <span className="shrink-0 tabular-nums">
+            {at + 1} / {items.length}
+          </span>
+        )}
+      </div>
+      {many && (
+        <div className="lab-noscrollbar -mx-1 mt-3 flex gap-2 overflow-x-auto p-1">
+          {items.map((it, i) => (
+            <button
+              key={it.key}
+              type="button"
+              onClick={() => setAt(i)}
+              onKeyDown={(e) => {
+                const d =
+                  e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+                if (!d) return;
+                e.preventDefault();
+                const next = (i + d + items.length) % items.length;
+                setAt(next);
+                const strip = e.currentTarget.parentElement;
+                (strip?.children[next] as HTMLElement | undefined)?.focus();
+              }}
+              aria-label={`Show ${it.caption}`}
+              aria-current={i === at}
+              className={`relative h-14 w-[5.5rem] shrink-0 overflow-hidden transition-[opacity,border-color] duration-200 ${i === at ? "opacity-100" : "opacity-50 hover:opacity-80"}`}
+              style={{
+                ...panel,
+                background: "var(--well)",
+                borderColor: i === at ? "var(--accent)" : "var(--line)",
+              }}
+            >
+              <LoadingImg
+                spinner={false}
+                src={mediaSrc(it.poster ?? it.key, 256)}
+                alt=""
+                loading="lazy"
+                draggable={false}
+                className="h-full w-full object-cover"
+              />
+            </button>
+          ))}
+        </div>
+      )}
+      <Lightbox
+        items={items}
+        at={zoomed}
+        onStep={(d) => {
+          const next = ((zoomed ?? 0) + d + items.length) % items.length;
+          setZoomed(next);
+          setAt(next);
+        }}
+        onClose={() => unzoom.current()}
+      />
+    </div>
+  );
+}
+
 function ProjectDetail({
   project,
   design,
+  remember,
 }: {
   project: Project;
   design: Design;
+  remember: NavState["remember"];
 }) {
-  // The hero is a still: the GIFs run 10–20MB and every turn re-encodes the
-  // page for its snapshot, so they stay further down, loaded lazily.
-  const first = project.media[0];
-  const heroKey =
-    first && first.kind === "image" && !first.key.endsWith(".gif")
-      ? first.key
-      : project.still;
-  const hero = project.media.find((m) => m.key === heroKey);
-  const gallery = project.media.filter((m) => m.key !== heroKey);
   return (
     <motion.div
       className="absolute inset-0 overflow-y-auto pr-1"
@@ -691,25 +1106,13 @@ function ProjectDetail({
       transition={{ duration: 0.2 }}
     >
       <h1 className={h1(design)}>{project.name}</h1>
-      <motion.div
-        layoutId={`card-${project.slug}`}
-        className="mt-8 aspect-[16/9] w-full overflow-hidden"
-        style={{ ...panel, background: "var(--well)" }}
-        transition={{ duration: 0.4, ease: [0.7, 0, 0.3, 1] }}
-      >
-        {/* biome-ignore lint/performance/noImgElement: snapshot needs a same-origin plain img */}
-        <img
-          src={mediaSrc(heroKey, 1920)}
-          alt={hero?.caption ?? project.name}
-          className={`h-full w-full ${project.logo ? "object-scale-down p-12" : "object-contain"}`}
-        />
-      </motion.div>
+      <Gallery project={project} remember={remember} />
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.25, duration: 0.3 }}
       >
-        <p className="mt-6 max-w-2xl text-xl">{project.short}</p>
+        <p className="mt-6 text-xl">{project.short}</p>
         {(project.demo || project.github) && (
           <div className="mt-5 flex flex-wrap gap-3">
             {project.demo && (
@@ -723,56 +1126,19 @@ function ProjectDetail({
         {project.description.map((para) => (
           <p
             key={para.slice(0, 32)}
-            className="mt-4 max-w-2xl text-[var(--muted)] leading-relaxed"
+            className="mt-4 text-[var(--muted)] leading-relaxed"
           >
             {para}
           </p>
         ))}
         <div className={`mt-8 text-[var(--faint)] ${design.label}`}>Stack</div>
-        <div className="mt-3 flex flex-wrap gap-1.5 sm:gap-2">
+        <div className="mt-3 flex flex-wrap gap-1.5 pb-4 sm:gap-2">
           {project.stack.map((s) => (
             <span key={s} className="px-2.5 py-1 text-sm" style={panel}>
               {s}
             </span>
           ))}
         </div>
-        {gallery.length > 0 && (
-          <div className="mt-8 grid gap-3 pb-4 sm:grid-cols-2">
-            {gallery.map((m) => (
-              <figure key={m.key}>
-                <div
-                  className="aspect-[16/10] overflow-hidden"
-                  style={{ ...panel, background: "var(--well)" }}
-                >
-                  {m.kind === "video" ? (
-                    // Served from R2 without CORS, so it can't be drawn into
-                    // a snapshot; the turn shows the empty panel instead.
-                    <video
-                      src={videoSrc(m.key)}
-                      controls
-                      muted
-                      playsInline
-                      preload="metadata"
-                      className="h-full w-full object-contain"
-                      data-lab-nocapture
-                    />
-                  ) : (
-                    // biome-ignore lint/performance/noImgElement: snapshot needs a same-origin plain img
-                    <img
-                      src={mediaSrc(m.key, 1200)}
-                      alt={m.caption}
-                      loading="lazy"
-                      className="h-full w-full object-contain"
-                    />
-                  )}
-                </div>
-                <figcaption className="mt-2 text-sm text-[var(--faint)]">
-                  {m.caption}
-                </figcaption>
-              </figure>
-            ))}
-          </div>
-        )}
       </motion.div>
     </motion.div>
   );
@@ -819,13 +1185,16 @@ function Timeline({
             )}
             <span
               aria-hidden
-              className="absolute rounded-full border border-[var(--line)] transition-colors group-hover:border-[var(--accent)]"
+              className={`absolute rounded-full transition-colors ${
+                first
+                  ? "bg-[var(--accent)]"
+                  : "bg-[var(--faint)] group-hover:bg-[var(--accent)]"
+              }`}
               style={{
                 width: NODE,
                 height: NODE,
                 top: NODE_Y - NODE / 2,
                 left: 0.5 - NODE / 2,
-                background: first ? "var(--accent)" : "var(--well)",
               }}
             />
             <div
@@ -934,8 +1303,8 @@ function ResumePage({ skin, nav, ref }: PageProps) {
     <Frame index={2} title="Resume" skin={skin} nav={nav} ref={ref}>
       <h1 className={`mt-8 ${h1(design)}`}>{RESUME.name}</h1>
       <div className="mt-4 min-h-0 flex-1 overflow-y-auto pr-2" data-lab-scroll>
-        <p className="max-w-2xl">{RESUME.tagline}</p>
-        <p className="mt-3 max-w-2xl text-[var(--muted)]">{RESUME.summary}</p>
+        <p>{RESUME.tagline}</p>
+        <p className="mt-3 text-[var(--muted)]">{RESUME.summary}</p>
         <div className="mt-6 grid items-start gap-4 sm:grid-cols-2">
           {RESUME.skills.map((g) => (
             <SkillGroup
@@ -961,8 +1330,8 @@ function ResumePage({ skin, nav, ref }: PageProps) {
                     <span className="text-[var(--faint)]"> · {r.place}</span>
                   )}
                 </div>
-                <p className="mt-3 max-w-2xl text-[var(--muted)]">{r.blurb}</p>
-                <ul className="mt-3 max-w-2xl list-disc space-y-1.5 pl-5 text-sm text-[var(--muted)]">
+                <p className="mt-3 text-[var(--muted)]">{r.blurb}</p>
+                <ul className="mt-3 list-disc space-y-1.5 pl-5 text-sm text-[var(--muted)]">
                   {r.bullets.map((b) => (
                     <li key={b.slice(0, 32)}>{b}</li>
                   ))}
@@ -1095,7 +1464,7 @@ function ContactForm({ design }: { design: Design }) {
           {fieldError("email")}
         </label>
       </div>
-      <label className="flex flex-col gap-2 lg:min-h-0 lg:flex-1">
+      <label className="flex flex-col gap-2 lg:max-h-[24rem] lg:min-h-0 lg:flex-1">
         <span className={`text-[var(--faint)] ${design.label}`}>Message</span>
         <textarea
           className={`min-h-40 resize-none lg:flex-1 ${inputClass}`}

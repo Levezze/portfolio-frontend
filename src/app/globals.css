@@ -9,6 +9,9 @@
 :root {
   color-scheme: dark;
   background: #0a0909;
+  /* Every page sits in one centred column: the full width up to 1024px,
+     then 60% of the window, up to 1536px on the biggest screens. */
+  --page: clamp(64rem, 60vw, 96rem);
 }
 
 body {
@@ -62,5 +65,35 @@ body {
     [data-scrolling] {
       scrollbar-color: oklch(0.708 0 0 / 30%) transparent;
     }
+  }
+}
+
+/* Loading placeholder for project images (LoadingImg): a soft light band
+   sweeping across, still where motion is reduced. */
+@keyframes lab-shimmer {
+  from {
+    background-position: 150% 0;
+  }
+  to {
+    background-position: -50% 0;
+  }
+}
+
+.lab-shimmer {
+  background:
+    linear-gradient(
+      100deg,
+      transparent 30%,
+      rgb(255 255 255 / 0.05) 50%,
+      transparent 70%
+    )
+    0 0 / 200% 100% no-repeat;
+  animation: lab-shimmer 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lab-shimmer {
+    animation: none;
+    background: rgb(255 255 255 / 0.03);
   }
 }
