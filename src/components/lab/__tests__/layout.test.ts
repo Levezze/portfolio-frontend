@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { prismLayout, sliceCount } from "../layout";
 
 describe("sliceCount", () => {
-  it("stays between 5 and 10 rows on a portrait screen", () => {
+  it("stays between 5 and 8 rows on a portrait screen", () => {
     for (const [w, h] of [
       [240, 320],
       [320, 568],
@@ -12,13 +12,13 @@ describe("sliceCount", () => {
     ]) {
       const n = sliceCount(w, h);
       expect(n).toBeGreaterThanOrEqual(5);
-      expect(n).toBeLessThanOrEqual(10);
+      expect(n).toBeLessThanOrEqual(8);
     }
   });
 
   // Landscape columns cut the four-tab nav: a multiple of four puts a cut on
   // every tab boundary and the same number of cuts inside each tab.
-  it("uses a multiple of four columns, 4 to 12, on a landscape screen", () => {
+  it("uses 4 or 8 columns on a landscape screen, however big", () => {
     for (const [w, h] of [
       [568, 320],
       [844, 390],
@@ -31,7 +31,7 @@ describe("sliceCount", () => {
       const n = sliceCount(w, h);
       expect(n % 4).toBe(0);
       expect(n).toBeGreaterThanOrEqual(4);
-      expect(n).toBeLessThanOrEqual(12);
+      expect(n).toBeLessThanOrEqual(8);
     }
   });
 
@@ -41,7 +41,7 @@ describe("sliceCount", () => {
   });
 
   it("uses more slices on bigger screens", () => {
-    expect(sliceCount(1440, 900)).toBeGreaterThan(sliceCount(844, 390));
+    expect(sliceCount(1440, 900)).toBeGreaterThan(sliceCount(568, 320));
   });
 
   it("respects a custom target slice size", () => {

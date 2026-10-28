@@ -38,8 +38,8 @@ export type LightSpec = {
 export type PrismHandle = {
   /** Run a page turn; resolves when the last slice has settled. */
   turn: (plan: SliceTurn[]) => Promise<void>;
-  /** Start the endless loading spin. */
-  startIntro: (dirs: SliceTurn[]) => void;
+  /** Start the endless loading spin, at its own pace. */
+  startIntro: (dirs: SliceTurn[], spec: MotionSpec) => void;
   /** Let every slice keep stepping until it faces `page`, then stop. */
   lockIntro: (page: number) => Promise<void>;
 };
@@ -53,6 +53,8 @@ type Motion = {
   from: number[];
   /** Step count each slice will make; Infinity while the intro spins. */
   steps: number[];
+  /** Timing for this motion only; the scene's spec otherwise. */
+  spec?: MotionSpec;
   done?: () => void;
 };
 
@@ -238,12 +240,13 @@ function Slices({
           done,
         };
       }),
-    startIntro: (dirs) => {
+    startIntro: (dirs, spec) => {
       motion.current = {
         start: performance.now(),
         plan: dirs,
         from: [...quarters.current],
         steps: dirs.map(() => NEVER),
+        spec,
       };
     },
     lockIntro: (page) =>
@@ -253,7 +256,7 @@ function Slices({
           done();
           return;
         }
-        const s = specRef.current;
+        const s = m.spec ?? specRef.current;
         const period = s.stepMs + s.holdMs;
         const now = performance.now();
         // Steps already started can't be cut short. Every slice runs at least as
@@ -275,7 +278,7 @@ function Slices({
   useFrame(() => {
     const m = motion.current;
     if (!m) return;
-    const s = specRef.current;
+    const s = m.spec ?? specRef.current;
     const now = performance.now();
     let finished = true;
     m.log ??= {

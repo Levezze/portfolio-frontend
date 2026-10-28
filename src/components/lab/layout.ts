@@ -28,8 +28,8 @@ export type PrismLayout = {
 };
 
 export const MIN_SLICES = 5;
-export const MAX_LANDSCAPE_SLICES = 12;
-export const MAX_SLICES = 10;
+export const MAX_LANDSCAPE_SLICES = 8;
+export const MAX_SLICES = 8;
 
 export function sliceCount(
   width: number,

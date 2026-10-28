@@ -4,6 +4,7 @@ import { domToCanvas } from "modern-screenshot";
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
+import { createBackStack } from "./backStack";
 import { Cubes } from "./Cubes";
 import { SITE } from "./config";
 import { driftClock } from "./Drift";
@@ -25,7 +26,7 @@ const nextFrames = () =>
     requestAnimationFrame(() => requestAnimationFrame(() => r())),
   );
 const readSize = (): Size => ({ w: window.innerWidth, h: window.innerHeight });
-const { motion: spec, light, skin: skinSpec } = SITE;
+const { motion: spec, introMotion, light, skin: skinSpec } = SITE;
 const skins = LAB_PAGES.map((_, i) => resolveSkin(skinSpec, i));
 
 function usePrefersReducedMotion() {
@@ -192,7 +193,8 @@ export function LabApp() {
       setDomHidden(true);
       await nextFrames();
       handle.current?.startIntro(
-        planTurn(0, 1, layout.slices.length, spec.staggerMs),
+        planTurn(0, 1, layout.slices.length, introMotion.staggerMs),
+        introMotion,
       );
       await Promise.all([captureAll(), sleep(MIN_INTRO_MS)]);
       if (cancelled) return;
@@ -214,39 +216,70 @@ export function LabApp() {
     if (phaseRef.current === "idle") captureAll();
   }, [layout]);
 
-  const go = useCallback(
-    async (to: number) => {
-      if (phase !== "idle" || to === active || !layout || !handle.current)
-        return;
+  // The browser's back button undoes page turns and the pages' own steps.
+  const back = useRef<ReturnType<typeof createBackStack> | null>(null);
+  useEffect(() => {
+    const stack = createBackStack(window);
+    back.current = stack;
+    return () => stack.dispose();
+  }, []);
+  const remember = useCallback(
+    (undo: () => unknown) => back.current?.push(undo) ?? (() => undo()),
+    [],
+  );
+
+  const turn = useCallback(
+    async (from: number, to: number) => {
+      if (!layout || !handle.current) return;
       if (reducedMotion) {
         setActive(to);
+        setPhase("idle");
         return;
       }
-      setPhase("turning");
       // Freeze the background first, then snapshot both ends of the turn at
       // that frozen frame: the current page may have changed (scroll, input)
       // and the target's old snapshot has the drift where it was minutes ago.
       // The live target then resumes from exactly the frame the slices show.
       driftClock.pause();
-      const [fromTex, toTex] = await Promise.all([
-        capture(active),
-        capture(to),
-      ]);
+      const [fromTex, toTex] = await Promise.all([capture(from), capture(to)]);
       const fresh = new Map<number, THREE.Texture>();
-      if (fromTex) fresh.set(active, fromTex);
+      if (fromTex) fresh.set(from, fromTex);
       if (toTex) fresh.set(to, toTex);
       replaceTextures(fresh);
       await nextFrames();
       setDomHidden(true);
       await handle.current.turn(
-        planTurn(active, to, layout.slices.length, spec.staggerMs),
+        planTurn(from, to, layout.slices.length, spec.staggerMs),
       );
       setActive(to);
       setDomHidden(false);
       setPhase("idle");
     },
-    [phase, active, layout, reducedMotion, capture, replaceTextures],
+    [layout, reducedMotion, capture, replaceTextures],
   );
+
+  // A back press undoes a turn through this ref, so it reads the app as it is
+  // then, not as it was when the turn was recorded.
+  const goRef = useRef<(to: number, fromHistory?: boolean) => boolean>(
+    () => false,
+  );
+  // Returns false when a turn is already running, so a back press can retry.
+  const go = useCallback(
+    (to: number, fromHistory = false) => {
+      if (to === active) return true;
+      if (phaseRef.current !== "idle" || !layout || !handle.current)
+        return false;
+      // Mark the turn started now: two quick calls would both see "idle".
+      phaseRef.current = "turning";
+      setPhase("turning");
+      const from = active;
+      if (!fromHistory) remember(() => goRef.current(from, true));
+      void turn(from, to);
+      return true;
+    },
+    [active, layout, remember, turn],
+  );
+  goRef.current = go;
 
   const setHandle = useCallback((h: PrismHandle | null) => {
     handle.current = h;
@@ -255,8 +288,8 @@ export function LabApp() {
 
   const idle = phase === "idle";
   const nav: NavState = useMemo(
-    () => ({ pages: LAB_PAGES, active, idle, go }),
-    [active, idle, go],
+    () => ({ pages: LAB_PAGES, active, idle, go, remember }),
+    [active, idle, go, remember],
   );
 
   const palette = skins[active].palette;
@@ -319,10 +352,10 @@ export function LabApp() {
           spin only ever shows as loading; then it fades and unmounts. */}
       {veil && (
         <div
-          className="fixed inset-0 z-20 flex items-center justify-center backdrop-blur-md transition-opacity duration-500"
+          className="fixed inset-0 z-20 flex items-center justify-center backdrop-blur-2xl transition-opacity duration-500"
           style={{
             opacity: phase === "idle" ? 0 : 1,
-            background: "rgba(3,4,5,0.35)",
+            background: "rgba(3,4,5,0.55)",
           }}
           onTransitionEnd={() => {
             if (phaseRef.current === "idle") setVeil(false);

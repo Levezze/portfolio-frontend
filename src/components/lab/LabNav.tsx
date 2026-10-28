@@ -13,7 +13,13 @@ export type NavState = {
   pages: readonly string[];
   active: number;
   idle: boolean;
-  go: (i: number) => void;
+  /** Turn to page `i`; false when a turn is already running. */
+  go: (i: number) => boolean;
+  /**
+   * Record a step the browser's back button undoes; returns the way the
+   * page's own UI closes it, so history stays in step.
+   */
+  remember: (undo: () => unknown) => () => void;
 };
 
 const num = (i: number) => String(i + 1).padStart(2, "0");
@@ -72,7 +78,10 @@ function Label({ name, i }: { name: string; i: number }) {
 export function PageNav({ nav, design }: { nav: NavState; design: Design }) {
   return (
     <nav
-      className={`absolute inset-x-4 bottom-4 flex gap-1 p-1 sm:inset-x-10 sm:bottom-6 ${design.label}`}
+      // Inset to the page column by Frame's [data-lab-nav] rule. Padding and
+      // offsets survive the page snapshot; auto margins didn't.
+      data-lab-nav
+      className={`absolute bottom-4 flex gap-1 p-1 sm:bottom-6 ${design.label}`}
       style={{
         background: "var(--nav-bg, var(--well))",
         border: "1px solid var(--line)",

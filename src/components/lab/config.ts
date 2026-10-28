@@ -10,6 +10,8 @@ import type { SkinSpec } from "./presets";
 export type SiteConfig = {
   /** Page turn: heavy slabs that accelerate into a stop and rebound. */
   motion: MotionSpec;
+  /** The loading spin behind the veil: slower and softer than a page turn. */
+  introMotion: MotionSpec;
   light: LightSpec;
   /** Target slice thickness; the count is clamped in layout.ts. */
   slicePx: number;
@@ -24,6 +26,15 @@ export const SITE: SiteConfig = {
     slowStart: 0.7,
     impactAt: 0.9,
     bounceDeg: 2.5,
+  },
+  // Near-linear steps with no rebound: no slam at the end of each quarter.
+  introMotion: {
+    stepMs: 1100,
+    holdMs: 300,
+    staggerMs: 140,
+    slowStart: 0.2,
+    impactAt: 1,
+    bounceDeg: 0,
   },
   light: {
     shadowStrength: 0.85,
@@ -44,9 +55,9 @@ export const SITE: SiteConfig = {
       everyS: 25,
       sizeMin: 104,
       sizeMax: 226,
-      passS: 16,
+      passS: 14,
       blurPx: 9,
-      shadowOpacity: 0.315,
+      shadowOpacity: 0.2,
       directions: "any",
     },
   },
