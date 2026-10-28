@@ -144,53 +144,61 @@ export function Gallery({
     <div className="mt-6 max-w-5xl">
       <motion.div
         layoutId={`card-${project.slug}`}
-        className="relative aspect-[16/9] w-full overflow-hidden"
+        // Focus shows on the panel's own border: the button fills the panel
+        // and its outline would be clipped by overflow-hidden.
+        className="relative aspect-[16/9] w-full overflow-hidden has-[:focus-visible]:[--panel-line:var(--accent)]"
         style={{ ...panel, background: "var(--well)" }}
         transition={{ duration: 0.4, ease: [0.7, 0, 0.3, 1] }}
       >
-        <AnimatePresence initial={false}>
-          <motion.button
-            key={m.key}
-            type="button"
-            className={`absolute inset-0 block cursor-zoom-in ${many ? "touch-pan-y" : ""}`}
-            // Keyboard: Motion's tap already answers Enter; Space opens too,
-            // and the arrows step like a swipe.
-            aria-label={`Enlarge ${m.caption}`}
-            onKeyDown={(e) => {
-              if (e.key === " ") {
-                e.preventDefault();
-                zoom(at);
-              } else if (many && e.key === "ArrowRight") step(1);
-              else if (many && e.key === "ArrowLeft") step(-1);
-            }}
-            // A tap opens the item larger; a swipe only changes the item.
-            onTapStart={() => {
-              dragged.current = false;
-            }}
-            onTap={() => {
-              if (!dragged.current) zoom(at);
-            }}
-            onDragStart={() => {
-              dragged.current = true;
-            }}
-            drag={many ? "x" : false}
-            dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={0.3}
-            onDragEnd={(_, info) => {
-              if (info.offset.x < -SWIPE || info.velocity.x < -500) step(1);
-              else if (info.offset.x > SWIPE || info.velocity.x > 500) step(-1);
-            }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
-          >
-            <MediaFill
-              m={m}
-              className={`pointer-events-none h-full w-full ${project.logo ? "object-scale-down p-12" : "object-contain"}`}
-            />
-          </motion.button>
-        </AnimatePresence>
+        {/* The button stays put while the items swap inside it, so keyboard
+            focus survives stepping with the arrows. */}
+        <motion.button
+          type="button"
+          className={`absolute inset-0 block cursor-zoom-in outline-none ${many ? "touch-pan-y" : ""}`}
+          // Keyboard: Motion's tap already answers Enter; Space opens too,
+          // and the arrows step like a swipe.
+          aria-label={`Enlarge ${m.caption}`}
+          onKeyDown={(e) => {
+            if (e.key === " ") {
+              e.preventDefault();
+              if (!e.repeat) zoom(at);
+            } else if (many && e.key === "ArrowRight") step(1);
+            else if (many && e.key === "ArrowLeft") step(-1);
+          }}
+          // A tap opens the item larger; a swipe only changes the item.
+          onTapStart={() => {
+            dragged.current = false;
+          }}
+          onTap={() => {
+            if (!dragged.current) zoom(at);
+          }}
+          onDragStart={() => {
+            dragged.current = true;
+          }}
+          drag={many ? "x" : false}
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0.3}
+          onDragEnd={(_, info) => {
+            if (info.offset.x < -SWIPE || info.velocity.x < -500) step(1);
+            else if (info.offset.x > SWIPE || info.velocity.x > 500) step(-1);
+          }}
+        >
+          <AnimatePresence initial={false}>
+            <motion.span
+              key={m.key}
+              className="absolute inset-0 block"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+            >
+              <MediaFill
+                m={m}
+                className={`pointer-events-none h-full w-full ${project.logo ? "object-scale-down p-12" : "object-contain"}`}
+              />
+            </motion.span>
+          </AnimatePresence>
+        </motion.button>
       </motion.div>
       <div className="mt-3 flex items-baseline justify-between gap-4 text-sm text-[var(--faint)]">
         <span>{m.caption}</span>

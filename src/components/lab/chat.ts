@@ -4,11 +4,16 @@
  * useLabChat.ts wires these to the WebSocket.
  */
 
-/** `error` marks a reply the site wrote because the backend refused or failed. */
+/**
+ * `error` marks a reply the backend never finished: one the site wrote
+ * because the backend refused or failed, or one `cut` short partway, whose
+ * text is what arrived and shows with the cut-off note beneath it.
+ */
 export type Turn = {
   role: "user" | "assistant";
   text: string;
   error?: boolean;
+  cut?: boolean;
 };
 
 /**
@@ -82,7 +87,11 @@ export function step(text: string, msg: ServerMessage): Step {
 export const OFFLINE_REPLY =
   "I can't reach the server right now. Try again in a bit, or reach Lev through the Contact page.";
 
-/** Added under a reply the connection or the backend cut short. */
+/** Gimli's reply when the server took the message but never answered. */
+export const SLOW_REPLY =
+  "That took too long, so I stopped waiting. Ask again in a moment.";
+
+/** Shown under a reply the connection or the backend cut short. */
 export const CUT_OFF_NOTE =
   "The connection dropped before I could finish. Ask again in a moment.";
 

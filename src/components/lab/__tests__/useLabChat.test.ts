@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { CHAT_LIMIT } from "../chat";
+import { CHAT_LIMIT, CUT_OFF_NOTE, OFFLINE_REPLY } from "../chat";
 import type { NavState } from "../LabNav";
 
 /**
@@ -125,6 +125,99 @@ describe("a reply that never finishes", () => {
   });
 });
 
+describe("a cut-off reply", () => {
+  it("keeps the reply's own text, with the cut-off flagged apart from it", () => {
+    const { result } = setup();
+    const id = send(result);
+    server({ type: "stream", content: "Lev **built**", message_id: id });
+    act(() => socket.emit("disconnected"));
+    settle();
+
+    const last = result.current.turns.at(-1);
+    expect(last?.text).toBe("Lev **built**");
+    expect(last?.cut).toBe(true);
+  });
+
+  it("flags the cut only once the reply has typed out", () => {
+    const { result } = setup();
+    const id = send(result);
+    server({ type: "stream", content: "x".repeat(400), message_id: id });
+    act(() => socket.emit("disconnected"));
+    act(() => vi.advanceTimersByTime(50));
+
+    expect(result.current.turns.at(-1)?.cut).toBeFalsy();
+    settle();
+    expect(result.current.turns.at(-1)?.cut).toBe(true);
+  });
+});
+
+describe("a slow reply", () => {
+  it("waits for a reply the server has started on, past the stall window", () => {
+    const { result } = setup();
+    const id = send(result);
+    server({ type: "start", message_id: id });
+    act(() => vi.advanceTimersByTime(30_000));
+
+    expect(busy(result.current.status)).toBe(true);
+    server({ type: "stream", content: "Lev built", message_id: id });
+    server({ type: "end", message_id: id });
+    settle();
+
+    expect(result.current.status).toBe("idle");
+    expect(result.current.turns.at(-1)).toEqual({
+      role: "assistant",
+      text: "Lev built",
+    });
+  });
+
+  it("gives up on a started reply that never comes, without calling the server unreachable", () => {
+    const { result } = setup();
+    const id = send(result);
+    server({ type: "start", message_id: id });
+    settle(120_000);
+
+    expect(result.current.status).toBe("idle");
+    const last = result.current.turns.at(-1);
+    expect(last?.error).toBe(true);
+    expect(last?.text).not.toBe(OFFLINE_REPLY);
+    expect(result.current.left).toBe(CHAT_LIMIT);
+  });
+
+  it("says the connection dropped when it closes after the server started", () => {
+    const { result } = setup();
+    const id = send(result);
+    server({ type: "start", message_id: id });
+    act(() => socket.emit("disconnected"));
+    settle();
+
+    expect(result.current.status).toBe("idle");
+    expect(result.current.turns.at(-1)).toMatchObject({
+      text: CUT_OFF_NOTE,
+      error: true,
+    });
+  });
+});
+
+describe("a refusal", () => {
+  it("explains a refusal before any text, and doesn't count it", () => {
+    const { result } = setup();
+    const id = send(result);
+    server({
+      type: "error",
+      error_code: "rate_limit_exceeded",
+      content: "raw",
+      details: { retry_after: 9 },
+      message_id: id,
+    });
+    settle();
+
+    const last = result.current.turns.at(-1);
+    expect(last?.error).toBe(true);
+    expect(last?.text).toMatch(/9 seconds/);
+    expect(result.current.left).toBe(CHAT_LIMIT);
+  });
+});
+
 describe("offline", () => {
   it("answers with an offline notice and withdraws the queued message", () => {
     const { result } = setup();
@@ -202,6 +295,48 @@ describe("new chat", () => {
   });
 });
 
+describe("page turns a tool asks for", () => {
+  const toolReply = (id: string, text = "Here.") => {
+    server({
+      type: "tool_call",
+      tool_name: "navigate_page",
+      parameters: { page: "projects" },
+      message_id: id,
+    });
+    if (text) server({ type: "stream", content: text, message_id: id });
+    server({ type: "end", message_id: id });
+  };
+
+  it("turns the page for a reply that is only a tool call", () => {
+    const { result, nav: n } = setup();
+    toolReply(send(result), "");
+    settle();
+
+    expect(n.go).toHaveBeenCalledWith(1);
+    expect(result.current.status).toBe("idle");
+  });
+
+  it("retries a page turn that lands while another turn is running", () => {
+    const go = vi.fn().mockReturnValueOnce(false).mockReturnValue(true);
+    const { result } = setup({ go } as unknown as NavState);
+    toolReply(send(result));
+    settle();
+
+    expect(go).toHaveBeenCalledTimes(2);
+    expect(go).toHaveBeenLastCalledWith(1);
+  });
+
+  it("keeps the page turn when the visitor sends again right away", () => {
+    const { result, nav: n } = setup();
+    toolReply(send(result));
+    act(() => vi.advanceTimersByTime(300));
+    send(result, "and then?");
+    settle(1_000);
+
+    expect(n.go).toHaveBeenCalledWith(1);
+  });
+});
+
 describe("memory across reloads", () => {
   const saved = [
     { role: "user", text: "who is Lev?" },
@@ -218,6 +353,19 @@ describe("memory across reloads", () => {
     expect(JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]")).toEqual(
       saved,
     );
+  });
+
+  it("saves a finished reply", () => {
+    const { result } = setup();
+    const id = send(result);
+    server({ type: "stream", content: "A whole answer.", message_id: id });
+    server({ type: "end", message_id: id });
+    settle();
+
+    expect(JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]")).toEqual([
+      { role: "user", text: "hi" },
+      { role: "assistant", text: "A whole answer." },
+    ]);
   });
 
   it("doesn't save a reply while it is still arriving", () => {

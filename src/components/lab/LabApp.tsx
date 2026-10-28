@@ -1,6 +1,7 @@
 "use client";
 
 import { domToCanvas } from "modern-screenshot";
+import { MotionConfig } from "motion/react";
 import dynamic from "next/dynamic";
 import {
   Component,
@@ -80,6 +81,11 @@ export function LabApp() {
   // turn instantly, as they do for reduced motion.
   const [noPrism, setNoPrism] = useState(false);
   const still = reducedMotion || noPrism;
+  // Read inside the intro, which runs once and outlives later renders.
+  const reducedRef = useRef(reducedMotion);
+  reducedRef.current = reducedMotion;
+  const noPrismRef = useRef(noPrism);
+  noPrismRef.current = noPrism;
 
   const pageRefs = useRef<(HTMLDivElement | null)[]>([]);
   const handle = useRef<PrismHandle | null>(null);
@@ -218,7 +224,9 @@ export function LabApp() {
     replaceTextures(next);
   }, [capture, replaceTextures]);
 
-  // Intro: spin while the pages are captured, then lock onto page 1.
+  // Intro: spin while the pages are captured, then lock onto page 1. With
+  // reduced motion the slices just rest on page 1 behind the veil. If the
+  // scene fails partway, the no-prism fallback has taken over: stop.
   // biome-ignore lint/correctness/useExhaustiveDependencies: runs once per scene
   useEffect(() => {
     if (!sceneReady || !layout || !handle.current) return;
@@ -227,15 +235,18 @@ export function LabApp() {
       setPhase("intro");
       setDomHidden(true);
       await nextFrames();
-      handle.current?.startIntro(
-        planTurn(0, 1, layout.slices.length, introMotion.staggerMs),
-        introMotion,
-      );
-      await Promise.all([captureAll(), sleep(MIN_INTRO_MS)]);
-      if (cancelled) return;
+      const spin = !reducedRef.current;
+      if (spin)
+        handle.current?.startIntro(
+          planTurn(0, 1, layout.slices.length, introMotion.staggerMs),
+          introMotion,
+        );
+      await Promise.all([captureAll(), spin && sleep(MIN_INTRO_MS)]);
+      if (cancelled || noPrismRef.current) return;
       setPhase("locking");
-      await handle.current?.lockIntro(0);
-      if (cancelled) return;
+      if (spin) await handle.current?.lockIntro(0);
+      else handle.current?.snap(0);
+      if (cancelled || noPrismRef.current) return;
       setActive(0);
       setDomHidden(false);
       setPhase("idle");
@@ -320,8 +331,10 @@ export function LabApp() {
   // Returns false when a turn is already running, so a back press can retry.
   const go = useCallback(
     (to: number, fromHistory = false) => {
-      if (to === active) return true;
+      // Busy first: a back press mid-turn, while `active` is still the page
+      // it left, must be refused and kept for a retry, not taken as done.
       if (phaseRef.current !== "idle" || !layout) return false;
+      if (to === active) return true;
       // Mark the turn started now: two quick calls would both see "idle".
       phaseRef.current = "turning";
       setPhase("turning");
@@ -348,79 +361,83 @@ export function LabApp() {
   const palette = skins[active].palette;
 
   return (
-    <div
-      className="fixed inset-0 overflow-hidden text-white"
-      style={{ background: palette.sceneBackground }}
-    >
-      {layout && !noPrism && (
-        <SceneBoundary onError={() => setNoPrism(true)}>
-          <PrismScene
-            layout={layout}
-            textures={textures}
-            spec={spec}
-            light={light}
-            capColor={palette.capColor}
-            sceneBackground={palette.sceneBackground}
-            restPage={active}
-            handleRef={setHandle}
-          />
-        </SceneBoundary>
-      )}
+    // Motion's own transitions (layout, fades, swaps) follow the visitor's
+    // reduced-motion setting too.
+    <MotionConfig reducedMotion="user">
+      <div
+        className="fixed inset-0 overflow-hidden text-white"
+        style={{ background: palette.sceneBackground }}
+      >
+        {layout && !noPrism && (
+          <SceneBoundary onError={() => setNoPrism(true)}>
+            <PrismScene
+              layout={layout}
+              textures={textures}
+              spec={spec}
+              light={light}
+              capColor={palette.capColor}
+              sceneBackground={palette.sceneBackground}
+              restPage={active}
+              handleRef={setHandle}
+            />
+          </SceneBoundary>
+        )}
 
-      <div className="fixed inset-0 z-10" aria-hidden={domHidden}>
-        {PAGE_COMPONENTS.map((Page, i) => {
-          const visible = !domHidden && i === active;
-          return (
-            <div
-              key={LAB_PAGES[i]}
-              className="absolute inset-0"
-              // Hidden pages stay rendered (opacity 0) so they can be
-              // snapshotted, but must not take clicks or focus.
-              inert={!visible}
-              style={{
-                opacity: visible ? 1 : 0,
-                pointerEvents: visible ? "auto" : "none",
-                transition: still ? "opacity 250ms ease" : undefined,
-              }}
-            >
-              <Page
-                skin={skins[i]}
-                nav={nav}
-                ref={(el: HTMLDivElement | null) => {
-                  pageRefs.current[i] = el;
+        <div className="fixed inset-0 z-10" aria-hidden={domHidden}>
+          {PAGE_COMPONENTS.map((Page, i) => {
+            const visible = !domHidden && i === active;
+            return (
+              <div
+                key={LAB_PAGES[i]}
+                className="absolute inset-0"
+                // Hidden pages stay rendered (opacity 0) so they can be
+                // snapshotted, but must not take clicks or focus.
+                inert={!visible}
+                style={{
+                  opacity: visible ? 1 : 0,
+                  pointerEvents: visible ? "auto" : "none",
+                  transition: still ? "opacity 250ms ease" : undefined,
                 }}
-              />
-            </div>
-          );
-        })}
-      </div>
-
-      {layout && (
-        <Cubes
-          axis={layout.axis}
-          capColor={palette.capColor}
-          spec={skinSpec.cubes}
-        />
-      )}
-
-      {/* The veil stays up until every slice has settled on page 1, so the
-          spin only ever shows as loading; then it fades and unmounts. */}
-      {veil && (
-        <div
-          className="fixed inset-0 z-20 flex items-center justify-center backdrop-blur-2xl transition-opacity duration-500"
-          style={{
-            opacity: phase === "idle" ? 0 : 1,
-            background: "rgba(3,4,5,0.55)",
-          }}
-          onTransitionEnd={() => {
-            if (phaseRef.current === "idle") setVeil(false);
-          }}
-        >
-          <span className="text-sm tracking-[0.6em] text-white/70 uppercase">
-            Loading
-          </span>
+              >
+                <Page
+                  skin={skins[i]}
+                  nav={nav}
+                  ref={(el: HTMLDivElement | null) => {
+                    pageRefs.current[i] = el;
+                  }}
+                />
+              </div>
+            );
+          })}
         </div>
-      )}
-    </div>
+
+        {layout && (
+          <Cubes
+            axis={layout.axis}
+            capColor={palette.capColor}
+            spec={skinSpec.cubes}
+          />
+        )}
+
+        {/* The veil stays up until every slice has settled on page 1, so the
+          spin only ever shows as loading; then it fades and unmounts. */}
+        {veil && (
+          <div
+            className="fixed inset-0 z-20 flex items-center justify-center backdrop-blur-2xl transition-opacity duration-500"
+            style={{
+              opacity: phase === "idle" ? 0 : 1,
+              background: "rgba(3,4,5,0.55)",
+            }}
+            onTransitionEnd={() => {
+              if (phaseRef.current === "idle") setVeil(false);
+            }}
+          >
+            <span className="text-sm tracking-[0.6em] text-white/70 uppercase">
+              Loading
+            </span>
+          </div>
+        )}
+      </div>
+    </MotionConfig>
   );
 }

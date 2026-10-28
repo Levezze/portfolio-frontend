@@ -2,29 +2,40 @@ import { describe, expect, it, vi } from "vitest";
 import { createBackStack } from "../backStack";
 
 /**
- * A window whose history records calls and whose back() fires popstate later,
- * as browsers do: the entry changes and the event lands after the call returns.
+ * A window whose history keeps a cursor over its entries, as browsers do:
+ * pushing drops anything forward of it, and back, forward and go() move it
+ * and fire popstate later, after the call returns.
  */
 function fakeWindow() {
   const listeners: ((e: { state: unknown }) => void)[] = [];
   const entries: unknown[] = [null];
+  let at = 0;
+  const move = (by: number) =>
+    queueMicrotask(() => {
+      at = Math.max(0, Math.min(entries.length - 1, at + by));
+      for (const l of listeners) l({ state: entries[at] ?? null });
+    });
   const history = {
     pushState: vi.fn((state: unknown) => {
+      entries.splice(at + 1);
       entries.push(state);
+      at = entries.length - 1;
     }),
-    back: vi.fn(() => {
-      queueMicrotask(() => {
-        entries.pop();
-        const state = entries[entries.length - 1] ?? null;
-        for (const l of listeners) l({ state });
-      });
-    }),
+    back: vi.fn(() => move(-1)),
+    go: vi.fn((by: number) => move(by)),
   };
   return {
     history,
-    entries,
-    /** The browser's own back button. */
+    /** Entries left by an earlier load of the site, with the cursor on top. */
+    seed(...states: unknown[]) {
+      entries.push(...states);
+      at = entries.length - 1;
+    },
+    /** Where the cursor is: 0 is the page before the site's own steps. */
+    at: () => at,
+    /** The browser's own back and forward buttons. */
     pressBack: () => history.back(),
+    pressForward: () => move(1),
     addEventListener: (_: "popstate", l: (e: { state: unknown }) => void) => {
       listeners.push(l);
     },
@@ -154,14 +165,39 @@ describe("createBackStack", () => {
 
   it("steps past entries left from an earlier load, then lets the browser leave", async () => {
     const win = fakeWindow();
-    win.entries.push({ lab: true }, { lab: true });
+    win.seed({ lab: true }, { lab: true });
     createBackStack(win);
 
     win.pressBack();
     await settle();
     // Both stale entries skipped, landing on the page before the site.
     expect(win.history.back).toHaveBeenCalledTimes(2);
-    expect(win.entries).toEqual([null]);
+    expect(win.at()).toBe(0);
+  });
+
+  it("treats the forward button as a no-op instead of another back", async () => {
+    const win = fakeWindow();
+    const stack = createBackStack(win);
+    const lower = vi.fn();
+    const upper = vi.fn();
+    stack.push(lower);
+    stack.push(upper);
+
+    win.pressBack();
+    await settle();
+    expect(upper).toHaveBeenCalledOnce();
+
+    // Forward can't redo the step, so it returns to where the site is.
+    win.pressForward();
+    await settle();
+    await settle();
+    expect(lower).not.toHaveBeenCalled();
+    expect(win.at()).toBe(1);
+
+    win.pressBack();
+    await settle();
+    expect(lower).toHaveBeenCalledOnce();
+    expect(win.at()).toBe(0);
   });
 
   it("stops listening once disposed", async () => {

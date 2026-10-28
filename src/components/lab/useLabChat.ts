@@ -10,6 +10,7 @@ import {
   OFFLINE_REPLY,
   restoreTurns,
   type ServerMessage,
+  SLOW_REPLY,
   step,
   type Turn,
   type Typing,
@@ -23,11 +24,13 @@ import type { NavState } from "./LabNav";
  * send, not on mount, so a page load with the backend down stays quiet.
  *
  * Every reply ends, whatever the network does. wsManager queues sends while
- * disconnected and never fails them, so a watchdog does: a reply that hasn't
- * started within FIRST_TOKEN_MS is offline (and withdrawn from the queue),
- * and one that goes quiet for STALL_MS, or whose socket closes, is cut off
- * and keeps what arrived. Offline and cut-off replies are error turns, so
- * they neither count against the chat nor go back to the model.
+ * disconnected and never fails them, so a watchdog does: a message the
+ * server hasn't taken up (`start`) within START_MS is offline (and withdrawn
+ * from the queue). The server then writes the whole reply before streaming
+ * it, so it gets GENERATE_MS, and the stream STALL_MS between chunks. A
+ * reply that runs out of time, or whose socket closes, ends as an error
+ * turn, keeping any text that arrived; error turns neither count against
+ * the chat nor go back to the model.
  *
  * Replies arrive in a burst and are typed out on screen (typeStep). The
  * stored turns always hold the full text; only what's shown is cut short.
@@ -40,8 +43,12 @@ import type { NavState } from "./LabNav";
  * else needs restoring.
  */
 
-const FIRST_TOKEN_MS = 8000;
+const START_MS = 8000;
+const GENERATE_MS = 60000;
 const STALL_MS = 20000;
+/** Between tries at a page turn a tool asked for, while another runs. */
+const TURN_RETRY_MS = 300;
+const TURN_TRIES = 20;
 const STORAGE_KEY = "levezze-chat";
 
 export type ChatStatus = "idle" | "waiting" | "streaming" | "offline";
@@ -57,10 +64,27 @@ export function useLabChat(nav: NavState) {
   // nav.go closes over the app's current page and phase; read it fresh.
   const navRef = useRef(nav);
   navRef.current = nav;
-  // Stops the latest send: listeners, timers, typing, its pending page turn.
+  // Stops the latest send: listeners, timers, typing.
   const stop = useRef<(() => void) | null>(null);
+  // A page turn a tool asked for. It outlives its reply, so a quick next
+  // message doesn't cancel it; a new chat or leaving does.
+  const pageTurn = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const turnTo = useCallback((to: number, delay: number, tries: number) => {
+    clearTimeout(pageTurn.current);
+    pageTurn.current = setTimeout(() => {
+      // Refused while another turn runs: try again once it has landed.
+      if (!navRef.current.go(to) && tries > 1)
+        turnTo(to, TURN_RETRY_MS, tries - 1);
+    }, delay);
+  }, []);
 
-  useEffect(() => () => stop.current?.(), []);
+  useEffect(
+    () => () => {
+      stop.current?.();
+      clearTimeout(pageTurn.current);
+    },
+    [],
+  );
 
   // Read after mount, not during render, so the server HTML still matches.
   useEffect(() => {
@@ -99,16 +123,14 @@ export function useLabChat(nav: NavState) {
       let typing: Typing = { shown: 0, rate: 0 };
       let last = 0;
       let frame = 0;
+      let started = false;
       let watchdog: ReturnType<typeof setTimeout> | undefined;
-      let pageTurn: ReturnType<typeof setTimeout> | undefined;
       let off: (() => void)[] = [];
 
-      const setReply = (t: string, error = false) =>
+      const setReply = (t: string, flags?: { error: true; cut?: true }) =>
         setTurns((all) => [
           ...all.slice(0, -1),
-          error
-            ? { role: "assistant", text: t, error }
-            : { role: "assistant", text: t },
+          { role: "assistant", text: t, ...flags },
         ]);
 
       // Once the reply is fully on screen: settle the status, then turn the
@@ -117,10 +139,8 @@ export function useLabChat(nav: NavState) {
         if (ended === null) return;
         setShown(null);
         setStatus(ended);
-        if (goTo !== undefined && ended === "idle") {
-          const to = goTo;
-          pageTurn = setTimeout(() => navRef.current.go(to), 600);
-        }
+        if (goTo !== undefined && ended === "idle")
+          turnTo(goTo, 600, TURN_TRIES);
       };
 
       const tick = (now: number) => {
@@ -160,38 +180,41 @@ export function useLabChat(nav: NavState) {
           );
         if (!frame) settle();
       };
-      const fail = (t: string, next: ChatStatus) => {
+      // `cut`: keep the text that arrived; the note shows beneath it.
+      const fail = (t: string, next: ChatStatus, cut = false) => {
         reply = t;
-        setReply(reply, true);
+        setReply(reply, cut ? { error: true, cut: true } : { error: true });
         type();
         finish(next);
       };
 
-      // The connection went away, or the reply stopped arriving.
-      const drop = () => {
+      // The connection closed, or the reply ran out of time.
+      const drop = (closed: boolean) => {
         if (ended !== null) return;
-        if (reply) return fail(`${reply}\n\n${CUT_OFF_NOTE}`, "idle");
+        if (reply) return fail(reply, "idle", true);
+        // The server took the message, so it was reachable after all.
+        if (started) return fail(closed ? CUT_OFF_NOTE : SLOW_REPLY, "idle");
         wsManager.cancel(id);
         fail(OFFLINE_REPLY, "offline");
       };
       const arm = (ms: number) => {
         clearTimeout(watchdog);
-        watchdog = setTimeout(drop, ms);
+        watchdog = setTimeout(() => drop(false), ms);
       };
 
       const onMessage = (raw: unknown) => {
         const msg = raw as ServerMessage & { message_id?: string };
         if (msg.message_id !== id || ended !== null) return;
-        arm(STALL_MS);
+        if (msg.type === "start") started = true;
+        arm(msg.type === "start" ? GENERATE_MS : STALL_MS);
         const s = step(reply, msg);
         if (s.goTo !== undefined) goTo = s.goTo;
         if (s.error) {
           // A refusal before any text is Gimli's to explain; after some, the
           // reply was cut short and says so.
-          return fail(
-            reply ? `${reply}\n\n${CUT_OFF_NOTE}` : errorReply(msg),
-            "idle",
-          );
+          return reply
+            ? fail(reply, "idle", true)
+            : fail(errorReply(msg), "idle");
         }
         if (s.text !== reply) {
           reply = s.text;
@@ -203,17 +226,16 @@ export function useLabChat(nav: NavState) {
 
       off = [
         wsManager.on("message", onMessage),
-        wsManager.on("disconnected", drop),
-        wsManager.on("reconnectFailed", drop),
+        wsManager.on("disconnected", () => drop(true)),
+        wsManager.on("reconnectFailed", () => drop(true)),
       ];
-      arm(FIRST_TOKEN_MS);
+      arm(START_MS);
       stop.current = () => {
         if (ended === null) wsManager.cancel(id);
         ended ??= "idle";
         detach();
         cancelAnimationFrame(frame);
         frame = 0;
-        clearTimeout(pageTurn);
       };
 
       wsManager.connect();
@@ -223,19 +245,22 @@ export function useLabChat(nav: NavState) {
         message_id: id,
       });
     },
-    [turns, busy],
+    [turns, busy, turnTo],
   );
 
   const visible = useMemo(() => {
     const end = turns.at(-1);
     if (shown === null || end?.role !== "assistant") return turns;
-    return [...turns.slice(0, -1), { ...end, text: end.text.slice(0, shown) }];
+    // The cut-off note waits until the text above it has typed out.
+    const typing = { ...end, text: end.text.slice(0, shown), cut: undefined };
+    return [...turns.slice(0, -1), typing];
   }, [turns, shown]);
 
   // Start over: the conversation, its count, and anything still in flight.
   const reset = useCallback(() => {
     stop.current?.();
     stop.current = null;
+    clearTimeout(pageTurn.current);
     setShown(null);
     setTurns([]);
     setStatus("idle");

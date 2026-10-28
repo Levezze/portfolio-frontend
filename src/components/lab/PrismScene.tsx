@@ -202,6 +202,9 @@ function Slices({
   // A new layout always starts at rest on the current page.
   // biome-ignore lint/correctness/useExhaustiveDependencies: restPage is read only on rebuild
   useLayoutEffect(() => restOn(restPage), [layout]);
+  // A scene torn down mid-turn (it failed) still settles that turn, so the
+  // app lands on the target page instead of waiting for good.
+  useEffect(() => () => motion.current?.done?.(), []);
 
   const faceMaterials = useMemo(
     () =>

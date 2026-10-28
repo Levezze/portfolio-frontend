@@ -2,7 +2,12 @@
 
 import { motion } from "motion/react";
 import { memo, type ReactNode, useEffect, useRef, useState } from "react";
-import { CHAT_LIMIT, MAX_MESSAGE_CHARS, type Turn } from "../chat";
+import {
+  CHAT_LIMIT,
+  CUT_OFF_NOTE,
+  MAX_MESSAGE_CHARS,
+  type Turn,
+} from "../chat";
 import { SUGGESTIONS, WELCOME } from "../content";
 import { LabMarkdown } from "../LabMarkdown";
 import type { Design } from "../presets";
@@ -101,10 +106,13 @@ const ChatTurn = memo(function ChatTurn({
   if (!turn.text) return null;
   return (
     <Message from="Gimli" avatar={<GimliAvatar />} design={design}>
-      {turn.error ? (
+      {turn.error && !turn.cut ? (
         <p className="text-[var(--muted)]">{turn.text}</p>
       ) : (
         <LabMarkdown text={turn.text} />
+      )}
+      {turn.cut && (
+        <p className="text-sm text-[var(--muted)]">{CUT_OFF_NOTE}</p>
       )}
     </Message>
   );
