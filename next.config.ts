@@ -8,6 +8,16 @@ const nextConfig: NextConfig = {
         hostname: "pub-8cd13f499aba45a08aa5d342d7244fe7.r2.dev",
         pathname: "/projects/**",
       },
+      {
+        protocol: "https",
+        hostname: "storage.googleapis.com",
+        pathname: "/aevark-email-assets/email/**",
+      },
+      {
+        protocol: "https",
+        hostname: "raw.githubusercontent.com",
+        pathname: "/Levezze/chatbotchat/main/logo/**",
+      },
     ],
   },
   turbopack: {
