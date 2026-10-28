@@ -17,10 +17,10 @@ export const metadata: Metadata = {
     locale: "en_US",
     images: [
       {
-        url: "/levezze-og.png",
+        url: "/levezze-og-turn.jpg",
         width: 1200,
         height: 630,
-        alt: "Levezze Portfolio",
+        alt: "The site mid page turn: its pages cut into slices, caught rotating",
       },
     ],
   },
@@ -29,12 +29,12 @@ export const metadata: Metadata = {
     title: "Levezze | Portfolio",
     description:
       "Lev Zhitnik | Full Stack & AI Engineer | Former Computational Designer & Architect",
-    images: ["/levezze-og.png"],
+    images: ["/levezze-og-turn.jpg"],
   },
   icons: {
     icon: [
-      { url: "/favicon.ico", sizes: "any" },
-      { url: "/favicon.svg", type: "image/svg+xml" },
+      // Drawn per size on a pixel grid, so no SVG: a scaled vector blurs it.
+      { url: "/favicon.ico", sizes: "16x16 32x32 48x48" },
       { url: "/favicon-96x96.png", sizes: "96x96", type: "image/png" },
     ],
     apple: "/apple-touch-icon.png",
