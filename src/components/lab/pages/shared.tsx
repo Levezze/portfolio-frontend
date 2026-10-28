@@ -200,20 +200,22 @@ export function BottomBlur({ height }: { height: string }) {
 }
 
 /**
- * A row that scrolls sideways with no scrollbar. It runs out past the page
- * padding to the screen edges, and whatever sits beyond the content column
- * blurs out: on the right while there is more to see, on the left once it
- * has been scrolled.
+ * A row of chips that scrolls sideways. The chips fade out at an edge with
+ * more of them past it, and the fade grows with the distance left to scroll,
+ * so it eases in from nothing instead of switching on.
  */
+const CHIP_FADE_PX = 48;
+
 export function ChipRow({ children }: { children: ReactNode }) {
   const row = useRef<HTMLDivElement>(null);
-  const [edges, setEdges] = useState({ left: false, right: false });
+  const [fade, setFade] = useState({ left: 0, right: 0 });
   const update = useCallback(() => {
     const el = row.current;
     if (!el) return;
-    setEdges({
-      left: el.scrollLeft > 1,
-      right: el.scrollLeft + el.clientWidth < el.scrollWidth - 1,
+    const rest = el.scrollWidth - el.clientWidth - el.scrollLeft;
+    setFade({
+      left: Math.min(Math.max(el.scrollLeft, 0), CHIP_FADE_PX),
+      right: Math.min(Math.max(rest, 0), CHIP_FADE_PX),
     });
   }, []);
   useEffect(() => {
@@ -224,32 +226,17 @@ export function ChipRow({ children }: { children: ReactNode }) {
     ro.observe(el);
     return () => ro.disconnect();
   }, [update]);
-  const fade = (on: boolean) => ({
-    opacity: on ? 1 : 0,
-    transition: "opacity 200ms ease",
-  });
+  const mask = `linear-gradient(to right, transparent 0, black ${fade.left}px, black calc(100% - ${fade.right}px), transparent 100%)`;
   return (
-    <div className="relative -mx-6 sm:-mx-12">
+    <div className="-mx-6 sm:-mx-12">
       <div
         ref={row}
         onScroll={update}
         className="lab-noscrollbar flex gap-2 overflow-x-auto px-6 pb-3 sm:px-12"
+        style={{ maskImage: mask, WebkitMaskImage: mask }}
       >
         {children}
       </div>
-      {/* Softer than the nav's blur: a chip half out of view stays legible. */}
-      <EdgeBlur
-        side="left"
-        className="inset-y-0 left-0 w-10 sm:w-12"
-        style={fade(edges.left)}
-        maxPx={4}
-      />
-      <EdgeBlur
-        side="right"
-        className="inset-y-0 right-0 w-10 sm:w-12"
-        style={fade(edges.right)}
-        maxPx={4}
-      />
     </div>
   );
 }
