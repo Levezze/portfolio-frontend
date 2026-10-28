@@ -4,7 +4,21 @@
  * useLabChat.ts wires these to the WebSocket.
  */
 
-export type Turn = { role: "user" | "assistant"; text: string };
+/** `error` marks a reply the site wrote because the backend refused or failed. */
+export type Turn = {
+  role: "user" | "assistant";
+  text: string;
+  error?: boolean;
+};
+
+/**
+ * Messages one chat takes before it asks for a new one. Soft: it lives in the
+ * browser and a new chat resets it; the backend's own limits are the guard.
+ */
+export const CHAT_LIMIT = 20;
+
+/** Backend's maximum message length (input_validation.py). */
+export const MAX_MESSAGE_CHARS = 1000;
 
 /** Page order in the lab: Chat, Projects, Resume, Contact. */
 const PAGE_INDEX: Record<string, number> = {
@@ -31,6 +45,8 @@ export function pageForTool(
 export type ServerMessage = {
   type: string;
   content?: string;
+  error_code?: string;
+  details?: { retry_after?: number };
   tool_name?: string;
   parameters?: Record<string, unknown>;
 };
@@ -62,8 +78,46 @@ export function step(text: string, msg: ServerMessage): Step {
   }
 }
 
+/** What to show for a backend error, in place of its raw text. */
+export function errorReply(msg: ServerMessage): string {
+  switch (msg.error_code) {
+    case "dangerous_content":
+      // Already written as a reply by the backend.
+      return msg.content || "I can only help with Lev's work and this site.";
+    case "rate_limit_exceeded": {
+      const wait = msg.details?.retry_after;
+      // The daily cap waits until UTC midnight; the per-visitor one, seconds.
+      if (wait !== undefined && wait > 3600)
+        return "I've answered all the messages I can for today. I'll be back tomorrow, and you can always reach Lev through the Contact page.";
+      return wait
+        ? `You're sending messages faster than I can answer. Give me ${wait} second${wait === 1 ? "" : "s"} and ask again.`
+        : "You're sending messages faster than I can answer. Give me a few seconds and ask again.";
+    }
+    case "message_too_long":
+      return `That message is too long for me. Keep it under ${MAX_MESSAGE_CHARS.toLocaleString("en-US")} characters and try again.`;
+    case "empty_message":
+    case "invalid_characters":
+      return "I couldn't read that message. Try rewording it.";
+    default:
+      return "Something went wrong on my end. Try again in a moment, or reach Lev through the Contact page.";
+  }
+}
+
+/** Messages left in this chat; a refused message doesn't count. */
+export function messagesLeft(turns: Turn[]): number {
+  const answered = turns.filter(
+    (t, i) => t.role === "user" && !turns[i + 1]?.error,
+  ).length;
+  return Math.max(0, CHAT_LIMIT - answered);
+}
+
+/**
+ * The history the backend sees. An error reply and the question it answered
+ * are left out: the model never saw either.
+ */
 export function toWire(turns: Turn[]) {
   return turns
+    .filter((t, i) => !t.error && !turns[i + 1]?.error)
     .filter((t) => t.text.trim() !== "")
     .map((t) => ({
       role: t.role,
@@ -93,4 +147,28 @@ export function restoreTurns(raw: string | null): Turn[] {
       t.text.trim() !== "",
   );
   return turns.at(-1)?.role === "user" ? turns.slice(0, -1) : turns;
+}
+
+/** Characters per second a reply types out at. */
+export const TYPE_CPS = 150;
+/** However much has arrived, typing catches up within this long. */
+export const CATCH_UP_MS = 2500;
+
+export type Typing = { shown: number; rate: number };
+
+/**
+ * One frame of the typewriter. The backend sends a reply in a burst, so
+ * the client types it out: at TYPE_CPS for short replies, faster when the
+ * backlog would take longer than CATCH_UP_MS. The rate only ever rises
+ * within a reply, so a long one doesn't crawl at the end. `shown` is
+ * fractional; floor it to slice the text.
+ */
+export function typeStep(t: Typing, target: number, dtMs: number): Typing {
+  const rate = Math.max(
+    t.rate,
+    TYPE_CPS,
+    ((target - t.shown) * 1000) / CATCH_UP_MS,
+  );
+  const shown = Math.min(target, t.shown + Math.max(1, (rate * dtMs) / 1000));
+  return { shown, rate };
 }

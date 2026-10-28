@@ -1,5 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { pageForTool, restoreTurns, step, type Turn, toWire } from "../chat";
+import {
+  CATCH_UP_MS,
+  CHAT_LIMIT,
+  errorReply,
+  messagesLeft,
+  pageForTool,
+  restoreTurns,
+  step,
+  type Turn,
+  TYPE_CPS,
+  toWire,
+  typeStep,
+} from "../chat";
 
 describe("pageForTool", () => {
   it("maps navigate_page to the lab page index", () => {
@@ -119,5 +131,112 @@ describe("restoreTurns", () => {
       { role: "user", text: "still there?" },
     ]);
     expect(restoreTurns(raw)).toHaveLength(2);
+  });
+});
+
+describe("typeStep", () => {
+  const start = { shown: 0, rate: 0 };
+
+  it("types a short reply at the base pace", () => {
+    const next = typeStep(start, 200, 100);
+    expect(next.shown).toBe(Math.round(TYPE_CPS / 10));
+  });
+
+  it("never shows more than has arrived", () => {
+    expect(typeStep(start, 3, 1000).shown).toBe(3);
+    expect(typeStep({ shown: 3, rate: TYPE_CPS }, 3, 16).shown).toBe(3);
+  });
+
+  it("shows at least one character a frame", () => {
+    expect(typeStep(start, 50, 1).shown).toBe(1);
+  });
+
+  it("types out a long reply within the catch-up time, with no slow tail", () => {
+    let s = start;
+    let ms = 0;
+    while (s.shown < 6000) {
+      s = typeStep(s, 6000, 16);
+      ms += 16;
+    }
+    expect(ms).toBeLessThanOrEqual(CATCH_UP_MS + 16);
+    expect(ms).toBeGreaterThan(CATCH_UP_MS / 2);
+  });
+
+  it("speeds up when more text arrives mid-reply", () => {
+    const early = typeStep(start, 20, 16);
+    const flooded = typeStep(early, 5000, 16);
+    expect(flooded.shown - early.shown).toBeGreaterThan(early.shown);
+  });
+});
+
+describe("errorReply", () => {
+  const rate = (retry_after: number) => ({
+    type: "error",
+    error_code: "rate_limit_exceeded",
+    content: "Too many messages.",
+    details: { retry_after },
+  });
+
+  it("tells a fast sender how long to wait", () => {
+    expect(errorReply(rate(9))).toMatch(/9 seconds/);
+  });
+
+  it("says the chat is out for the day when the daily cap is hit", () => {
+    expect(errorReply(rate(50_000))).toMatch(/tomorrow/);
+  });
+
+  it("passes the guardrail's own reply through", () => {
+    expect(
+      errorReply({
+        type: "error",
+        error_code: "dangerous_content",
+        content: "I'm Gimli-AI.",
+      }),
+    ).toBe("I'm Gimli-AI.");
+  });
+
+  it("names the length limit for a long message", () => {
+    expect(
+      errorReply({ type: "error", error_code: "message_too_long" }),
+    ).toMatch(/1,000 characters/);
+  });
+
+  it("never shows the server's raw text for an unknown failure", () => {
+    const text = errorReply({ type: "error", content: "Traceback boom" });
+    expect(text).not.toMatch(/boom/);
+    expect(text).toMatch(/Contact page/);
+  });
+});
+
+describe("errors in the conversation", () => {
+  const turns: Turn[] = [
+    { role: "user", text: "hi" },
+    { role: "assistant", text: "hello" },
+    { role: "user", text: "again" },
+    { role: "assistant", text: "Slow down.", error: true },
+  ];
+
+  it("keeps an error and the question it answered away from the model", () => {
+    expect(toWire(turns)).toEqual([
+      { role: "user", content: [{ type: "text", text: "hi" }] },
+      { role: "assistant", content: [{ type: "text", text: "hello" }] },
+    ]);
+  });
+
+  it("remembers which replies were errors across a reload", () => {
+    expect(restoreTurns(JSON.stringify(turns))).toEqual(turns);
+  });
+
+  it("counts only answered messages against the chat's limit", () => {
+    expect(messagesLeft(turns)).toBe(CHAT_LIMIT - 1);
+    expect(messagesLeft([])).toBe(CHAT_LIMIT);
+  });
+
+  it("never counts below zero", () => {
+    const many: Turn[] = Array.from({ length: CHAT_LIMIT + 3 }, () => [
+      { role: "user" as const, text: "q" },
+      { role: "assistant" as const, text: "a" },
+    ]).flat();
+    expect(messagesLeft(many)).toBe(0);
   });
 });
