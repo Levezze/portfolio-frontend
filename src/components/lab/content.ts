@@ -56,9 +56,9 @@ export const PROJECTS: Project[] = [
       "Pet longevity lab, where I'm the technical co-founder and only engineer",
     description: [
       "aēv is a pet longevity lab I co-founded in 2026. I'm the technical co-founder and the only engineer on the founding team. Together with veterinarians and researchers we're building a new kind of product: a proprietary process that turns a pet's bloodwork, history and lifestyle into a longevity assessment that owners can act on and vets can review.",
-      "I designed and built the whole platform. It has three services. A Next.js app holds the marketing site, onboarding and checkout, the owner's dashboard and a workspace for vets and admins. A Node.js API (Hono, Prisma, PostgreSQL) runs accounts, pets, care journeys, appointments, Stripe subscriptions and notifications. A Python engine (FastAPI) does the clinical processing. Typed contracts are generated from the engine through the API to the client, and the services talk over Pub/Sub on Google Cloud Run.",
-      "The engine reads lab reports with Gemini, then checks mechanically that every extracted value actually appears on the page; anything that fails goes to a person for review. Written results come from a three-step LLM pipeline: a draft, a compliance rewrite, and an audit model that can flag a claim but never rewrite it. Biological-age models are species-specific, with separate approaches for dogs and cats.",
-      "About eight months in, that is roughly 3,800 commits across the three services, around 33,000 automated tests and 100 architecture decision records. Beyond the code I own product, UI/UX design, infrastructure, CI and release automation, and the data work.",
+      "I designed and built the whole platform: four services, from a Next.js client for owners and vets to a Node.js API and Python processing, with typed contracts generated across them. They run on Google Cloud Run and talk over Pub/Sub.",
+      "The AI side is built as multi-step LLM pipelines with validation at each step: lab reports are read and checked against the source before anything is used, written results are drafted and audited in separate steps, and whatever fails validation goes to a person for review.",
+      "Beyond the code I own product, UI/UX design, infrastructure, CI and release automation, and the data work.",
     ],
     stack: [
       "Next.js",
@@ -74,7 +74,7 @@ export const PROJECTS: Project[] = [
       "Pydantic",
       "SQLAlchemy",
       "Gemini",
-      "Vertex AI",
+      "OpenAI",
       "Google Cloud Run",
       "Pub/Sub",
       "Clerk",
@@ -89,7 +89,7 @@ export const PROJECTS: Project[] = [
     slug: "chatbotchat",
     name: "chatbotchat",
     short:
-      "Open-source message bus that lets AI coding agents talk across repos",
+      "Open-source message bus that lets AI coding agents talk across repos and providers",
     description: [
       "chatbotchat (cbc) is a local message bus that lets AI coding agents talk to each other directly, across repos and sessions, without me copying messages between terminals. One always-on Rust daemon owns the conversation state in SQLite. Agents reach it through the same actions exposed as MCP tools and as a CLI, so it works with Claude Code, Codex and any other MCP client.",
       "The design goal is bounded autonomy, not a black-box agent swarm. Two agents in a room trade messages hands-free: each waits on a background poll and re-reads the room before replying instead of trusting its own compacted memory. A soft cap on autonomous turns pulls the human back in, and a room only closes when both sides vote to close it.",
@@ -301,7 +301,8 @@ export const WELCOME = {
   name: "Lev Zhitnik",
   intro:
     "Full Stack & AI Engineer, Co-Founder, Computational Designer. Forever curious and always excited to build things people want to use.",
-  gimli: "Greetings traveler, I'm Gimli-AI, Lev's sidekick, at your service!",
+  gimli:
+    "Greetings, traveler! I'm Gimli-AI, Lev's automated sidekick. Ask me anything about his work. You have my ear, and my axe.",
 };
 
 export const SUGGESTIONS = [
@@ -330,13 +331,13 @@ export const RESUME = {
       blurb:
         "A pet longevity lab. The only engineer on the founding team, building a new product with veterinarians and researchers.",
       bullets: [
-        "Designed and built the whole platform: a Next.js app for owners and vets, a Node.js API (Hono, Prisma, PostgreSQL, Stripe) and a Python engine (FastAPI) for clinical processing, on Google Cloud Run with Pub/Sub.",
-        "Built the AI workflows: grounded lab-report extraction with Gemini and human review, and a three-step LLM pipeline (draft, compliance rewrite, audit) for written results.",
-        "Own product, UI/UX design, infrastructure, CI and data work: about 3,800 commits and 33,000 automated tests in eight months.",
+        "Designed and built the whole platform: four services spanning a Next.js client for owners and vets, a Node.js API (Hono, Prisma, PostgreSQL, Stripe) and Python processing (FastAPI), on Google Cloud Run with Pub/Sub.",
+        "Built the AI workflows: multi-step LLM pipelines with validation and human review, for reading lab reports and writing results.",
+        "Own product, UI/UX design, infrastructure, CI and data work.",
       ],
     },
     {
-      years: "09/2024 — 03/2026",
+      years: "09/2024 — 01/2026",
       company: "Stealth-Mode Startup",
       role: "Full-Stack & AI Engineer",
       place: "Remote",
