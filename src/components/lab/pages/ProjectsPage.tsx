@@ -50,19 +50,20 @@ function ProjectCard({
       style={{ background: "var(--well)", borderRadius: "var(--radius)" }}
     >
       <span className="relative block h-40 overflow-hidden sm:h-48">
-        {p.thumb ? (
-          <MediaFill
-            m={p.thumb}
-            className="h-full w-full object-cover opacity-70 transition-[opacity,transform] duration-500 group-hover:scale-[1.03] group-hover:opacity-100"
-          />
-        ) : (
-          <LoadingImg
-            src={mediaSrc(p.still, 828)}
-            alt=""
-            loading="lazy"
-            className={`h-full w-full opacity-70 transition-[opacity,transform] duration-500 group-hover:scale-[1.03] group-hover:opacity-100 ${p.logo ? "object-scale-down p-8" : "object-cover"}`}
-          />
-        )}
+        {/* Dim the media as one layer. Dimmed separately, a video's poster
+            shows through the moving video beneath it as a still ghost. */}
+        <span className="relative block h-full w-full opacity-70 transition-[opacity,transform] duration-500 group-hover:scale-[1.03] group-hover:opacity-100">
+          {p.thumb ? (
+            <MediaFill m={p.thumb} className="h-full w-full object-cover" />
+          ) : (
+            <LoadingImg
+              src={mediaSrc(p.still, 828)}
+              alt=""
+              loading="lazy"
+              className={`h-full w-full ${p.logo ? "object-scale-down p-8" : "object-cover"}`}
+            />
+          )}
+        </span>
         <span
           className={`absolute top-3 left-3 rounded-full px-2.5 py-0.5 text-[var(--muted)] ${design.label}`}
           style={{ background: "var(--well)" }}
