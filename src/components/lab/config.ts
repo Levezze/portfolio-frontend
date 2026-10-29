@@ -12,6 +12,8 @@ export type SiteConfig = {
   motion: MotionSpec;
   /** The loading spin behind the veil: slower and softer than a page turn. */
   introMotion: MotionSpec;
+  /** How long before the slices lock the veil lifts, so the end of the spin shows. */
+  introRevealMs: number;
   light: LightSpec;
   /** Target slice thickness; the count is clamped in layout.ts. */
   slicePx: number;
@@ -36,6 +38,7 @@ export const SITE: SiteConfig = {
     impactAt: 1,
     bounceDeg: 0,
   },
+  introRevealMs: 1000,
   light: {
     shadowStrength: 0.85,
     lightAngleDeg: 50,
