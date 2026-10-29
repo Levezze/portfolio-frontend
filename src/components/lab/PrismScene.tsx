@@ -40,8 +40,14 @@ export type PrismHandle = {
   turn: (plan: SliceTurn[]) => Promise<void>;
   /** Start the endless loading spin, at its own pace. */
   startIntro: (dirs: SliceTurn[], spec: MotionSpec) => void;
-  /** Let every slice keep stepping until it faces `page`, then stop. */
-  lockIntro: (page: number) => Promise<void>;
+  /**
+   * Let every slice keep stepping until it faces `page`, then stop.
+   * `planned` gets the `performance.now()` time the last slice will settle.
+   */
+  lockIntro: (
+    page: number,
+    planned?: (endsAt: number) => void,
+  ) => Promise<void>;
   /** Stop any motion and face `page` at once, for a turn that wasn't shown. */
   snap: (page: number) => void;
 };
@@ -258,10 +264,11 @@ function Slices({
         spec,
       };
     },
-    lockIntro: (page) =>
+    lockIntro: (page, planned) =>
       new Promise<void>((done) => {
         const m = motion.current;
         if (!m) {
+          planned?.(performance.now());
           done();
           return;
         }
@@ -280,6 +287,14 @@ function Slices({
           while (faceForQuarter(m.from[i] + p.dir * n) !== page) n++;
           return n;
         });
+        planned?.(
+          m.start +
+            Math.max(
+              ...m.plan.map(
+                (p, i) => p.delayMs + turnDurationMs(m.steps[i], s),
+              ),
+            ),
+        );
         m.done = done;
       }),
     snap: restOn,

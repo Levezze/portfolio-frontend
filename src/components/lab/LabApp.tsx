@@ -38,7 +38,13 @@ const nextFrames = () =>
     requestAnimationFrame(() => requestAnimationFrame(() => r())),
   );
 const readSize = (): Size => ({ w: window.innerWidth, h: window.innerHeight });
-const { motion: spec, introMotion, light, skin: skinSpec } = SITE;
+const {
+  motion: spec,
+  introMotion,
+  introRevealMs,
+  light,
+  skin: skinSpec,
+} = SITE;
 const skins = LAB_PAGES.map((_, i) => resolveSkin(skinSpec, i));
 
 function hasWebGL() {
@@ -239,6 +245,7 @@ export function LabApp({ resume }: { resume: Resume }) {
   useEffect(() => {
     if (!sceneReady || !layout || !handle.current) return;
     let cancelled = false;
+    let reveal: number | undefined;
     (async () => {
       setPhase("intro");
       setDomHidden(true);
@@ -251,9 +258,18 @@ export function LabApp({ resume }: { resume: Resume }) {
         );
       await Promise.all([captureAll(), spin && sleep(MIN_INTRO_MS)]);
       if (cancelled || noPrismRef.current) return;
-      setPhase("locking");
-      if (spin) await handle.current?.lockIntro(0);
+      // The lock can run several steps past ready, so time the veil from its
+      // end: it lifts `introRevealMs` before the last slice settles, and only
+      // the last of the spin shows in the clear.
+      if (spin)
+        await handle.current?.lockIntro(0, (endsAt) => {
+          reveal = window.setTimeout(
+            () => setPhase("locking"),
+            Math.max(0, endsAt - introRevealMs - performance.now()),
+          );
+        });
       else handle.current?.snap(0);
+      window.clearTimeout(reveal);
       if (cancelled || noPrismRef.current) return;
       setActive(0);
       setDomHidden(false);
@@ -268,6 +284,7 @@ export function LabApp({ resume }: { resume: Resume }) {
     });
     return () => {
       cancelled = true;
+      window.clearTimeout(reveal);
     };
   }, [sceneReady]);
 
@@ -429,17 +446,17 @@ export function LabApp({ resume }: { resume: Resume }) {
           />
         )}
 
-        {/* The veil stays up until every slice has settled on page 1, so the
-          spin only ever shows as loading; then it fades and unmounts. */}
+        {/* The veil stays up while the pages load, then fades and unmounts
+          as the slices finish spinning and lock onto page 1. */}
         {veil && (
           <div
             className="fixed inset-0 z-20 flex items-center justify-center backdrop-blur-2xl transition-opacity duration-500"
             style={{
-              opacity: phase === "idle" ? 0 : 1,
+              opacity: phase === "intro" ? 1 : 0,
               background: "rgba(3,4,5,0.55)",
             }}
             onTransitionEnd={() => {
-              if (phaseRef.current === "idle") setVeil(false);
+              if (phaseRef.current !== "intro") setVeil(false);
             }}
           >
             <span className="text-sm tracking-[0.6em] text-white/70 uppercase">
