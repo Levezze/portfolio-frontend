@@ -14,6 +14,14 @@ export type SiteConfig = {
   introMotion: MotionSpec;
   /** How long before the slices lock the veil lifts, so the end of the spin shows. */
   introRevealMs: number;
+  /**
+   * Longest a page snapshot waits for its images and videos. Past it the
+   * snapshot goes ahead without the stragglers, which then pop in when the
+   * turn lands; without a cap one stuck video holds a turn for 30s.
+   */
+  snapshotTimeoutMs: number;
+  /** A turn whose snapshots take longer than this shows the Loading veil. */
+  turnVeilDelayMs: number;
   light: LightSpec;
   /** Target slice thickness; the count is clamped in layout.ts. */
   slicePx: number;
@@ -39,6 +47,8 @@ export const SITE: SiteConfig = {
     bounceDeg: 0,
   },
   introRevealMs: 1000,
+  snapshotTimeoutMs: 3000,
+  turnVeilDelayMs: 300,
   light: {
     shadowStrength: 0.85,
     lightAngleDeg: 50,

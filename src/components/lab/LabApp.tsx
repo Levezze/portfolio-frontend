@@ -1,7 +1,7 @@
 "use client";
 
 import { domToCanvas } from "modern-screenshot";
-import { MotionConfig } from "motion/react";
+import { AnimatePresence, MotionConfig, motion } from "motion/react";
 import dynamic from "next/dynamic";
 import {
   Component,
@@ -24,6 +24,7 @@ import { planTurn } from "./motion";
 import type { PrismHandle } from "./PrismScene";
 import { ResumeContext } from "./pages/ResumePage";
 import type { Resume } from "./profile";
+import { createTapQueue } from "./tapQueue";
 import { usePrefersReducedMotion } from "./useReducedMotion";
 
 const PrismScene = dynamic(() => import("./PrismScene"), { ssr: false });
@@ -42,6 +43,8 @@ const {
   motion: spec,
   introMotion,
   introRevealMs,
+  snapshotTimeoutMs,
+  turnVeilDelayMs,
   light,
   skin: skinSpec,
 } = SITE;
@@ -83,7 +86,11 @@ export function LabApp({ resume }: { resume: Resume }) {
     LAB_PAGES.map(() => null),
   );
   const [sceneReady, setSceneReady] = useState(false);
-  const [veil, setVeil] = useState(true);
+  // A turn's snapshots are taking long: the Loading veil covers the wait.
+  const [loading, setLoading] = useState(false);
+  // The page a tap is turning to, or waiting to: its button shows pressed.
+  const [target, setTarget] = useState<number | null>(null);
+  const taps = useRef(createTapQueue());
   const reducedMotion = usePrefersReducedMotion();
   // Without the prism (no WebGL, or it failed) the pages show directly and
   // turn instantly, as they do for reduced motion.
@@ -101,6 +108,8 @@ export function LabApp({ resume }: { resume: Resume }) {
   texturesRef.current = textures;
   const phaseRef = useRef(phase);
   phaseRef.current = phase;
+  const activeRef = useRef(active);
+  activeRef.current = active;
   const pendingSize = useRef<Size | null>(null);
 
   const layout = useMemo(
@@ -128,10 +137,18 @@ export function LabApp({ resume }: { resume: Resume }) {
     };
   }, []);
   useEffect(() => {
-    if (phase === "idle" && pendingSize.current) {
+    if (phase !== "idle") return;
+    if (pendingSize.current) {
+      // The prism rebuilds at the new size; a tap kept for it is dropped.
       setSize(pendingSize.current);
       pendingSize.current = null;
+      taps.current.clear();
+      setTarget(null);
+      return;
     }
+    const to = taps.current.take(activeRef.current);
+    if (to === null) setTarget(null);
+    else goRef.current(to);
   }, [phase]);
 
   useEffect(() => {
@@ -179,6 +196,7 @@ export function LabApp({ resume }: { resume: Resume }) {
         scale: Math.min(window.devicePixelRatio, 2),
         width: size.w,
         height: size.h,
+        timeout: snapshotTimeoutMs,
         features: { restoreScrollPosition: true },
         onCloneNode: (clone) => {
           if (!(clone instanceof HTMLElement)) return;
@@ -321,11 +339,17 @@ export function LabApp({ resume }: { resume: Resume }) {
       // and the target's old snapshot has the drift where it was minutes ago.
       // The live target then resumes from exactly the frame the slices show.
       driftClock.pause();
+      // A slow snapshot (an image still loading) shows the Loading veil, so a
+      // tap never looks ignored. It lifts as the slices start to turn.
+      const slow = window.setTimeout(() => setLoading(true), turnVeilDelayMs);
       try {
-        const [fromTex, toTex] = await Promise.all([
-          capture(from),
-          capture(to),
-        ]);
+        // Let the pressed button paint first, so the snapshot has it too.
+        const [fromTex, toTex] = await nextFrames()
+          .then(() => Promise.all([capture(from), capture(to)]))
+          .finally(() => {
+            window.clearTimeout(slow);
+            setLoading(false);
+          });
         const fresh = new Map<number, THREE.Texture>();
         if (fromTex) fresh.set(from, fromTex);
         if (toTex) fresh.set(to, toTex);
@@ -353,16 +377,24 @@ export function LabApp({ resume }: { resume: Resume }) {
   const goRef = useRef<(to: number, fromHistory?: boolean) => boolean>(
     () => false,
   );
-  // Returns false when a turn is already running, so a back press can retry.
+  // While the prism is busy a tap is kept for when it rests, and a back press
+  // is refused (false) so the back stack can retry it.
   const go = useCallback(
     (to: number, fromHistory = false) => {
+      if (!layout) return false;
       // Busy first: a back press mid-turn, while `active` is still the page
       // it left, must be refused and kept for a retry, not taken as done.
-      if (phaseRef.current !== "idle" || !layout) return false;
+      if (phaseRef.current !== "idle") {
+        if (fromHistory) return false;
+        taps.current.keep(to);
+        setTarget(to);
+        return true;
+      }
       if (to === active) return true;
       // Mark the turn started now: two quick calls would both see "idle".
       phaseRef.current = "turning";
       setPhase("turning");
+      setTarget(to);
       const from = active;
       if (!fromHistory) remember(() => goRef.current(from, true));
       void turn(from, to);
@@ -377,10 +409,9 @@ export function LabApp({ resume }: { resume: Resume }) {
     if (h) setSceneReady(true);
   }, []);
 
-  const idle = phase === "idle";
   const nav: NavState = useMemo(
-    () => ({ pages: LAB_PAGES, active, idle, go, remember }),
-    [active, idle, go, remember],
+    () => ({ pages: LAB_PAGES, active, target, go, remember }),
+    [active, target, go, remember],
   );
 
   const palette = skins[active].palette;
@@ -446,24 +477,26 @@ export function LabApp({ resume }: { resume: Resume }) {
           />
         )}
 
-        {/* The veil stays up while the pages load, then fades and unmounts
-          as the slices finish spinning and lock onto page 1. */}
-        {veil && (
-          <div
-            className="fixed inset-0 z-20 flex items-center justify-center backdrop-blur-2xl transition-opacity duration-500"
-            style={{
-              opacity: phase === "intro" ? 1 : 0,
-              background: "rgba(3,4,5,0.55)",
-            }}
-            onTransitionEnd={() => {
-              if (phaseRef.current !== "intro") setVeil(false);
-            }}
-          >
-            <span className="text-sm tracking-[0.6em] text-white/70 uppercase">
-              Loading
-            </span>
-          </div>
-        )}
+        {/* The veil covers the intro while the pages load, then fades as the
+          slices lock onto page 1. It comes back if a turn's snapshots are
+          slow. Taps pass through, so another one can still be kept. */}
+        <AnimatePresence initial={false}>
+          {(phase === "intro" || loading) && (
+            <motion.div
+              key="veil"
+              className="pointer-events-none fixed inset-0 z-20 flex items-center justify-center backdrop-blur-2xl"
+              style={{ background: "rgba(3,4,5,0.55)" }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <span className="text-sm tracking-[0.6em] text-white/70 uppercase">
+                Loading
+              </span>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </MotionConfig>
   );

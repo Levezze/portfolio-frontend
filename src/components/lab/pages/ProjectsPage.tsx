@@ -59,7 +59,6 @@ function ProjectCard({
             <LoadingImg
               src={mediaSrc(p.still, 828)}
               alt=""
-              loading="lazy"
               className={`h-full w-full ${p.logo ? "object-scale-down p-8" : "object-cover"}`}
             />
           )}
