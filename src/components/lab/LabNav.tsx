@@ -12,8 +12,6 @@ import type { Design } from "./presets";
 export type NavState = {
   pages: readonly string[];
   active: number;
-  /** The page a tap is turning to, or waiting to turn to once at rest. */
-  target: number | null;
   /**
    * Turn to page `i`. Mid-turn the tap waits for the landing; false only for
    * a back press, which the back stack retries.
@@ -97,8 +95,6 @@ export function PageNav({ nav, design }: { nav: NavState; design: Design }) {
     >
       {nav.pages.map((name, i) => {
         const on = i === nav.active;
-        // Lit at once on tap, before the turn can start.
-        const pressed = !on && i === nav.target;
         return (
           <button
             key={name}
@@ -110,9 +106,7 @@ export function PageNav({ nav, design }: { nav: NavState; design: Design }) {
             className={`flex flex-1 items-center justify-center rounded-full px-4 py-2 transition-colors ${
               on
                 ? "text-[var(--on-accent)]"
-                : pressed
-                  ? "bg-[var(--surface)] text-[var(--text)]"
-                  : "text-[var(--muted)] hover:bg-[var(--surface)] hover:text-[var(--text)]"
+                : "text-[var(--muted)] hover:bg-[var(--surface)] hover:text-[var(--text)]"
             }`}
             style={on ? { background: "var(--accent)" } : undefined}
           >
