@@ -238,7 +238,6 @@ export function Gallery({
                 spinner={false}
                 src={mediaSrc(it.poster ?? it.key, 256)}
                 alt=""
-                loading="lazy"
                 draggable={false}
                 className="h-full w-full object-cover"
               />
