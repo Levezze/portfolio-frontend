@@ -88,8 +88,6 @@ export function LabApp({ resume }: { resume: Resume }) {
   const [sceneReady, setSceneReady] = useState(false);
   // A turn's snapshots are taking long: the Loading veil covers the wait.
   const [loading, setLoading] = useState(false);
-  // The page a tap is turning to, or waiting to: its button shows pressed.
-  const [target, setTarget] = useState<number | null>(null);
   const taps = useRef(createTapQueue());
   const reducedMotion = usePrefersReducedMotion();
   // Without the prism (no WebGL, or it failed) the pages show directly and
@@ -143,12 +141,10 @@ export function LabApp({ resume }: { resume: Resume }) {
       setSize(pendingSize.current);
       pendingSize.current = null;
       taps.current.clear();
-      setTarget(null);
       return;
     }
     const to = taps.current.take(activeRef.current);
-    if (to === null) setTarget(null);
-    else goRef.current(to);
+    if (to !== null) goRef.current(to);
   }, [phase]);
 
   useEffect(() => {
@@ -343,13 +339,13 @@ export function LabApp({ resume }: { resume: Resume }) {
       // tap never looks ignored. It lifts as the slices start to turn.
       const slow = window.setTimeout(() => setLoading(true), turnVeilDelayMs);
       try {
-        // Let the pressed button paint first, so the snapshot has it too.
-        const [fromTex, toTex] = await nextFrames()
-          .then(() => Promise.all([capture(from), capture(to)]))
-          .finally(() => {
-            window.clearTimeout(slow);
-            setLoading(false);
-          });
+        const [fromTex, toTex] = await Promise.all([
+          capture(from),
+          capture(to),
+        ]).finally(() => {
+          window.clearTimeout(slow);
+          setLoading(false);
+        });
         const fresh = new Map<number, THREE.Texture>();
         if (fromTex) fresh.set(from, fromTex);
         if (toTex) fresh.set(to, toTex);
@@ -387,14 +383,12 @@ export function LabApp({ resume }: { resume: Resume }) {
       if (phaseRef.current !== "idle") {
         if (fromHistory) return false;
         taps.current.keep(to);
-        setTarget(to);
         return true;
       }
       if (to === active) return true;
       // Mark the turn started now: two quick calls would both see "idle".
       phaseRef.current = "turning";
       setPhase("turning");
-      setTarget(to);
       const from = active;
       if (!fromHistory) remember(() => goRef.current(from, true));
       void turn(from, to);
@@ -410,8 +404,8 @@ export function LabApp({ resume }: { resume: Resume }) {
   }, []);
 
   const nav: NavState = useMemo(
-    () => ({ pages: LAB_PAGES, active, target, go, remember }),
-    [active, target, go, remember],
+    () => ({ pages: LAB_PAGES, active, go, remember }),
+    [active, go, remember],
   );
 
   const palette = skins[active].palette;
